@@ -98,7 +98,10 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
         <div class="qr" id="qr">
           Pilih paket untuk melihat detail.
         </div>
-        <p id="status" class="muted">Pembayaran GoPay dan DANA tersedia pukul 07.00–22.00 WIB.</p>
+        <p id="status" class="muted">
+          GoPay dan DANA tersedia pukul 07.00–00.00 WIB.
+          QRIS belum diaktifkan.
+        </p>
       </div>
     </div>
 
@@ -108,8 +111,8 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
       <div id="payment-order-info"></div>
 
       <div class="notice">
-        Pembayaran manual hanya tersedia setiap hari pukul
-        <b>07.00–22.00 WIB</b>.
+        Pembayaran GoPay dan DANA tersedia setiap hari pukul
+        <b>07.00 sampai 00.00 WIB</b>.
         Pastikan nominal transfer sesuai dengan total pesanan.
       </div>
 
@@ -222,9 +225,10 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
   </section>
 
   <div class="notice">
-    <b>Informasi:</b>
-    Pembayaran GoPay dan DANA menggunakan verifikasi manual admin.
-    Voucher baru diberikan setelah pembayaran diperiksa dan disetujui admin.
+    <b>Informasi pembayaran:</b>
+    GoPay dan DANA menggunakan verifikasi manual admin.
+    QRIS belum aktif dan belum dapat menerima pembayaran otomatis.
+    Voucher diberikan setelah pembayaran diperiksa dan disetujui admin.
   </div>
 
 </main>
@@ -266,7 +270,7 @@ function escapeHtml(s) {
   }[c]));
 }
 
-// WAKTU OPERASIONAL WIB
+// JAM OPERASIONAL E-WALLET WIB
 function isPaymentOpen() {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
@@ -276,7 +280,9 @@ function isPaymentOpen() {
   }).formatToParts(new Date());
 
   const hour = Number(parts.find(p => p.type === "hour").value);
-  return hour >= 7 && hour < 22;
+
+  // Buka pukul 07.00 sampai sebelum 00.00 WIB
+  return hour >= 7;
 }
 
 function updatePaymentHours() {
@@ -285,20 +291,25 @@ function updatePaymentHours() {
   $("pay").disabled = !open;
   $("pay").textContent = open
     ? "Lanjutkan pembelian"
-    : "Pembayaran tutup pukul 22.00";
+    : "Pembayaran tutup - buka pukul 07.00";
 
   if (!open) {
     $("status").textContent =
-      "Pembayaran GoPay dan DANA sedang tutup. Silakan kembali pukul 07.00 WIB.";
+      "Pembayaran GoPay dan DANA sedang tutup. Silakan kembali pukul 07.00 WIB. QRIS belum aktif.";
   } else {
     $("status").textContent =
-      "Pembayaran GoPay dan DANA tersedia pukul 07.00–22.00 WIB.";
+      "Pembayaran GoPay dan DANA tersedia pukul 07.00–00.00 WIB. QRIS belum aktif.";
   }
 
-  if (currentOrder && $("payment-box").classList.contains("hidden") === false) {
+  if (currentOrder && !$("payment-box").classList.contains("hidden")) {
     $("submit-proof").disabled = !open || proofSubmitted;
-    if (!open) {
-      showMessage("proof-message", "Jam pembayaran sedang tutup. Silakan kembali pukul 07.00 WIB.", true);
+
+    if (!open && !proofSubmitted) {
+      showMessage(
+        "proof-message",
+        "Jam pembayaran GoPay dan DANA sedang tutup. Silakan kembali pukul 07.00 WIB.",
+        true
+      );
     }
   }
 }
@@ -346,7 +357,7 @@ function renderChoice() {
     : "Pilih paket.";
 }
 
-// MEMUAT PAKET DARI SUPABASE
+// MEMUAT PAKET
 async function loadPackages() {
   $("packages").innerHTML = '<div class="card">Menghubungkan ke database...</div>';
 
@@ -372,7 +383,7 @@ async function loadPackages() {
   renderPackages();
 }
 
-// LOGIN ADMIN
+// STATUS LOGIN ADMIN
 async function updateAdminUI() {
   const { data: { session } } = await db.auth.getSession();
   const loggedIn = !!session;
@@ -382,7 +393,7 @@ async function updateAdminUI() {
   $("logout").classList.toggle("hidden", !loggedIn);
 }
 
-// NAVIGASI TAB
+// NAVIGASI
 $("ct").onclick = () => toggle(false);
 $("at").onclick = () => toggle(true);
 
@@ -395,7 +406,7 @@ function toggle(a) {
   if (a) updateAdminUI();
 }
 
-// LOGIN
+// LOGIN ADMIN
 $("login").onclick = async () => {
   const email = $("email").value.trim();
   const password = $("password").value;
@@ -469,10 +480,11 @@ $("pay").onclick = async () => {
 
   if (!isPaymentOpen()) {
     updatePaymentHours();
-    return alert("Pembayaran hanya tersedia pukul 07.00–22.00 WIB.");
+    return alert("Pembayaran GoPay dan DANA hanya tersedia pukul 07.00–00.00 WIB.");
   }
 
   if (!p) return alert("Pilih paket terlebih dahulu.");
+
   if (!/^0[0-9]{8,13}$/.test(phone)) {
     return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
   }
@@ -486,7 +498,9 @@ $("pay").onclick = async () => {
     });
 
     if (error) throw error;
-    if (!data || !data.success) throw new Error(data?.error || "Pesanan gagal dibuat.");
+    if (!data || !data.success) {
+      throw new Error(data?.error || "Pesanan gagal dibuat.");
+    }
 
     currentOrder = data.order;
     currentPhone = phone;
@@ -501,7 +515,8 @@ $("pay").onclick = async () => {
       <small>Status: Menunggu Pembayaran</small>
     `;
 
-    $("status").textContent = "Silakan lakukan transfer dan unggah bukti pembayaran.";
+    $("status").textContent =
+      "Silakan lakukan transfer dan unggah bukti pembayaran.";
 
     $("payment-order-info").innerHTML = `
       <div class="success">
@@ -513,7 +528,15 @@ $("pay").onclick = async () => {
     $("payment-amount").textContent = rupiah(data.order.amount_idr);
     $("payment-box").classList.remove("hidden");
     $("payment-proof").value = "";
-    showMessage("proof-message", "Silakan transfer sesuai nominal dan unggah bukti pembayaran.");
+    $("payment-proof").disabled = false;
+    $("submit-proof").textContent = "Kirim bukti pembayaran";
+
+    showMessage(
+      "proof-message",
+      "Silakan transfer sesuai nominal dan unggah bukti pembayaran."
+    );
+
+    $("proof-message").className = "muted";
 
     $("check-id").value = data.order.id;
     $("check-phone").value = phone;
@@ -531,7 +554,7 @@ $("pay").onclick = async () => {
   }
 };
 
-// GANTI TAMPILAN NOMOR SESUAI METODE
+// PILIH METODE E-WALLET
 function selectedProvider() {
   return document.querySelector('input[name="provider"]:checked')?.value || "gopay";
 }
@@ -539,13 +562,18 @@ function selectedProvider() {
 document.querySelectorAll('input[name="provider"]').forEach(radio => {
   radio.addEventListener("change", () => {
     const provider = selectedProvider();
+
     $("account-number").textContent = WALLET_NUMBER;
     $("account-name").textContent = WALLET_NAME;
-    showMessage("proof-message", "Metode dipilih: " + provider.toUpperCase() + ". Transfer ke nomor di atas.");
+
+    showMessage(
+      "proof-message",
+      "Metode dipilih: " + provider.toUpperCase() + ". Transfer ke nomor di atas."
+    );
   });
 });
 
-// SALIN NOMOR E-WALLET
+// SALIN NOMOR
 $("copy-number").onclick = async () => {
   try {
     await navigator.clipboard.writeText(WALLET_NUMBER);
@@ -555,7 +583,7 @@ $("copy-number").onclick = async () => {
   }
 };
 
-// KIRIM BUKTI PEMBAYARAN
+// UNGGAH BUKTI TRANSFER
 $("submit-proof").onclick = async () => {
   if (!currentOrder?.id || !currentPhone) {
     return showMessage("proof-message", "Pesanan tidak ditemukan. Buat pesanan terlebih dahulu.", true);
@@ -609,7 +637,9 @@ $("submit-proof").onclick = async () => {
     });
 
     if (error) throw error;
-    if (!data?.success) throw new Error(data?.error || "Gagal mengirim bukti pembayaran.");
+    if (!data?.success) {
+      throw new Error(data?.error || "Gagal mengirim bukti pembayaran.");
+    }
 
     proofSubmitted = true;
 
@@ -624,7 +654,12 @@ $("submit-proof").onclick = async () => {
 
   } catch (error) {
     console.error("Submit proof error:", error);
-    showMessage("proof-message", error.message || "Gagal mengirim bukti pembayaran.", true);
+    showMessage(
+      "proof-message",
+      error.message || "Gagal mengirim bukti pembayaran.",
+      true
+    );
+
     button.disabled = false;
     button.textContent = "Kirim bukti pembayaran";
   }
@@ -657,6 +692,7 @@ $("check-button").addEventListener("click", async () => {
     });
 
     if (error) throw error;
+
     if (!data || data.success === false) {
       throw new Error(data?.message || "Pesanan tidak ditemukan.");
     }
@@ -703,7 +739,7 @@ loadPackages();
 updateAdminUI();
 updatePaymentHours();
 
-// Perbarui status jam operasional secara berkala
+// Perbarui jam operasional setiap 30 detik
 setInterval(updatePaymentHours, 30000);
 
 if ("serviceWorker" in navigator) {
