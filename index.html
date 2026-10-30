@@ -1,123 +1,402 @@
+
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102a43"><link rel="manifest" href="manifest.webmanifest">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102a43">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Fatih Reload WiFi</title>
+
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f2f6fa;color:#172b3a;font:15px system-ui}
+*{box-sizing:border-box}
+body{margin:0;background:#f2f6fa;color:#172b3a;font:15px system-ui}
 header{background:linear-gradient(120deg,#102a43,#1769aa);color:white;padding:24px max(16px,calc((100% - 950px)/2)) 32px}
-.brand{font-size:21px;font-weight:900}.hero{margin-top:25px}.hero h1{font-size:36px;margin:0}
-.wrap{max-width:950px;margin:24px auto;padding:0 15px}.tabs,.row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.tabs{justify-content:flex-start;margin-bottom:16px}button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;background:#1769aa;color:white}
-.tab{background:white;color:#102a43;border:1px solid #dce5ec}.active{background:#1769aa!important;color:white!important}
+.brand{font-size:21px;font-weight:900}
+.hero{margin-top:25px}
+.hero h1{font-size:36px;margin:0}
+.wrap{max-width:950px;margin:24px auto;padding:0 15px}
+.tabs,.row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.tabs{justify-content:flex-start;margin-bottom:16px}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;background:#1769aa;color:white}
+button:disabled{opacity:.6;cursor:not-allowed}
+.tab{background:white;color:#102a43;border:1px solid #dce5ec}
+.active{background:#1769aa!important;color:white!important}
 .card{background:white;border:1px solid #dce5ec;border-radius:15px;padding:17px;margin-bottom:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.pkg{cursor:pointer}.pkg.selected{border:2px solid #1769aa;background:#f3f9ff}
-.price{font-size:27px;font-weight:850;margin:7px 0}.muted,small{color:#66798a;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.pkg{cursor:pointer}
+.pkg.selected{border:2px solid #1769aa;background:#f3f9ff}
+.price{font-size:27px;font-weight:850;margin:7px 0}
+.muted,small{color:#66798a;font-size:13px}
 .pill{display:inline-block;background:#e8f5f7;color:#087887;border-radius:20px;padding:4px 9px;font-size:11px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin:12px 0;display:grid;gap:6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin:12px 0;display:grid;gap:6px}
 .field input,.field select,.file{width:100%;padding:12px;border:1px solid #dce5ec;border-radius:10px;font:inherit}
-.wide{width:100%}.qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:25px;text-align:center;min-height:150px;display:grid;place-content:center;gap:8px}
-.hidden{display:none!important}.notice{background:#fff8e8;border:1px solid #f0d99b;color:#73520b;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin:14px 0}
-table{width:100%;border-collapse:collapse}td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}
+.wide{width:100%}
+.qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:25px;text-align:center;min-height:150px;display:grid;place-content:center;gap:8px}
+.hidden{display:none!important}
+.notice{background:#fff8e8;border:1px solid #f0d99b;color:#73520b;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin:14px 0}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}
 footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
-@media(max-width:650px){.cols{grid-template-columns:1fr}.hero h1{font-size:30px}}
+.check-input{width:100%;padding:12px;margin:8px 0;border:1px solid #dce5ec;border-radius:10px;font:inherit}
+@media(max-width:650px){
+  .cols{grid-template-columns:1fr}
+  .hero h1{font-size:30px}
+}
 </style>
 </head>
+
 <body>
-<header><div class="brand">FATIH RELOAD</div><div class="hero"><h1>Voucher WiFi<br>tanpa antre.</h1><p>Pilih paket internet dengan mudah.</p></div></header>
+
+<header>
+  <div class="brand">FATIH RELOAD</div>
+  <div class="hero">
+    <h1>Voucher WiFi<br>tanpa antre.</h1>
+    <p>Pilih paket internet dengan mudah.</p>
+  </div>
+</header>
+
 <main class="wrap">
-<div class="tabs"><button class="tab active" id="ct">Halaman pelanggan</button><button class="tab" id="at">Dashboard admin</button></div>
-<section id="customer">
-<h2>Pilih paket internet</h2><div class="grid" id="packages"><div class="card">Memuat paket...</div></div>
-<div class="cols" style="margin-top:15px">
-<div class="card"><h2>Detail pembelian</h2><div id="choice">Pilih paket.</div><div class="field"><label>Nomor WhatsApp</label><input id="wa" inputmode="tel" placeholder="08xxxxxxxxxx"></div><button class="wide" id="pay">Lanjutkan pembelian</button></div>
-<div class="card"><h2>Informasi pembelian</h2><div class="qr" id="qr">Pilih paket untuk melihat detail.</div><p id="status" class="muted">Pembayaran QRIS belum diaktifkan.</p></div>
-</div></section>
-<section id="admin" class="hidden">
-<div class="row"><h2>Dashboard admin</h2><button id="logout" class="hidden">Keluar</button></div>
-<div id="loginbox" class="card"><h3>Login admin</h3><p class="muted">Gunakan email dan password akun admin Supabase yang sudah dibuat.</p>
-<div class="field"><label>Email admin</label><input id="email" type="email" autocomplete="username" placeholder="email admin"></div>
-<div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"></div>
-<button id="login">Login</button><p id="loginmsg" class="muted"></p></div>
-<div id="adminarea" class="hidden">
-<div class="card"><h3>Impor stok voucher</h3><div class="field"><label>Paket tujuan</label><select id="target"></select></div>
-<input class="file" id="file" type="file" accept=".csv,text/csv">
-<p class="muted">Format: satu kode voucher per baris. Baris judul seperti “kode” atau “voucher” akan dilewati. Maksimal 5.000 kode per impor.</p>
-<button id="import">Impor kode voucher</button><p id="msg" class="muted"></p></div>
-<div class="card"><h3>Paket tersedia</h3><div id="admintable"></div></div>
-</div></section>
-<div class="notice"><b>Status integrasi:</b> Katalog dan login admin terhubung ke Supabase. Impor voucher memakai Edge Function <code>import-vouchers</code>. Pembayaran QRIS dinamis, verifikasi webhook, dan pengiriman WhatsApp otomatis belum diaktifkan. Jangan menerima pembayaran melalui halaman ini sebelum payment gateway dan webhook selesai dipasang.</div>
-</main><footer>© Fatih Reload</footer>
+
+  <div class="tabs">
+    <button class="tab active" id="ct">Halaman pelanggan</button>
+    <button class="tab" id="at">Dashboard admin</button>
+  </div>
+
+  <!-- HALAMAN PELANGGAN -->
+  <section id="customer">
+    <h2>Pilih paket internet</h2>
+    <div class="grid" id="packages">
+      <div class="card">Memuat paket...</div>
+    </div>
+
+    <div class="cols" style="margin-top:15px">
+      <div class="card">
+        <h2>Detail pembelian</h2>
+        <div id="choice">Pilih paket.</div>
+
+        <div class="field">
+          <label>Nomor WhatsApp</label>
+          <input id="wa" inputmode="tel" placeholder="08xxxxxxxxxx">
+        </div>
+
+        <button class="wide" id="pay">Lanjutkan pembelian</button>
+      </div>
+
+      <div class="card">
+        <h2>Informasi pembelian</h2>
+        <div class="qr" id="qr">
+          Pilih paket untuk melihat detail.
+        </div>
+        <p id="status" class="muted">Pembayaran QRIS belum diaktifkan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD ADMIN -->
+  <section id="admin" class="hidden">
+    <div class="row">
+      <h2>Dashboard admin</h2>
+      <button id="logout" class="hidden">Keluar</button>
+    </div>
+
+    <div id="loginbox" class="card">
+      <h3>Login admin</h3>
+      <p class="muted">Gunakan email dan password akun admin Supabase yang sudah dibuat.</p>
+
+      <div class="field">
+        <label>Email admin</label>
+        <input id="email" type="email" autocomplete="username" placeholder="email admin">
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Password">
+      </div>
+
+      <button id="login">Login</button>
+      <p id="loginmsg" class="muted"></p>
+    </div>
+
+    <div id="adminarea" class="hidden">
+      <div class="card">
+        <h3>Impor stok voucher</h3>
+
+        <div class="field">
+          <label>Paket tujuan</label>
+          <select id="target"></select>
+        </div>
+
+        <input class="file" id="file" type="file" accept=".csv,text/csv">
+
+        <p class="muted">
+          Format: satu kode voucher per baris. Baris judul seperti
+          “kode” atau “voucher” akan dilewati. Maksimal 5.000 kode per impor.
+        </p>
+
+        <button id="import">Impor kode voucher</button>
+        <p id="msg" class="muted"></p>
+      </div>
+
+      <div class="card">
+        <h3>Paket tersedia</h3>
+        <div id="admintable"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CEK PESANAN -->
+  <section id="check-order" class="card" style="max-width:500px;margin:30px auto;padding:20px">
+    <h2>Cek Pesanan</h2>
+    <p>Masukkan ID pesanan dan nomor WhatsApp untuk melihat status pembelian.</p>
+
+    <label for="check-id">ID Pesanan</label>
+    <input
+      id="check-id"
+      class="check-input"
+      type="text"
+      placeholder="Masukkan ID pesanan"
+    >
+
+    <label for="check-phone">Nomor WhatsApp</label>
+    <input
+      id="check-phone"
+      class="check-input"
+      type="tel"
+      placeholder="Contoh: 089xxxxxxxxx"
+    >
+
+    <button id="check-button" class="wide" type="button">
+      Periksa Pesanan
+    </button>
+
+    <div id="check-result" style="margin-top:15px;white-space:pre-line"></div>
+  </section>
+
+  <div class="notice">
+    <b>Status integrasi:</b>
+    Katalog dan login admin terhubung ke Supabase.
+    Impor voucher memakai Edge Function <code>import-vouchers</code>.
+    Pembayaran QRIS dinamis, verifikasi webhook, dan pengiriman WhatsApp
+    otomatis belum diaktifkan.
+    Jangan menerima pembayaran melalui halaman ini sebelum payment gateway
+    dan webhook selesai dipasang.
+  </div>
+
+</main>
+
+<footer>© Fatih Reload</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const SUPABASE_URL = "https://rxobthqkwhyfmcduuzeu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_L8-uxzioNXR4bwx6nWQb_Q_rewY_iD4";
+
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let packagesData = [], selectedId = null;
+
+let packagesData = [];
+let selectedId = null;
+
 const $ = id => document.getElementById(id);
 const rupiah = n => "Rp" + Number(n).toLocaleString("id-ID");
-function showMessage(id, message, error=false){$(id).textContent=message;$(id).style.color=error?"#b42318":"";}
-function renderPackages(){
-  $("packages").innerHTML = packagesData.length ? packagesData.map(p=>`
-    <div class="card pkg ${p.id===selectedId?"selected":""}" data-id="${p.id}">
-      <span class="pill">Paket internet</span><h3>${escapeHtml(p.name)}</h3>
-      <div class="price">${rupiah(p.price_idr)}</div><small>${escapeHtml(p.description || ("Voucher "+p.name))}</small>
-    </div>`).join("") : '<div class="card">Belum ada paket aktif.</div>';
-  document.querySelectorAll(".pkg").forEach(el=>el.addEventListener("click",()=>{selectedId=el.dataset.id;renderPackages();renderChoice();}));
-  $("target").innerHTML=packagesData.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${rupiah(p.price_idr)}</option>`).join("");
-  $("admintable").innerHTML='<table><tr><th>Paket</th><th>Harga</th></tr>'+packagesData.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${rupiah(p.price_idr)}</td></tr>`).join("")+'</table>';
+
+function showMessage(id, message, error=false) {
+  $(id).textContent = message;
+  $(id).style.color = error ? "#b42318" : "";
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
+}
+
+// MENAMPILKAN PAKET
+function renderPackages() {
+  $("packages").innerHTML = packagesData.length
+    ? packagesData.map(p => `
+      <div class="card pkg ${p.id === selectedId ? "selected" : ""}" data-id="${p.id}">
+        <span class="pill">Paket internet</span>
+        <h3>${escapeHtml(p.name)}</h3>
+        <div class="price">${rupiah(p.price_idr)}</div>
+        <small>${escapeHtml(p.description || ("Voucher " + p.name))}</small>
+      </div>
+    `).join("")
+    : '<div class="card">Belum ada paket aktif.</div>';
+
+  document.querySelectorAll(".pkg").forEach(el => {
+    el.addEventListener("click", () => {
+      selectedId = el.dataset.id;
+      renderPackages();
+      renderChoice();
+    });
+  });
+
+  $("target").innerHTML = packagesData.map(p =>
+    `<option value="${p.id}">${escapeHtml(p.name)} — ${rupiah(p.price_idr)}</option>`
+  ).join("");
+
+  $("admintable").innerHTML =
+    '<table><tr><th>Paket</th><th>Harga</th></tr>' +
+    packagesData.map(p =>
+      `<tr><td>${escapeHtml(p.name)}</td><td>${rupiah(p.price_idr)}</td></tr>`
+    ).join("") +
+    '</table>';
+
   renderChoice();
 }
-function renderChoice(){
- const p=packagesData.find(x=>x.id===selectedId);
- $("choice").innerHTML=p?`<b>${escapeHtml(p.name)}</b> — ${rupiah(p.price_idr)}`:"Pilih paket.";
+
+function renderChoice() {
+  const p = packagesData.find(x => x.id === selectedId);
+
+  $("choice").innerHTML = p
+    ? `<b>${escapeHtml(p.name)}</b> — ${rupiah(p.price_idr)}`
+    : "Pilih paket.";
 }
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-async function loadPackages(){
- $("packages").innerHTML='<div class="card">Menghubungkan ke database...</div>';
- const {data,error}=await db.from("packages").select("id,name,slug,price_idr,description").eq("is_active",true).order("price_idr");
- if(error){$("packages").innerHTML='<div class="card">Gagal memuat paket dari Supabase. Periksa kebijakan akses tabel packages (petunjuk ada di README).</div>';console.error(error);return;}
- packagesData=data||[];
- if(!packagesData.some(p=>p.id===selectedId))selectedId=packagesData[0]?.id||null;
- renderPackages();
+
+// MEMUAT PAKET DARI SUPABASE
+async function loadPackages() {
+  $("packages").innerHTML = '<div class="card">Menghubungkan ke database...</div>';
+
+  const { data, error } = await db
+    .from("packages")
+    .select("id,name,slug,price_idr,description")
+    .eq("is_active", true)
+    .order("price_idr");
+
+  if (error) {
+    $("packages").innerHTML =
+      '<div class="card">Gagal memuat paket dari Supabase. Periksa kebijakan akses tabel packages.</div>';
+    console.error(error);
+    return;
+  }
+
+  packagesData = data || [];
+
+  if (!packagesData.some(p => p.id === selectedId)) {
+    selectedId = packagesData[0]?.id || null;
+  }
+
+  renderPackages();
 }
-async function updateAdminUI(){
- const {data:{session}}=await db.auth.getSession();
- const loggedIn=!!session;
- $("loginbox").classList.toggle("hidden",loggedIn);
- $("adminarea").classList.toggle("hidden",!loggedIn);
- $("logout").classList.toggle("hidden",!loggedIn);
+
+// STATUS LOGIN ADMIN
+async function updateAdminUI() {
+  const { data: { session } } = await db.auth.getSession();
+  const loggedIn = !!session;
+
+  $("loginbox").classList.toggle("hidden", loggedIn);
+  $("adminarea").classList.toggle("hidden", !loggedIn);
+  $("logout").classList.toggle("hidden", !loggedIn);
 }
-$("ct").onclick=()=>toggle(false);$("at").onclick=()=>toggle(true);
-function toggle(a){$("customer").classList.toggle("hidden",a);$("admin").classList.toggle("hidden",!a);$("ct").classList.toggle("active",!a);$("at").classList.toggle("active",a);if(a)updateAdminUI();}
-$("login").onclick=async()=>{
- const email=$("email").value.trim(),password=$("password").value;
- if(!email||!password)return showMessage("loginmsg","Isi email dan password.",true);
- $("login").disabled=true;showMessage("loginmsg","Memeriksa akun...");
- const {error}=await db.auth.signInWithPassword({email,password});
- $("login").disabled=false;
- if(error)return showMessage("loginmsg","Login gagal: "+error.message,true);
- showMessage("loginmsg","Login berhasil.");await updateAdminUI();
-};
-$("logout").onclick=async()=>{await db.auth.signOut();await updateAdminUI();};
-$("import").onclick=async()=>{
- const file=$("file").files[0],packageId=$("target").value;
- if(!file)return showMessage("msg","Pilih file CSV terlebih dahulu.",true);
- if(!packageId)return showMessage("msg","Pilih paket tujuan.",true);
- if(file.size>500000)return showMessage("msg","Ukuran file maksimal 500 KB.",true);
- $("import").disabled=true;showMessage("msg","Sedang mengimpor voucher...");
- try{
-   const csv=await file.text();
-   const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});
-   if(error)throw error;
-   if(!data?.success)throw new Error(data?.error||"Impor gagal.");
-   showMessage("msg",`Selesai. Dibaca: ${data.total_dibaca}; duplikat di file: ${data.duplikat_dalam_file}; berhasil ditambahkan: ${data.berhasil_ditambahkan}.`);
-   $("file").value="";
- }catch(e){console.error(e);showMessage("msg","Gagal impor: "+(e.message||"Periksa login dan pengaturan Edge Function."),true);}
- $("import").disabled=false;
+
+// NAVIGASI TAB
+$("ct").onclick = () => toggle(false);
+$("at").onclick = () => toggle(true);
+
+function toggle(a) {
+  $("customer").classList.toggle("hidden", a);
+  $("admin").classList.toggle("hidden", !a);
+  $("ct").classList.toggle("active", !a);
+  $("at").classList.toggle("active", a);
+
+  if (a) updateAdminUI();
+}
+
+// LOGIN ADMIN
+$("login").onclick = async () => {
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  if (!email || !password) {
+    return showMessage("loginmsg", "Isi email dan password.", true);
+  }
+
+  $("login").disabled = true;
+  showMessage("loginmsg", "Memeriksa akun...");
+
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  $("login").disabled = false;
+
+  if (error) {
+    return showMessage("loginmsg", "Login gagal: " + error.message, true);
+  }
+
+  showMessage("loginmsg", "Login berhasil.");
+  await updateAdminUI();
 };
 
+// LOGOUT ADMIN
+$("logout").onclick = async () => {
+  await db.auth.signOut();
+  await updateAdminUI();
+};
+
+// IMPOR VOUCHER
+$("import").onclick = async () => {
+  const file = $("file").files[0];
+  const packageId = $("target").value;
+
+  if (!file) {
+    return showMessage("msg", "Pilih file CSV terlebih dahulu.", true);
+  }
+
+  if (!packageId) {
+    return showMessage("msg", "Pilih paket tujuan.", true);
+  }
+
+  if (file.size > 500000) {
+    return showMessage("msg", "Ukuran file maksimal 500 KB.", true);
+  }
+
+  $("import").disabled = true;
+  showMessage("msg", "Sedang mengimpor voucher...");
+
+  try {
+    const csv = await file.text();
+
+    const { data, error } = await db.functions.invoke("import-vouchers", {
+      body: {
+        package_id: packageId,
+        csv
+      }
+    });
+
+    if (error) throw error;
+    if (!data?.success) {
+      throw new Error(data?.error || "Impor gagal.");
+    }
+
+    showMessage(
+      "msg",
+      `Selesai. Dibaca: ${data.total_dibaca}; duplikat di file: ${data.duplikat_dalam_file}; berhasil ditambahkan: ${data.berhasil_ditambahkan}.`
+    );
+
+    $("file").value = "";
+
+  } catch (e) {
+    console.error(e);
+    showMessage(
+      "msg",
+      "Gagal impor: " + (e.message || "Periksa login dan pengaturan Edge Function."),
+      true
+    );
+  }
+
+  $("import").disabled = false;
+};
+
+// MEMBUAT PESANAN
 $("pay").onclick = async () => {
   const p = packagesData.find(x => x.id === selectedId);
   const phone = $("wa").value.trim();
@@ -143,6 +422,7 @@ $("pay").onclick = async () => {
     });
 
     if (error) throw error;
+
     if (!data || !data.success) {
       throw new Error(data?.error || "Pesanan gagal dibuat.");
     }
@@ -157,18 +437,108 @@ $("pay").onclick = async () => {
       <small>QRIS belum tersedia. Silakan tunggu aktivasi pembayaran.</small>
     `;
 
-    $("status").textContent = "Pesanan berhasil dibuat. Pembayaran QRIS belum terhubung.";
+    $("status").textContent =
+      "Pesanan berhasil dibuat. Pembayaran QRIS belum terhubung.";
+
+    // Otomatis mengisi ID pesanan ke formulir cek pesanan
+    $("check-id").value = data.order.id;
+    $("check-phone").value = phone;
 
   } catch (error) {
     console.error("Create order error:", error);
     $("status").textContent = "Pesanan gagal dibuat.";
     alert(error.message || "Terjadi kesalahan saat membuat pesanan.");
+
   } finally {
     button.disabled = false;
-    button.textContent = "Bayar Sekarang";
+    button.textContent = "Lanjutkan pembelian";
   }
 };
-db.auth.onAuthStateChange(()=>{updateAdminUI();});
-loadPackages();updateAdminUI();
-if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-</script></body></html>
+
+// CEK PESANAN
+$("check-button").addEventListener("click", async () => {
+  const orderId = $("check-id").value.trim();
+  const phone = $("check-phone").value.trim();
+  const button = $("check-button");
+  const result = $("check-result");
+
+  if (!orderId || !phone) {
+    result.textContent = "Masukkan ID pesanan dan nomor WhatsApp.";
+    return;
+  }
+
+  if (!/^0[0-9]{8,13}$/.test(phone)) {
+    result.textContent = "Nomor WhatsApp tidak valid.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Memeriksa...";
+  result.textContent = "Sedang memeriksa pesanan...";
+
+  try {
+    const { data, error } = await db.functions.invoke("check-order", {
+      body: {
+        order_id: orderId,
+        phone: phone
+      }
+    });
+
+    if (error) throw error;
+
+    if (!data || data.success === false) {
+      throw new Error(data?.message || "Pesanan tidak ditemukan.");
+    }
+
+    const order = data.order || data;
+    const status = order.status || "unknown";
+
+    let message = "Status pesanan: " + status;
+
+    if (status === "pending") {
+      message += "\nPesanan menunggu pembayaran.";
+
+    } else if (status === "paid") {
+      message += "\nPembayaran berhasil.";
+
+      if (order.voucher_code) {
+        message += "\nKode voucher: " + order.voucher_code;
+      } else {
+        message += "\nVoucher sedang diproses.";
+      }
+
+    } else if (status === "expired") {
+      message += "\nPesanan sudah kedaluwarsa.";
+
+    } else if (status === "cancelled") {
+      message += "\nPesanan dibatalkan.";
+    }
+
+    result.textContent = message;
+
+  } catch (error) {
+    console.error("Check order error:", error);
+    result.textContent = error.message || "Gagal memeriksa pesanan.";
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Periksa Pesanan";
+  }
+});
+
+// MEMANTAU LOGIN
+db.auth.onAuthStateChange(() => {
+  updateAdminUI();
+});
+
+// MENJALANKAN APLIKASI
+loadPackages();
+updateAdminUI();
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
+</script>
+
+</body>
+</html>
