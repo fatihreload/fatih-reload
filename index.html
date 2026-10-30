@@ -117,12 +117,56 @@ $("import").onclick=async()=>{
  }catch(e){console.error(e);showMessage("msg","Gagal impor: "+(e.message||"Periksa login dan pengaturan Edge Function."),true);}
  $("import").disabled=false;
 };
-$("pay").onclick=()=>{
- const p=packagesData.find(x=>x.id===selectedId),phone=$("wa").value.trim();
- if(!p)return alert("Pilih paket terlebih dahulu.");
- if(!/^0[0-9]{8,13}$/.test(phone))return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
- $("qr").innerHTML=`<b>${escapeHtml(p.name)}</b><strong>${rupiah(p.price_idr)}</strong><small>Nomor WhatsApp: ${escapeHtml(phone)}</small>`;
- $("status").textContent="Pemesanan belum dibuat. Pembayaran QRIS belum terhubung.";
+
+$("pay").onclick = async () => {
+  const p = packagesData.find(x => x.id === selectedId);
+  const phone = $("wa").value.trim();
+  const button = $("pay");
+
+  if (!p) {
+    return alert("Pilih paket terlebih dahulu.");
+  }
+
+  if (!/^0[0-9]{8,13}$/.test(phone)) {
+    return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
+  }
+
+  button.disabled = true;
+  button.textContent = "Memproses pesanan...";
+
+  try {
+    const { data, error } = await db.functions.invoke("create-order", {
+      body: {
+        package_id: selectedId,
+        phone: phone
+      }
+    });
+
+    if (error) throw error;
+    if (!data || !data.success) {
+      throw new Error(data?.error || "Pesanan gagal dibuat.");
+    }
+
+    $("qr").innerHTML = `
+      <b>Pesanan Berhasil Dibuat</b>
+      <strong>${rupiah(data.order.amount_idr)}</strong>
+      <small>Paket: ${escapeHtml(data.package_name)}</small>
+      <small>WhatsApp: ${escapeHtml(phone)}</small>
+      <small>ID Pesanan: ${escapeHtml(data.order.id)}</small>
+      <small>Status: Menunggu Pembayaran</small>
+      <small>QRIS belum tersedia. Silakan tunggu aktivasi pembayaran.</small>
+    `;
+
+    $("status").textContent = "Pesanan berhasil dibuat. Pembayaran QRIS belum terhubung.";
+
+  } catch (error) {
+    console.error("Create order error:", error);
+    $("status").textContent = "Pesanan gagal dibuat.";
+    alert(error.message || "Terjadi kesalahan saat membuat pesanan.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Bayar Sekarang";
+  }
 };
 db.auth.onAuthStateChange(()=>{updateAdminUI();});
 loadPackages();updateAdminUI();
