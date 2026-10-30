@@ -52,6 +52,8 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
 .payment-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .btn-reject{background:#b42318}
 .proof-link{display:inline-block;margin-top:8px;color:#1769aa;font-weight:700}
+.voucher-box{background:white;border:1px solid #b7e2c4;border-radius:10px;padding:15px;margin-top:12px;text-align:center}
+.voucher-code{font-size:25px;font-weight:900;letter-spacing:1px;margin:8px 0;overflow-wrap:anywhere}
 @media(max-width:650px){
   .cols{grid-template-columns:1fr}
   .hero h1{font-size:30px}
@@ -278,6 +280,11 @@ let currentOrder = null;
 let currentPhone = null;
 let proofSubmitted = false;
 
+// Variabel pemantauan pesanan
+let orderPollingTimer = null;
+let orderPollingActive = false;
+let orderPollingBusy = false;
+
 const $ = id => document.getElementById(id);
 const rupiah = n => "Rp" + Number(n).toLocaleString("id-ID");
 
@@ -294,6 +301,27 @@ function escapeHtml(s) {
     '"': "&quot;",
     "'": "&#39;"
   }[c]));
+}
+
+// Mengambil kode voucher dari respons string/objek
+function getVoucherCode(value) {
+  if (typeof value === "string") return value;
+
+  if (Array.isArray(value)) {
+    return value.length ? getVoucherCode(value[0]) : "";
+  }
+
+  if (value && typeof value === "object") {
+    return getVoucherCode(
+      value.voucher_code ??
+      value.code ??
+      value.deliver_voucher ??
+      value.data ??
+      ""
+    );
+  }
+
+  return "";
 }
 
 // JAM OPERASIONAL E-WALLET WIB
@@ -519,6 +547,8 @@ $("pay").onclick = async () => {
     return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
   }
 
+  stopOrderPolling();
+
   button.disabled = true;
   button.textContent = "Memproses pesanan...";
 
@@ -559,6 +589,7 @@ $("pay").onclick = async () => {
     $("payment-box").classList.remove("hidden");
     $("payment-proof").value = "";
     $("payment-proof").disabled = false;
+    $("submit-proof").disabled = false;
     $("submit-proof").textContent = "Kirim bukti pembayaran";
 
     showMessage(
@@ -612,6 +643,129 @@ $("copy-number").onclick = async () => {
     showMessage("proof-message", "Nomor tujuan: " + WALLET_NUMBER);
   }
 };
+
+// =====================================
+// PEMANTAUAN OTOMATIS STATUS PESANAN
+// =====================================
+
+function stopOrderPolling() {
+  orderPollingActive = false;
+  orderPollingBusy = false;
+
+  if (orderPollingTimer) {
+    clearTimeout(orderPollingTimer);
+    orderPollingTimer = null;
+  }
+}
+
+function showCustomerVoucher(code) {
+  $("proof-message").className = "success";
+
+  $("proof-message").innerHTML = `
+    <b>Pembayaran berhasil!</b><br>
+    Voucher kamu sudah siap digunakan.
+
+    <div class="voucher-box">
+      <div class="muted">KODE VOUCHER</div>
+      <div class="voucher-code">${escapeHtml(code)}</div>
+      <button type="button" id="copy-customer-voucher">
+        Salin kode voucher
+      </button>
+    </div>
+  `;
+
+  $("copy-customer-voucher").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      $("copy-customer-voucher").textContent = "Berhasil disalin!";
+    } catch {
+      alert("Silakan salin kode voucher secara manual: " + code);
+    }
+  };
+
+  $("submit-proof").disabled = true;
+  $("submit-proof").textContent = "Voucher sudah diterbitkan";
+  $("payment-proof").disabled = true;
+
+  $("status").textContent =
+    "Pembayaran berhasil dan voucher sudah tersedia.";
+}
+
+async function checkCustomerOrderAutomatically() {
+  if (!orderPollingActive || orderPollingBusy) return;
+
+  orderPollingBusy = true;
+
+  try {
+    const { data, error } = await db.functions.invoke("check-order", {
+      body: {
+        order_id: currentOrder.id,
+        phone: currentPhone
+      }
+    });
+
+    if (error) throw error;
+
+    if (!data || data.success === false) {
+      throw new Error(data?.message || "Gagal memeriksa pesanan.");
+    }
+
+    const order = data.order || data;
+    const status = order.status;
+
+    if (status === "paid") {
+      const code = getVoucherCode(order.voucher_code);
+
+      if (code) {
+        stopOrderPolling();
+        showCustomerVoucher(code);
+        return;
+      }
+
+      $("proof-message").textContent =
+        "Pembayaran disetujui. Voucher sedang diproses...";
+    } else if (status === "pending") {
+      $("proof-message").textContent =
+        "Bukti pembayaran berhasil dikirim. Menunggu verifikasi admin...";
+    } else if (status === "expired" || status === "cancelled") {
+      stopOrderPolling();
+
+      $("proof-message").className = "notice";
+      $("proof-message").textContent =
+        status === "expired"
+          ? "Pesanan sudah kedaluwarsa."
+          : "Pesanan dibatalkan.";
+
+      return;
+    }
+
+  } catch (error) {
+    console.error("Auto check order:", error);
+  } finally {
+    orderPollingBusy = false;
+
+    if (orderPollingActive) {
+      orderPollingTimer = setTimeout(
+        checkCustomerOrderAutomatically,
+        3000
+      );
+    }
+  }
+}
+
+function startOrderPolling() {
+  stopOrderPolling();
+
+  if (!currentOrder?.id || !currentPhone) return;
+
+  orderPollingActive = true;
+
+  $("proof-message").className = "success";
+  $("proof-message").textContent =
+    "Bukti pembayaran berhasil dikirim. Menunggu verifikasi admin...";
+
+  checkCustomerOrderAutomatically();
+}
 
 // UNGGAH BUKTI TRANSFER
 $("submit-proof").onclick = async () => {
@@ -673,14 +827,11 @@ $("submit-proof").onclick = async () => {
 
     proofSubmitted = true;
 
-    showMessage(
-      "proof-message",
-      "Bukti pembayaran berhasil dikirim. Pesanan menunggu verifikasi admin."
-    );
-
-    $("proof-message").className = "success";
     $("submit-proof").textContent = "Bukti berhasil dikirim";
+    $("submit-proof").disabled = true;
     $("payment-proof").disabled = true;
+
+    startOrderPolling();
 
   } catch (error) {
     console.error("Submit proof error:", error);
@@ -696,7 +847,7 @@ $("submit-proof").onclick = async () => {
 };
 
 // =====================================
-// FITUR BARU: VERIFIKASI PEMBAYARAN
+// FITUR VERIFIKASI PEMBAYARAN ADMIN
 // =====================================
 
 // MEMUAT DAFTAR PESANAN ADMIN
@@ -840,13 +991,15 @@ $("payment-list").addEventListener("click", async event => {
     }
 
     if (action === "approve") {
+      const voucherCode = getVoucherCode(data.voucher_code);
+
       $("admin-payment-message").innerHTML = `
         <div class="success">
           <b>Pembayaran berhasil disetujui!</b><br>
           Voucher berhasil diberikan.<br><br>
           Kode voucher:<br>
           <strong style="font-size:23px">
-            ${escapeHtml(data.voucher_code)}
+            ${escapeHtml(voucherCode || "Voucher diterbitkan. Periksa cek pesanan.")}
           </strong>
         </div>
       `;
@@ -878,7 +1031,7 @@ $("refresh-payments").addEventListener("click", () => {
   loadAdminPayments();
 });
 
-// CEK PESANAN PELANGGAN
+// CEK PESANAN PELANGGAN MANUAL
 $("check-button").addEventListener("click", async () => {
   const orderId = $("check-id").value.trim();
   const phone = $("check-phone").value.trim();
@@ -918,10 +1071,12 @@ $("check-button").addEventListener("click", async () => {
     if (status === "pending") {
       message += "\nPesanan menunggu pembayaran atau verifikasi admin.";
     } else if (status === "paid") {
+      const code = getVoucherCode(order.voucher_code);
+
       message += "\nPembayaran berhasil.";
 
-      if (order.voucher_code) {
-        message += "\nKode voucher: " + order.voucher_code;
+      if (code) {
+        message += "\nKode voucher: " + code;
       } else {
         message += "\nVoucher sedang diproses.";
       }
