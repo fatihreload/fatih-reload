@@ -48,6 +48,10 @@ table{width:100%;border-collapse:collapse}
 td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}
 footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
 .check-input{width:100%;padding:12px;margin:8px 0;border:1px solid #dce5ec;border-radius:10px;font:inherit}
+.payment-card{border:1px solid #dce5ec;border-radius:12px;padding:15px;margin:12px 0;background:#fff}
+.payment-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn-reject{background:#b42318}
+.proof-link{display:inline-block;margin-top:8px;color:#1769aa;font-weight:700}
 @media(max-width:650px){
   .cols{grid-template-columns:1fr}
   .hero h1{font-size:30px}
@@ -183,6 +187,8 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
     </div>
 
     <div id="adminarea" class="hidden">
+
+      <!-- IMPOR VOUCHER -->
       <div class="card">
         <h3>Impor stok voucher</h3>
 
@@ -202,10 +208,30 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
         <p id="msg" class="muted"></p>
       </div>
 
+      <!-- DAFTAR PAKET -->
       <div class="card">
         <h3>Paket tersedia</h3>
         <div id="admintable"></div>
       </div>
+
+      <!-- VERIFIKASI PEMBAYARAN -->
+      <div class="card">
+        <div class="row">
+          <h3>Verifikasi Pembayaran</h3>
+          <button id="refresh-payments" type="button">Muat ulang</button>
+        </div>
+
+        <p class="muted">
+          Periksa bukti transfer sebelum menyetujui pembayaran.
+        </p>
+
+        <div id="payment-list">
+          Memuat daftar pembayaran...
+        </div>
+
+        <div id="admin-payment-message"></div>
+      </div>
+
     </div>
   </section>
 
@@ -280,8 +306,6 @@ function isPaymentOpen() {
   }).formatToParts(new Date());
 
   const hour = Number(parts.find(p => p.type === "hour").value);
-
-  // Buka pukul 07.00 sampai sebelum 00.00 WIB
   return hour >= 7;
 }
 
@@ -391,6 +415,12 @@ async function updateAdminUI() {
   $("loginbox").classList.toggle("hidden", loggedIn);
   $("adminarea").classList.toggle("hidden", !loggedIn);
   $("logout").classList.toggle("hidden", !loggedIn);
+
+  if (loggedIn) {
+    loadAdminPayments();
+  } else {
+    $("payment-list").textContent = "Silakan login sebagai admin.";
+  }
 }
 
 // NAVIGASI
@@ -665,7 +695,190 @@ $("submit-proof").onclick = async () => {
   }
 };
 
-// CEK PESANAN
+// =====================================
+// FITUR BARU: VERIFIKASI PEMBAYARAN
+// =====================================
+
+// MEMUAT DAFTAR PESANAN ADMIN
+async function loadAdminPayments() {
+  const container = $("payment-list");
+
+  container.textContent = "Memuat daftar pembayaran...";
+
+  try {
+    const { data, error } = await db.functions.invoke("admin-payments", {
+      body: { action: "list" }
+    });
+
+    if (error) throw error;
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Gagal memuat daftar pembayaran.");
+    }
+
+    const orders = data.orders || [];
+
+    if (!orders.length) {
+      container.innerHTML =
+        '<div class="notice">Belum ada pembayaran yang menunggu verifikasi.</div>';
+      return;
+    }
+
+    container.innerHTML = orders.map(order => `
+      <div class="payment-card">
+
+        <div class="row">
+          <b>${escapeHtml(order.packages?.name || "Paket WiFi")}</b>
+          <span class="pill">Menunggu verifikasi</span>
+        </div>
+
+        <p>Nomor WhatsApp:
+          <b>${escapeHtml(order.customer_phone)}</b>
+        </p>
+
+        <p>Nominal:
+          <b>${rupiah(order.amount_idr)}</b>
+        </p>
+
+        <p>Metode pembayaran:
+          <b>${escapeHtml((order.payment_provider || "-").toUpperCase())}</b>
+        </p>
+
+        <p class="muted">
+          ID Pesanan:<br>
+          ${escapeHtml(order.id)}
+        </p>
+
+        <p class="muted">
+          Bukti dikirim:
+          ${escapeHtml(
+            order.payment_submitted_at
+              ? new Date(order.payment_submitted_at).toLocaleString("id-ID", {
+                  timeZone: "Asia/Jakarta"
+                })
+              : "-"
+          )}
+        </p>
+
+        ${
+          order.proof_url
+            ? `<a class="proof-link"
+                 href="${escapeHtml(order.proof_url)}"
+                 target="_blank"
+                 rel="noopener noreferrer">
+                 Buka bukti transfer
+               </a>`
+            : `<p class="error">Bukti transfer tidak dapat dibuka.</p>`
+        }
+
+        <div class="payment-actions">
+          <button
+            type="button"
+            data-payment-action="approve"
+            data-order-id="${escapeHtml(order.id)}">
+            Setujui pembayaran
+          </button>
+
+          <button
+            type="button"
+            class="btn-reject"
+            data-payment-action="reject"
+            data-order-id="${escapeHtml(order.id)}">
+            Tolak pembayaran
+          </button>
+        </div>
+
+      </div>
+    `).join("");
+
+  } catch (error) {
+    console.error("Load admin payments:", error);
+
+    container.innerHTML = `
+      <div class="notice">
+        Gagal memuat daftar pembayaran.<br>
+        ${escapeHtml(error.message || "Periksa koneksi dan konfigurasi function.")}
+      </div>
+    `;
+  }
+}
+
+// KLIK SETUJUI ATAU TOLAK
+$("payment-list").addEventListener("click", async event => {
+  const button = event.target.closest("button[data-payment-action]");
+
+  if (!button) return;
+
+  const action = button.dataset.paymentAction;
+  const orderId = button.dataset.orderId;
+
+  const question = action === "approve"
+    ? "Pastikan uang sudah masuk ke akun e-wallet. Setujui pembayaran ini dan berikan voucher?"
+    : "Yakin ingin menolak pembayaran ini?";
+
+  if (!confirm(question)) return;
+
+  button.disabled = true;
+
+  showMessage(
+    "admin-payment-message",
+    "Sedang memproses pembayaran..."
+  );
+
+  try {
+    const { data, error } = await db.functions.invoke("admin-payments", {
+      body: {
+        action,
+        order_id: orderId
+      }
+    });
+
+    if (error) throw error;
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Proses pembayaran gagal.");
+    }
+
+    if (action === "approve") {
+      $("admin-payment-message").innerHTML = `
+        <div class="success">
+          <b>Pembayaran berhasil disetujui!</b><br>
+          Voucher berhasil diberikan.<br><br>
+          Kode voucher:<br>
+          <strong style="font-size:23px">
+            ${escapeHtml(data.voucher_code)}
+          </strong>
+        </div>
+      `;
+    } else {
+      $("admin-payment-message").innerHTML = `
+        <div class="notice">
+          Pembayaran berhasil ditolak.
+        </div>
+      `;
+    }
+
+    await loadAdminPayments();
+
+  } catch (error) {
+    console.error("Payment action error:", error);
+
+    showMessage(
+      "admin-payment-message",
+      error.message || "Terjadi kesalahan saat memproses pembayaran.",
+      true
+    );
+
+    button.disabled = false;
+  }
+});
+
+// MUAT ULANG DAFTAR PEMBAYARAN
+$("refresh-payments").addEventListener("click", () => {
+  loadAdminPayments();
+});
+
+// CEK PESANAN PELANGGAN
 $("check-button").addEventListener("click", async () => {
   const orderId = $("check-id").value.trim();
   const phone = $("check-phone").value.trim();
