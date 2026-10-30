@@ -1,18 +1,130 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><link rel="manifest" href="manifest.webmanifest"><title>Fatih Reload WiFi</title><style>
-*{box-sizing:border-box}body{margin:0;background:#f2f6fa;color:#172b3a;font:15px system-ui}header{background:linear-gradient(120deg,#102a43,#1769aa);color:white;padding:24px max(16px,calc((100% - 950px)/2)) 32px}.brand{font-size:21px;font-weight:900}.hero{margin-top:25px}.hero h1{font-size:36px;margin:0}.wrap{max-width:950px;margin:24px auto;padding:0 15px}.tabs,.row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}.tabs{justify-content:flex-start;margin-bottom:16px}button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;background:#1769aa;color:white}.tab{background:white;color:#102a43;border:1px solid #dce5ec}.active{background:#1769aa!important;color:white!important}.card{background:white;border:1px solid #dce5ec;border-radius:15px;padding:17px;margin-bottom:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.pkg{cursor:pointer}.pkg.selected{border:2px solid #1769aa;background:#f3f9ff}.price{font-size:27px;font-weight:850;margin:7px 0}.muted,small{color:#66798a;font-size:13px}.pill{display:inline-block;background:#e8f5f7;color:#087887;border-radius:20px;padding:4px 9px;font-size:11px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin:12px 0;display:grid;gap:6px}.field input,.field select,.file{width:100%;padding:12px;border:1px solid #dce5ec;border-radius:10px;font:inherit}.wide{width:100%}.qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:25px;text-align:center;min-height:180px;display:grid;place-content:center;gap:8px}.hidden{display:none!important}.notice{background:#fff8e8;border:1px solid #f0d99b;color:#73520b;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin:14px 0}.stat{background:#f3f7fa;padding:12px;border-radius:10px}.stat b{font-size:22px;display:block}table{width:100%;border-collapse:collapse}td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}footer{text-align:center;padding:25px;color:#66798a;font-size:12px}@media(max-width:650px){.cols{grid-template-columns:1fr}.hero h1{font-size:30px}}</style></head><body>
-<header><div class="brand">FATIH RELOAD</div><div class="hero"><h1>Voucher WiFi<br>tanpa antre.</h1><p>Pilih paket, bayar QRIS, terima kode di website dan WhatsApp.</p></div></header>
-<main class="wrap"><div class="tabs"><button class="tab active" id="ct">Halaman pelanggan</button><button class="tab" id="at">Dashboard admin</button></div>
-<section id="customer"><h2>Pilih paket internet</h2><div class="grid" id="packages"></div><div class="cols" style="margin-top:15px"><div class="card"><h2>Detail pembelian</h2><div id="choice">Pilih paket.</div><div class="field"><label>Nomor WhatsApp</label><input id="wa" placeholder="08xxxxxxxxxx"></div><button class="wide" id="pay">Buat pembayaran QRIS</button></div><div class="card"><h2>Pembayaran & voucher</h2><div class="qr" id="qr">▦<b>QRIS akan muncul di sini</b><small>Pilih paket untuk memulai.</small></div><p id="status" class="muted">Belum ada transaksi.</p></div></div></section>
-<section id="admin" class="hidden"><div class="row"><h2>Dashboard admin</h2><button id="export">Ekspor CSV</button></div><div class="grid"><div class="stat">Total stok<b id="total">0</b></div><div class="stat">Kode terjual (demo)<b>0</b></div><div class="stat">Jumlah paket<b id="count">0</b></div></div>
-<div class="card"><h2>Tambah / ubah paket</h2><div class="cols"><div class="field"><label>Nama paket</label><input id="name" placeholder="Contoh: 1 Jam"></div><div class="field"><label>Harga (Rp)</label><input id="price" type="number" placeholder="2000"></div></div><button id="save">Simpan paket</button></div>
-<div class="card"><h2>Upload kode voucher CSV</h2><div class="field"><label>Paket tujuan</label><select id="target"></select></div><input class="file" id="file" type="file" accept=".csv,text/csv"><p class="muted">Format: satu kode per baris atau CSV dengan kolom kode. Impor dilakukan ke paket yang dipilih.</p><button id="import">Impor kode voucher</button><p id="msg" class="muted"></p></div><div class="card"><h2>Stok per paket</h2><div id="table"></div></div></section>
-<div class="notice"><b>Catatan:</b> Ini prototipe. QRIS dan WhatsApp belum aktif. Untuk operasional nyata dibutuhkan backend HTTPS, database, payment gateway QRIS dinamis, webhook pembayaran, dan WhatsApp Business API/provider. Jangan gunakan QR demo untuk menerima pembayaran.</div></main><footer>© Fatih Reload</footer>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102a43"><link rel="manifest" href="manifest.webmanifest">
+<title>Fatih Reload WiFi</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f6fa;color:#172b3a;font:15px system-ui}
+header{background:linear-gradient(120deg,#102a43,#1769aa);color:white;padding:24px max(16px,calc((100% - 950px)/2)) 32px}
+.brand{font-size:21px;font-weight:900}.hero{margin-top:25px}.hero h1{font-size:36px;margin:0}
+.wrap{max-width:950px;margin:24px auto;padding:0 15px}.tabs,.row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.tabs{justify-content:flex-start;margin-bottom:16px}button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;background:#1769aa;color:white}
+.tab{background:white;color:#102a43;border:1px solid #dce5ec}.active{background:#1769aa!important;color:white!important}
+.card{background:white;border:1px solid #dce5ec;border-radius:15px;padding:17px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.pkg{cursor:pointer}.pkg.selected{border:2px solid #1769aa;background:#f3f9ff}
+.price{font-size:27px;font-weight:850;margin:7px 0}.muted,small{color:#66798a;font-size:13px}
+.pill{display:inline-block;background:#e8f5f7;color:#087887;border-radius:20px;padding:4px 9px;font-size:11px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin:12px 0;display:grid;gap:6px}
+.field input,.field select,.file{width:100%;padding:12px;border:1px solid #dce5ec;border-radius:10px;font:inherit}
+.wide{width:100%}.qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:25px;text-align:center;min-height:150px;display:grid;place-content:center;gap:8px}
+.hidden{display:none!important}.notice{background:#fff8e8;border:1px solid #f0d99b;color:#73520b;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin:14px 0}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}
+footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
+@media(max-width:650px){.cols{grid-template-columns:1fr}.hero h1{font-size:30px}}
+</style>
+</head>
+<body>
+<header><div class="brand">FATIH RELOAD</div><div class="hero"><h1>Voucher WiFi<br>tanpa antre.</h1><p>Pilih paket internet dengan mudah.</p></div></header>
+<main class="wrap">
+<div class="tabs"><button class="tab active" id="ct">Halaman pelanggan</button><button class="tab" id="at">Dashboard admin</button></div>
+<section id="customer">
+<h2>Pilih paket internet</h2><div class="grid" id="packages"><div class="card">Memuat paket...</div></div>
+<div class="cols" style="margin-top:15px">
+<div class="card"><h2>Detail pembelian</h2><div id="choice">Pilih paket.</div><div class="field"><label>Nomor WhatsApp</label><input id="wa" inputmode="tel" placeholder="08xxxxxxxxxx"></div><button class="wide" id="pay">Lanjutkan pembelian</button></div>
+<div class="card"><h2>Informasi pembelian</h2><div class="qr" id="qr">Pilih paket untuk melihat detail.</div><p id="status" class="muted">Pembayaran QRIS belum diaktifkan.</p></div>
+</div></section>
+<section id="admin" class="hidden">
+<div class="row"><h2>Dashboard admin</h2><button id="logout" class="hidden">Keluar</button></div>
+<div id="loginbox" class="card"><h3>Login admin</h3><p class="muted">Gunakan email dan password akun admin Supabase yang sudah dibuat.</p>
+<div class="field"><label>Email admin</label><input id="email" type="email" autocomplete="username" placeholder="email admin"></div>
+<div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"></div>
+<button id="login">Login</button><p id="loginmsg" class="muted"></p></div>
+<div id="adminarea" class="hidden">
+<div class="card"><h3>Impor stok voucher</h3><div class="field"><label>Paket tujuan</label><select id="target"></select></div>
+<input class="file" id="file" type="file" accept=".csv,text/csv">
+<p class="muted">Format: satu kode voucher per baris. Baris judul seperti “kode” atau “voucher” akan dilewati. Maksimal 5.000 kode per impor.</p>
+<button id="import">Impor kode voucher</button><p id="msg" class="muted"></p></div>
+<div class="card"><h3>Paket tersedia</h3><div id="admintable"></div></div>
+</div></section>
+<div class="notice"><b>Status integrasi:</b> Katalog dan login admin terhubung ke Supabase. Impor voucher memakai Edge Function <code>import-vouchers</code>. Pembayaran QRIS dinamis, verifikasi webhook, dan pengiriman WhatsApp otomatis belum diaktifkan. Jangan menerima pembayaran melalui halaman ini sebelum payment gateway dan webhook selesai dipasang.</div>
+</main><footer>© Fatih Reload</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const KEY="fatih_v2";let d=JSON.parse(localStorage.getItem(KEY)||"null")||{p:[{id:"a",n:"1 Jam",v:2000,c:[]},{id:"b",n:"3 Jam",v:5000,c:[]},{id:"c",n:"1 Hari",v:10000,c:[]},{id:"d",n:"7 Hari",v:25000,c:[]}]};let sel=d.p[0].id;const save=()=>localStorage.setItem(KEY,JSON.stringify(d)),rp=n=>"Rp"+n.toLocaleString("id-ID");
-function render(){packages.innerHTML=d.p.map(p=>`<div class="card pkg ${p.id===sel?"selected":""}" data-id="${p.id}"><span class="pill">${p.c.length} stok</span><h3>${p.n}</h3><div class="price">${rp(p.v)}</div><small>Voucher ${p.n}</small></div>`).join("");document.querySelectorAll(".pkg").forEach(x=>x.onclick=()=>{sel=x.dataset.id;render()});let p=d.p.find(x=>x.id===sel);choice.innerHTML=p?`<b>${p.n}</b> — ${rp(p.v)}<br><small>${p.c.length} voucher tersedia</small>`:"Tidak ada paket";total.textContent=d.p.reduce((a,p)=>a+p.c.length,0);count.textContent=d.p.length;target.innerHTML=d.p.map(p=>`<option value="${p.id}">${p.n}</option>`).join("");table.innerHTML="<table><tr><th>Paket</th><th>Harga</th><th>Stok</th></tr>"+d.p.map(p=>`<tr><td>${p.n}</td><td>${rp(p.v)}</td><td>${p.c.length}</td></tr>`).join("")+"</table>"}
-ct.onclick=()=>toggle(false);at.onclick=()=>toggle(true);function toggle(a){customer.classList.toggle("hidden",a);admin.classList.toggle("hidden",!a);ct.classList.toggle("active",!a);at.classList.toggle("active",a)}
-save.onclick=()=>{let n=name.value.trim(),v=+price.value;if(!n||v<1)return alert("Isi nama dan harga.");let p=d.p.find(x=>x.n.toLowerCase()===n.toLowerCase());if(p)p.v=v;else{let id="x"+Date.now();d.p.push({id,n,v,c:[]});sel=id}save();render();name.value=price.value=""};
-import.onclick=async()=>{let f=file.files[0],p=d.p.find(x=>x.id===target.value);if(!f)return alert("Pilih CSV");let lines=(await f.text()).replace(/^\uFEFF/,"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean),codes=[];for(let i=0;i<lines.length;i++){let s=lines[i];if(i===0&&/kode|voucher|code/i.test(s))continue;let c=(s.split(/[;,]/)[0]||"").replace(/^["']|["']$/g,"").trim();if(c)codes.push(c)}let before=p.c.length;p.c=[...new Set([...p.c,...codes])];save();render();msg.textContent=`${p.c.length-before} kode unik berhasil diimpor ke ${p.n}.`};
-pay.onclick=()=>{let p=d.p.find(x=>x.id===sel);if(!wa.value.trim())return alert("Masukkan nomor WhatsApp.");if(!p.c.length)return alert("Stok paket kosong.");qr.innerHTML=`<b>QRIS dinamis belum dihubungkan</b><strong>${rp(p.v)}</strong><small>Paket ${p.n}</small>`;status.innerHTML="Status: <b>Menunggu pembayaran (demo)</b><br>Voucher belum diberikan sebelum pembayaran diverifikasi."};
-export.onclick=()=>{let a=["paket,kode"];d.p.forEach(p=>p.c.forEach(c=>a.push(`"${p.n}","${c}"`)));let l=document.createElement("a");l.href=URL.createObjectURL(new Blob([a.join("\n")],{type:"text/csv"}));l.download="stok-voucher-fatih-reload.csv";l.click()};render();if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+const SUPABASE_URL = "https://rxobthqkwhyfmcduuzeu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_L8-uxzioNXR4bwx6nWQb_Q_rewY_iD4";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let packagesData = [], selectedId = null;
+const $ = id => document.getElementById(id);
+const rupiah = n => "Rp" + Number(n).toLocaleString("id-ID");
+function showMessage(id, message, error=false){$(id).textContent=message;$(id).style.color=error?"#b42318":"";}
+function renderPackages(){
+  $("packages").innerHTML = packagesData.length ? packagesData.map(p=>`
+    <div class="card pkg ${p.id===selectedId?"selected":""}" data-id="${p.id}">
+      <span class="pill">Paket internet</span><h3>${escapeHtml(p.name)}</h3>
+      <div class="price">${rupiah(p.price_idr)}</div><small>${escapeHtml(p.description || ("Voucher "+p.name))}</small>
+    </div>`).join("") : '<div class="card">Belum ada paket aktif.</div>';
+  document.querySelectorAll(".pkg").forEach(el=>el.addEventListener("click",()=>{selectedId=el.dataset.id;renderPackages();renderChoice();}));
+  $("target").innerHTML=packagesData.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${rupiah(p.price_idr)}</option>`).join("");
+  $("admintable").innerHTML='<table><tr><th>Paket</th><th>Harga</th></tr>'+packagesData.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${rupiah(p.price_idr)}</td></tr>`).join("")+'</table>';
+  renderChoice();
+}
+function renderChoice(){
+ const p=packagesData.find(x=>x.id===selectedId);
+ $("choice").innerHTML=p?`<b>${escapeHtml(p.name)}</b> — ${rupiah(p.price_idr)}`:"Pilih paket.";
+}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function loadPackages(){
+ $("packages").innerHTML='<div class="card">Menghubungkan ke database...</div>';
+ const {data,error}=await db.from("packages").select("id,name,slug,price_idr,description").eq("is_active",true).order("price_idr");
+ if(error){$("packages").innerHTML='<div class="card">Gagal memuat paket dari Supabase. Periksa kebijakan akses tabel packages (petunjuk ada di README).</div>';console.error(error);return;}
+ packagesData=data||[];
+ if(!packagesData.some(p=>p.id===selectedId))selectedId=packagesData[0]?.id||null;
+ renderPackages();
+}
+async function updateAdminUI(){
+ const {data:{session}}=await db.auth.getSession();
+ const loggedIn=!!session;
+ $("loginbox").classList.toggle("hidden",loggedIn);
+ $("adminarea").classList.toggle("hidden",!loggedIn);
+ $("logout").classList.toggle("hidden",!loggedIn);
+}
+$("ct").onclick=()=>toggle(false);$("at").onclick=()=>toggle(true);
+function toggle(a){$("customer").classList.toggle("hidden",a);$("admin").classList.toggle("hidden",!a);$("ct").classList.toggle("active",!a);$("at").classList.toggle("active",a);if(a)updateAdminUI();}
+$("login").onclick=async()=>{
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email||!password)return showMessage("loginmsg","Isi email dan password.",true);
+ $("login").disabled=true;showMessage("loginmsg","Memeriksa akun...");
+ const {error}=await db.auth.signInWithPassword({email,password});
+ $("login").disabled=false;
+ if(error)return showMessage("loginmsg","Login gagal: "+error.message,true);
+ showMessage("loginmsg","Login berhasil.");await updateAdminUI();
+};
+$("logout").onclick=async()=>{await db.auth.signOut();await updateAdminUI();};
+$("import").onclick=async()=>{
+ const file=$("file").files[0],packageId=$("target").value;
+ if(!file)return showMessage("msg","Pilih file CSV terlebih dahulu.",true);
+ if(!packageId)return showMessage("msg","Pilih paket tujuan.",true);
+ if(file.size>500000)return showMessage("msg","Ukuran file maksimal 500 KB.",true);
+ $("import").disabled=true;showMessage("msg","Sedang mengimpor voucher...");
+ try{
+   const csv=await file.text();
+   const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});
+   if(error)throw error;
+   if(!data?.success)throw new Error(data?.error||"Impor gagal.");
+   showMessage("msg",`Selesai. Dibaca: ${data.total_dibaca}; duplikat di file: ${data.duplikat_dalam_file}; berhasil ditambahkan: ${data.berhasil_ditambahkan}.`);
+   $("file").value="";
+ }catch(e){console.error(e);showMessage("msg","Gagal impor: "+(e.message||"Periksa login dan pengaturan Edge Function."),true);}
+ $("import").disabled=false;
+};
+$("pay").onclick=()=>{
+ const p=packagesData.find(x=>x.id===selectedId),phone=$("wa").value.trim();
+ if(!p)return alert("Pilih paket terlebih dahulu.");
+ if(!/^0[0-9]{8,13}$/.test(phone))return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
+ $("qr").innerHTML=`<b>${escapeHtml(p.name)}</b><strong>${rupiah(p.price_idr)}</strong><small>Nomor WhatsApp: ${escapeHtml(phone)}</small>`;
+ $("status").textContent="Pemesanan belum dibuat. Pembayaran QRIS belum terhubung.";
+};
+db.auth.onAuthStateChange(()=>{updateAdminUI();});
+loadPackages();updateAdminUI();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 </script></body></html>
