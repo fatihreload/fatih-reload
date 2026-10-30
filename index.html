@@ -36,6 +36,14 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:25px;text-align:center;min-height:150px;display:grid;place-content:center;gap:8px}
 .hidden{display:none!important}
 .notice{background:#fff8e8;border:1px solid #f0d99b;color:#73520b;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin:14px 0}
+.success{background:#eaf8ef;border:1px solid #b7e2c4;color:#176b35;border-radius:12px;padding:12px;margin:12px 0}
+.error{color:#b42318}
+.payment-method{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.payment-method label{flex:1;min-width:120px;border:1px solid #dce5ec;border-radius:10px;padding:13px;cursor:pointer}
+.payment-method input{margin-right:7px}
+.account{background:#f3f9ff;border:1px solid #c8dfef;padding:15px;border-radius:12px;margin:12px 0}
+.account-number{font-size:24px;font-weight:900;letter-spacing:1px}
+.copy{background:#e8f1f8;color:#1769aa;padding:7px 10px;margin-top:8px}
 table{width:100%;border-collapse:collapse}
 td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}
 footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
@@ -82,6 +90,7 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
         </div>
 
         <button class="wide" id="pay">Lanjutkan pembelian</button>
+        <p id="order-message" class="muted"></p>
       </div>
 
       <div class="card">
@@ -89,9 +98,60 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
         <div class="qr" id="qr">
           Pilih paket untuk melihat detail.
         </div>
-        <p id="status" class="muted">Pembayaran QRIS belum diaktifkan.</p>
+        <p id="status" class="muted">Pembayaran GoPay dan DANA tersedia pukul 07.00–22.00 WIB.</p>
       </div>
     </div>
+
+    <!-- PEMBAYARAN MANUAL -->
+    <section id="payment-box" class="card hidden">
+      <h2>Pembayaran E-Wallet</h2>
+      <div id="payment-order-info"></div>
+
+      <div class="notice">
+        Pembayaran manual hanya tersedia setiap hari pukul
+        <b>07.00–22.00 WIB</b>.
+        Pastikan nominal transfer sesuai dengan total pesanan.
+      </div>
+
+      <h3>Pilih metode pembayaran</h3>
+      <div class="payment-method">
+        <label>
+          <input type="radio" name="provider" value="gopay" checked>
+          <b>GoPay</b>
+        </label>
+        <label>
+          <input type="radio" name="provider" value="dana">
+          <b>DANA</b>
+        </label>
+      </div>
+
+      <div class="account">
+        <div class="muted">Transfer ke nomor e-wallet berikut</div>
+        <div class="account-number" id="account-number">089601293092</div>
+        <b id="account-name">MUHAMAD IMRON</b>
+        <br>
+        <button type="button" class="copy" id="copy-number">Salin nomor</button>
+      </div>
+
+      <div class="field">
+        <label>Nominal yang harus ditransfer</label>
+        <div class="price" id="payment-amount">Rp0</div>
+      </div>
+
+      <div class="field">
+        <label>Unggah bukti transfer</label>
+        <input
+          class="file"
+          id="payment-proof"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+        >
+        <small>Format JPG, PNG, WEBP, atau PDF. Maksimal 5 MB.</small>
+      </div>
+
+      <button class="wide" id="submit-proof">Kirim bukti pembayaran</button>
+      <p id="proof-message" class="muted"></p>
+    </section>
   </section>
 
   <!-- DASHBOARD ADMIN -->
@@ -152,36 +212,19 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
     <p>Masukkan ID pesanan dan nomor WhatsApp untuk melihat status pembelian.</p>
 
     <label for="check-id">ID Pesanan</label>
-    <input
-      id="check-id"
-      class="check-input"
-      type="text"
-      placeholder="Masukkan ID pesanan"
-    >
+    <input id="check-id" class="check-input" type="text" placeholder="Masukkan ID pesanan">
 
     <label for="check-phone">Nomor WhatsApp</label>
-    <input
-      id="check-phone"
-      class="check-input"
-      type="tel"
-      placeholder="Contoh: 089xxxxxxxxx"
-    >
+    <input id="check-phone" class="check-input" type="tel" placeholder="Contoh: 089xxxxxxxxx">
 
-    <button id="check-button" class="wide" type="button">
-      Periksa Pesanan
-    </button>
-
+    <button id="check-button" class="wide" type="button">Periksa Pesanan</button>
     <div id="check-result" style="margin-top:15px;white-space:pre-line"></div>
   </section>
 
   <div class="notice">
-    <b>Status integrasi:</b>
-    Katalog dan login admin terhubung ke Supabase.
-    Impor voucher memakai Edge Function <code>import-vouchers</code>.
-    Pembayaran QRIS dinamis, verifikasi webhook, dan pengiriman WhatsApp
-    otomatis belum diaktifkan.
-    Jangan menerima pembayaran melalui halaman ini sebelum payment gateway
-    dan webhook selesai dipasang.
+    <b>Informasi:</b>
+    Pembayaran GoPay dan DANA menggunakan verifikasi manual admin.
+    Voucher baru diberikan setelah pembayaran diperiksa dan disetujui admin.
   </div>
 
 </main>
@@ -196,8 +239,14 @@ const SUPABASE_KEY = "sb_publishable_L8-uxzioNXR4bwx6nWQb_Q_rewY_iD4";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const WALLET_NUMBER = "089601293092";
+const WALLET_NAME = "MUHAMAD IMRON";
+
 let packagesData = [];
 let selectedId = null;
+let currentOrder = null;
+let currentPhone = null;
+let proofSubmitted = false;
 
 const $ = id => document.getElementById(id);
 const rupiah = n => "Rp" + Number(n).toLocaleString("id-ID");
@@ -215,6 +264,43 @@ function escapeHtml(s) {
     '"': "&quot;",
     "'": "&#39;"
   }[c]));
+}
+
+// WAKTU OPERASIONAL WIB
+function isPaymentOpen() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date());
+
+  const hour = Number(parts.find(p => p.type === "hour").value);
+  return hour >= 7 && hour < 22;
+}
+
+function updatePaymentHours() {
+  const open = isPaymentOpen();
+
+  $("pay").disabled = !open;
+  $("pay").textContent = open
+    ? "Lanjutkan pembelian"
+    : "Pembayaran tutup pukul 22.00";
+
+  if (!open) {
+    $("status").textContent =
+      "Pembayaran GoPay dan DANA sedang tutup. Silakan kembali pukul 07.00 WIB.";
+  } else {
+    $("status").textContent =
+      "Pembayaran GoPay dan DANA tersedia pukul 07.00–22.00 WIB.";
+  }
+
+  if (currentOrder && $("payment-box").classList.contains("hidden") === false) {
+    $("submit-proof").disabled = !open || proofSubmitted;
+    if (!open) {
+      showMessage("proof-message", "Jam pembayaran sedang tutup. Silakan kembali pukul 07.00 WIB.", true);
+    }
+  }
 }
 
 // MENAMPILKAN PAKET
@@ -286,7 +372,7 @@ async function loadPackages() {
   renderPackages();
 }
 
-// STATUS LOGIN ADMIN
+// LOGIN ADMIN
 async function updateAdminUI() {
   const { data: { session } } = await db.auth.getSession();
   const loggedIn = !!session;
@@ -309,7 +395,7 @@ function toggle(a) {
   if (a) updateAdminUI();
 }
 
-// LOGIN ADMIN
+// LOGIN
 $("login").onclick = async () => {
   const email = $("email").value.trim();
   const password = $("password").value;
@@ -321,10 +407,7 @@ $("login").onclick = async () => {
   $("login").disabled = true;
   showMessage("loginmsg", "Memeriksa akun...");
 
-  const { error } = await db.auth.signInWithPassword({
-    email,
-    password
-  });
+  const { error } = await db.auth.signInWithPassword({ email, password });
 
   $("login").disabled = false;
 
@@ -336,7 +419,7 @@ $("login").onclick = async () => {
   await updateAdminUI();
 };
 
-// LOGOUT ADMIN
+// LOGOUT
 $("logout").onclick = async () => {
   await db.auth.signOut();
   await updateAdminUI();
@@ -347,17 +430,9 @@ $("import").onclick = async () => {
   const file = $("file").files[0];
   const packageId = $("target").value;
 
-  if (!file) {
-    return showMessage("msg", "Pilih file CSV terlebih dahulu.", true);
-  }
-
-  if (!packageId) {
-    return showMessage("msg", "Pilih paket tujuan.", true);
-  }
-
-  if (file.size > 500000) {
-    return showMessage("msg", "Ukuran file maksimal 500 KB.", true);
-  }
+  if (!file) return showMessage("msg", "Pilih file CSV terlebih dahulu.", true);
+  if (!packageId) return showMessage("msg", "Pilih paket tujuan.", true);
+  if (file.size > 500000) return showMessage("msg", "Ukuran file maksimal 500 KB.", true);
 
   $("import").disabled = true;
   showMessage("msg", "Sedang mengimpor voucher...");
@@ -366,16 +441,11 @@ $("import").onclick = async () => {
     const csv = await file.text();
 
     const { data, error } = await db.functions.invoke("import-vouchers", {
-      body: {
-        package_id: packageId,
-        csv
-      }
+      body: { package_id: packageId, csv }
     });
 
     if (error) throw error;
-    if (!data?.success) {
-      throw new Error(data?.error || "Impor gagal.");
-    }
+    if (!data?.success) throw new Error(data?.error || "Impor gagal.");
 
     showMessage(
       "msg",
@@ -383,14 +453,9 @@ $("import").onclick = async () => {
     );
 
     $("file").value = "";
-
   } catch (e) {
     console.error(e);
-    showMessage(
-      "msg",
-      "Gagal impor: " + (e.message || "Periksa login dan pengaturan Edge Function."),
-      true
-    );
+    showMessage("msg", "Gagal impor: " + (e.message || "Periksa login dan pengaturan Edge Function."), true);
   }
 
   $("import").disabled = false;
@@ -402,10 +467,12 @@ $("pay").onclick = async () => {
   const phone = $("wa").value.trim();
   const button = $("pay");
 
-  if (!p) {
-    return alert("Pilih paket terlebih dahulu.");
+  if (!isPaymentOpen()) {
+    updatePaymentHours();
+    return alert("Pembayaran hanya tersedia pukul 07.00–22.00 WIB.");
   }
 
+  if (!p) return alert("Pilih paket terlebih dahulu.");
   if (!/^0[0-9]{8,13}$/.test(phone)) {
     return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
   }
@@ -415,17 +482,15 @@ $("pay").onclick = async () => {
 
   try {
     const { data, error } = await db.functions.invoke("create-order", {
-      body: {
-        package_id: selectedId,
-        phone: phone
-      }
+      body: { package_id: selectedId, phone }
     });
 
     if (error) throw error;
+    if (!data || !data.success) throw new Error(data?.error || "Pesanan gagal dibuat.");
 
-    if (!data || !data.success) {
-      throw new Error(data?.error || "Pesanan gagal dibuat.");
-    }
+    currentOrder = data.order;
+    currentPhone = phone;
+    proofSubmitted = false;
 
     $("qr").innerHTML = `
       <b>Pesanan Berhasil Dibuat</b>
@@ -434,24 +499,134 @@ $("pay").onclick = async () => {
       <small>WhatsApp: ${escapeHtml(phone)}</small>
       <small>ID Pesanan: ${escapeHtml(data.order.id)}</small>
       <small>Status: Menunggu Pembayaran</small>
-      <small>QRIS belum tersedia. Silakan tunggu aktivasi pembayaran.</small>
     `;
 
-    $("status").textContent =
-      "Pesanan berhasil dibuat. Pembayaran QRIS belum terhubung.";
+    $("status").textContent = "Silakan lakukan transfer dan unggah bukti pembayaran.";
 
-    // Otomatis mengisi ID pesanan ke formulir cek pesanan
+    $("payment-order-info").innerHTML = `
+      <div class="success">
+        <b>Pesanan berhasil dibuat.</b><br>
+        ID Pesanan: ${escapeHtml(data.order.id)}
+      </div>
+    `;
+
+    $("payment-amount").textContent = rupiah(data.order.amount_idr);
+    $("payment-box").classList.remove("hidden");
+    $("payment-proof").value = "";
+    showMessage("proof-message", "Silakan transfer sesuai nominal dan unggah bukti pembayaran.");
+
     $("check-id").value = data.order.id;
     $("check-phone").value = phone;
+
+    $("payment-box").scrollIntoView({ behavior: "smooth", block: "start" });
+    updatePaymentHours();
 
   } catch (error) {
     console.error("Create order error:", error);
     $("status").textContent = "Pesanan gagal dibuat.";
     alert(error.message || "Terjadi kesalahan saat membuat pesanan.");
-
   } finally {
     button.disabled = false;
-    button.textContent = "Lanjutkan pembelian";
+    updatePaymentHours();
+  }
+};
+
+// GANTI TAMPILAN NOMOR SESUAI METODE
+function selectedProvider() {
+  return document.querySelector('input[name="provider"]:checked')?.value || "gopay";
+}
+
+document.querySelectorAll('input[name="provider"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    const provider = selectedProvider();
+    $("account-number").textContent = WALLET_NUMBER;
+    $("account-name").textContent = WALLET_NAME;
+    showMessage("proof-message", "Metode dipilih: " + provider.toUpperCase() + ". Transfer ke nomor di atas.");
+  });
+});
+
+// SALIN NOMOR E-WALLET
+$("copy-number").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(WALLET_NUMBER);
+    showMessage("proof-message", "Nomor e-wallet berhasil disalin.");
+  } catch {
+    showMessage("proof-message", "Nomor tujuan: " + WALLET_NUMBER);
+  }
+};
+
+// KIRIM BUKTI PEMBAYARAN
+$("submit-proof").onclick = async () => {
+  if (!currentOrder?.id || !currentPhone) {
+    return showMessage("proof-message", "Pesanan tidak ditemukan. Buat pesanan terlebih dahulu.", true);
+  }
+
+  if (!isPaymentOpen()) {
+    updatePaymentHours();
+    return;
+  }
+
+  if (proofSubmitted) {
+    return showMessage("proof-message", "Bukti pembayaran sudah dikirim.", true);
+  }
+
+  const file = $("payment-proof").files[0];
+
+  if (!file) {
+    return showMessage("proof-message", "Pilih file bukti transfer terlebih dahulu.", true);
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    return showMessage("proof-message", "Format file harus JPG, PNG, WEBP, atau PDF.", true);
+  }
+
+  if (file.size <= 0 || file.size > 5 * 1024 * 1024) {
+    return showMessage("proof-message", "Ukuran file maksimal 5 MB.", true);
+  }
+
+  const provider = selectedProvider();
+  const formData = new FormData();
+
+  formData.append("order_id", currentOrder.id);
+  formData.append("phone", currentPhone);
+  formData.append("provider", provider);
+  formData.append("proof", file);
+
+  const button = $("submit-proof");
+  button.disabled = true;
+  button.textContent = "Mengirim bukti...";
+
+  try {
+    const { data, error } = await db.functions.invoke("submit-payment-proof", {
+      body: formData
+    });
+
+    if (error) throw error;
+    if (!data?.success) throw new Error(data?.error || "Gagal mengirim bukti pembayaran.");
+
+    proofSubmitted = true;
+
+    showMessage(
+      "proof-message",
+      "Bukti pembayaran berhasil dikirim. Pesanan menunggu verifikasi admin."
+    );
+
+    $("proof-message").className = "success";
+    $("submit-proof").textContent = "Bukti berhasil dikirim";
+    $("payment-proof").disabled = true;
+
+  } catch (error) {
+    console.error("Submit proof error:", error);
+    showMessage("proof-message", error.message || "Gagal mengirim bukti pembayaran.", true);
+    button.disabled = false;
+    button.textContent = "Kirim bukti pembayaran";
   }
 };
 
@@ -478,14 +653,10 @@ $("check-button").addEventListener("click", async () => {
 
   try {
     const { data, error } = await db.functions.invoke("check-order", {
-      body: {
-        order_id: orderId,
-        phone: phone
-      }
+      body: { order_id: orderId, phone }
     });
 
     if (error) throw error;
-
     if (!data || data.success === false) {
       throw new Error(data?.message || "Pesanan tidak ditemukan.");
     }
@@ -496,8 +667,7 @@ $("check-button").addEventListener("click", async () => {
     let message = "Status pesanan: " + status;
 
     if (status === "pending") {
-      message += "\nPesanan menunggu pembayaran.";
-
+      message += "\nPesanan menunggu pembayaran atau verifikasi admin.";
     } else if (status === "paid") {
       message += "\nPembayaran berhasil.";
 
@@ -506,10 +676,8 @@ $("check-button").addEventListener("click", async () => {
       } else {
         message += "\nVoucher sedang diproses.";
       }
-
     } else if (status === "expired") {
       message += "\nPesanan sudah kedaluwarsa.";
-
     } else if (status === "cancelled") {
       message += "\nPesanan dibatalkan.";
     }
@@ -519,7 +687,6 @@ $("check-button").addEventListener("click", async () => {
   } catch (error) {
     console.error("Check order error:", error);
     result.textContent = error.message || "Gagal memeriksa pesanan.";
-
   } finally {
     button.disabled = false;
     button.textContent = "Periksa Pesanan";
@@ -531,9 +698,13 @@ db.auth.onAuthStateChange(() => {
   updateAdminUI();
 });
 
-// MENJALANKAN APLIKASI
+// JALANKAN APLIKASI
 loadPackages();
 updateAdminUI();
+updatePaymentHours();
+
+// Perbarui status jam operasional secara berkala
+setInterval(updatePaymentHours, 30000);
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
