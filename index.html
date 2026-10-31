@@ -413,10 +413,45 @@ window.loadVoucherCSV=async function(input){
 
 /* IMPORT VOUCHER */
 window.importVouchers=async function(){
-  if(!requireAdmin())return;const packageId=$("importPackage").value,csv=$("voucherCSV").value.trim(),b=$("importBtn"),out=$("importResult");
-  if(!packageId){showToast("Pilih paket terlebih dahulu.");return}if(!csv){showToast("Masukkan daftar kode voucher.");return}
-  setLoading(b,true,"Mengimpor...");out.innerHTML="";
-  try{const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});if(error)throw error;const p=unwrapData(data),count=p?.imported_count??p?.inserted??p?.count??p?.imported??"-";out.innerHTML=`<div class="notice success"><strong>Import selesai.</strong><br>${escapeHTML(p?.message||`Jumlah voucher yang berhasil diproses: ${count}`)}</div>`;$("voucherCSV").value="";if($("voucherFile"))$("voucherFile").value="";if($("voucherFileInfo")){ $("voucherFileInfo").className="notice";$("voucherFileInfo").textContent="Belum ada file dipilih. Pilih file berformat .csv dari HP atau komputer.";}await loadStock();showToast("Import voucher selesai.")}catch(e){console.error(e);out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}finally{setLoading(b,false)}
+  if(!requireAdmin())return;
+  const packageId=$("importPackage").value;
+  const csv=$("voucherCSV").value.trim();
+  const b=$("importBtn"),out=$("importResult");
+  if(!packageId){showToast("Pilih paket terlebih dahulu.");return}
+  if(!csv){showToast("Pilih file CSV yang berisi kode voucher.");return}
+  setLoading(b,true,"Mengimpor...");
+  out.innerHTML="";
+  try{
+    const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});
+    if(error)throw error;
+    const p=unwrapData(data);
+    if(!p || p.success!==true){
+      throw new Error(p?.error||p?.pesan||p?.message||"Server tidak mengonfirmasi keberhasilan impor.");
+    }
+    const added=Number(p.berhasil_ditambahkan??0);
+    const total=Number(p.total_dibaca??0);
+    const duplicates=Number(p.duplikat_dalam_file??0);
+    out.innerHTML=`<div class="notice success"><strong>${escapeHTML(p.pesan||"Import voucher selesai.")}</strong><br>
+      Total kode dibaca: <strong>${total}</strong><br>
+      Berhasil ditambahkan: <strong>${added}</strong><br>
+      Duplikat dalam file: <strong>${duplicates}</strong>
+      ${added===0?'<br><strong>Catatan:</strong> Tidak ada kode baru yang ditambahkan. Kode mungkin sudah pernah diimpor sebelumnya.':''}
+    </div>`;
+    $("voucherCSV").value="";
+    if($("voucherFile"))$("voucherFile").value="";
+    if($("voucherFileInfo")){
+      $("voucherFileInfo").className="notice";
+      $("voucherFileInfo").textContent="Belum ada file dipilih. Pilih file berformat .csv dari HP atau komputer.";
+    }
+    const stockUpdated=await loadStock();
+    if(!stockUpdated)out.innerHTML+=`<div class="notice warning" style="margin-top:8px">Impor dilaporkan berhasil, tetapi tampilan stok gagal diperbarui. Tekan Refresh pada menu Paket & Stok.</div>`;
+    showToast(`Import selesai. ${added} voucher baru ditambahkan.`);
+  }catch(e){
+    console.error("Import voucher gagal:",e);
+    out.innerHTML=`<div class="notice warning"><strong>Import gagal.</strong><br>${escapeHTML(getErrorMessage(e))}</div>`;
+  }finally{
+    setLoading(b,false);
+  }
 };
 
 /* KELOLA VOUCHER - API MENERIMA SATU package_id UUID */
