@@ -297,8 +297,59 @@ window.loadAdminPayments=async function(){
     box.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Pesanan</th><th>Pelanggan</th><th>Nominal</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead><tbody>${rows.map(o=>{const id=o.id||o.order_id,proof=o.payment_proof_url||o.proof_url||o.payment_proof||"";return `<tr><td><strong>${escapeHTML(String(id||"-").slice(0,12))}</strong><div class="small muted">${formatDate(o.created_at)}</div></td><td>${escapeHTML(o.customer_phone||o.phone||"-")}</td><td><strong>${money(o.amount_idr||o.amount||0)}</strong></td><td>${statusBadge(o.status)}</td><td>${proof?`<a href="${escapeHTML(proof)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Lihat Bukti</a>`:"Belum ada"}</td><td><button class="btn btn-success btn-sm" onclick="approvePayment('${String(id).replace(/'/g,"")}')">Setujui</button> <button class="btn btn-danger btn-sm" onclick="rejectPayment('${String(id).replace(/'/g,"")}')">Tolak</button></td></tr>`}).join("")}</tbody></table></div>`
   }catch(e){console.error(e);box.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}
 };
-async function processPaymentAction(action,id){if(!requireAdmin())return;if(!confirm(`Yakin ingin ${action==="approve"?"menyetujui":"menolak"} pembayaran ini?`))return;try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action,order_id:id}});if(error)throw error;showToast(unwrapData(data)?.message||"Pembayaran berhasil diproses.");await loadAdminPayments();await loadTransactionHistory();await refreshAdminDashboard();await loadStock()}catch(e){console.error(e);showToast("Gagal memproses pembayaran: "+getErrorMessage(e))}}
-window.approvePayment=id=>processPaymentAction("approve",id);window.rejectPayment=id=>processPaymentAction("reject",id);
+
+async function processPaymentAction(action,id){
+  if(!requireAdmin())return;
+
+  if(!confirm(`Yakin ingin ${action==="approve"?"menyetujui":"menolak"} pembayaran ini?`))return;
+
+  try{
+    const {data,error}=await db.functions.invoke("admin-payments",{
+      body:{action,order_id:id}
+    });
+
+    if(error)throw error;
+
+    const result=unwrapData(data);
+
+    if(!result || result.success!==true){
+      throw new Error(result?.error||"Pembayaran gagal diproses.");
+    }
+
+    if(action==="approve"){
+      const voucherCode=String(result.voucher_code||"").trim();
+
+      if(voucherCode){
+        alert(
+          "PEMBAYARAN BERHASIL DISETUJUI!\n\n"+
+          "KODE VOUCHER:\n"+
+          voucherCode+
+          "\n\nSilakan berikan kode ini kepada pelanggan."
+        );
+      }else{
+        alert(
+          "Pembayaran berhasil disetujui, tetapi kode voucher tidak diterima dari server.\n\n"+
+          "Perlu pemeriksaan fungsi deliver_voucher."
+        );
+      }
+    }else{
+      showToast(result.message||"Pembayaran ditolak.");
+    }
+
+    await loadAdminPayments();
+    await loadTransactionHistory();
+    await refreshAdminDashboard();
+    await loadStock();
+
+  }catch(e){
+    console.error("Payment action error:",e);
+    showToast("Gagal memproses pembayaran: "+getErrorMessage(e));
+  }
+}
+
+window.approvePayment=id=>processPaymentAction("approve",id);
+window.rejectPayment=id=>processPaymentAction("reject",id);
+
 
 /* RIWAYAT TRANSAKSI */
 function initializeHistoryDates(){/* Kosong = tampilkan seluruh riwayat, bukan hanya hari ini. */}
