@@ -218,6 +218,7 @@ const $ = id => document.getElementById(id);
 let packages=[], packageStocks=[], selectedPackageId=null, currentOrder=null;
 let currentPhone="", currentOrderId="", currentOrderStatus="", proofSubmitted=false;
 let availableVouchers=[], historyCurrentPage=1, historyTotalPages=1;
+window.adminPaymentRows=[];
 const historyLimit=20;
 let currentAdminView="admin-home", currentCustomerView="customer-home";
 let adminDataLoadedForSession=false, adminVerified=false;
@@ -477,60 +478,89 @@ window.deleteVoucher=async function(id){
 window.loadAdminPayments=async function(){
   if(!requireAdmin())return;const box=$("payment-list");if(!box)return;box.innerHTML=`<div class="empty">Memuat daftar pembayaran...</div>`;
   try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"list"}});if(error)throw error;const p=unwrapData(data),rows=getRows(p,["orders","payments","data","items"]);
+    window.adminPaymentRows=rows;
     if(!rows.length){box.innerHTML=`<div class="empty">Tidak ada pembayaran yang menunggu verifikasi.</div>`;return}
     box.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Pesanan</th><th>Pelanggan</th><th>Nominal</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead><tbody>${rows.map(o=>{const id=o.id||o.order_id,proof=o.payment_proof_url||o.proof_url||o.payment_proof||"";return `<tr><td><strong>${escapeHTML(String(id||"-").slice(0,12))}</strong><div class="small muted">${formatDate(o.created_at)}</div></td><td>${escapeHTML(o.customer_phone||o.phone||"-")}</td><td><strong>${money(o.amount_idr||o.amount||0)}</strong></td><td>${statusBadge(o.status)}</td><td>${proof?`<a href="${escapeHTML(proof)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Lihat Bukti</a>`:"Belum ada"}</td><td><button class="btn btn-success btn-sm" onclick="approvePayment('${String(id).replace(/'/g,"")}')">Setujui</button> <button class="btn btn-danger btn-sm" onclick="rejectPayment('${String(id).replace(/'/g,"")}')">Tolak</button></td></tr>`}).join("")}</tbody></table></div>`
   }catch(e){console.error(e);box.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}
 };
 
+function toWhatsAppNumber(phone){
+  let number=String(phone||"").replace(/\\D/g,"");
+  if(number.startsWith("0"))number="62"+number.slice(1);
+  else if(number.startsWith("8"))number="62"+number;
+  return number;
+}
+
+function showApprovedVoucherInAdmin(orderInfo,voucherCode){
+  const box=$("payment-list");
+  if(!box)return;
+  const phone=orderInfo?.customer_phone||orderInfo?.phone||"";
+  const waNumber=toWhatsAppNumber(phone);
+  const packageName=orderInfo?.package_name||orderInfo?.packages?.name||orderInfo?.package?.name||"";
+  const message=[
+    "Halo! Terima kasih telah membeli voucher WiFi Fatih Reload.",
+    "Pembayaran Anda sudah berhasil diverifikasi.",
+    packageName?"Paket: "+packageName:"",
+    "Kode Voucher: "+voucherCode,
+    "Silakan masukkan kode voucher pada halaman login WiFi.",
+    "Terima kasih."
+  ].filter(Boolean).join("\\n\\n");
+  const waUrl=waNumber.length>=10&&waNumber.length<=15
+    ? "https://wa.me/"+waNumber+"?text="+encodeURIComponent(message)
+    : "";
+  const shareAction=waUrl
+    ? `<a class="btn btn-success btn-sm" href="${escapeHTML(waUrl)}" target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>`
+    : `<div class="notice warning" style="margin-top:10px">Nomor WhatsApp pelanggan tidak tersedia atau tidak valid. Periksa nomor pada data pesanan.</div>`;
+  box.insertAdjacentHTML("afterbegin",`<div class="notice success" style="margin-bottom:14px;padding:15px">
+    <strong>✓ Pembayaran berhasil disetujui</strong>
+    <div style="margin-top:8px">Kode voucher pelanggan:</div>
+    <div class="code-box" style="margin:8px 0"><strong>${escapeHTML(voucherCode)}</strong></div>
+    <div class="small">Nomor pelanggan: ${escapeHTML(phone||"-")}</div>
+    ${shareAction}
+  </div>`);
+}
+
 async function processPaymentAction(action,id){
   if(!requireAdmin())return;
-
   if(!confirm(`Yakin ingin ${action==="approve"?"menyetujui":"menolak"} pembayaran ini?`))return;
+
+  const orderInfo=(window.adminPaymentRows||[]).find(o=>String(o.id||o.order_id)===String(id))||null;
 
   try{
     const {data,error}=await db.functions.invoke("admin-payments",{
       body:{action,order_id:id}
     });
-
     if(error)throw error;
 
     const result=unwrapData(data);
-
     if(!result || result.success!==true){
       throw new Error(result?.error||"Pembayaran gagal diproses.");
     }
 
     if(action==="approve"){
       const voucherCode=String(result.voucher_code||"").trim();
-
-      if(voucherCode){
-        alert(
-          "PEMBAYARAN BERHASIL DISETUJUI!\n\n"+
-          "KODE VOUCHER:\n"+
-          voucherCode+
-          "\n\nSilakan berikan kode ini kepada pelanggan."
-        );
-      }else{
-        alert(
-          "Pembayaran berhasil disetujui, tetapi kode voucher tidak diterima dari server.\n\n"+
-          "Perlu pemeriksaan fungsi deliver_voucher."
-        );
+      if(!voucherCode){
+        throw new Error("Pembayaran disetujui, tetapi kode voucher tidak diterima dari server. Periksa fungsi deliver_voucher.");
       }
-    }else{
-      showToast(result.message||"Pembayaran ditolak.");
+      await loadAdminPayments();
+      await loadTransactionHistory();
+      await refreshAdminDashboard();
+      await loadStock();
+      showApprovedVoucherInAdmin(orderInfo,voucherCode);
+      showToast("Pembayaran disetujui. Kode voucher siap dibagikan.");
+      return;
     }
 
+    showToast(result.message||"Pembayaran ditolak.");
     await loadAdminPayments();
     await loadTransactionHistory();
     await refreshAdminDashboard();
     await loadStock();
-
   }catch(e){
     console.error("Payment action error:",e);
     showToast("Gagal memproses pembayaran: "+getErrorMessage(e));
   }
 }
-
 window.approvePayment=id=>processPaymentAction("approve",id);
 window.rejectPayment=id=>processPaymentAction("reject",id);
 
