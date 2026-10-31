@@ -239,7 +239,35 @@ body.dark-theme .bottom-nav,
 body.dark-theme .admin-mobile-nav{border-top-color:#30404e}
 body.dark-theme .footer{color:#8295a6}
 @media(max-width:700px){.theme-toggle{min-width:36px;padding:6px 8px}}
-
+/* PETUNJUK PEMBELIAN VOUCHER */
+.purchase-steps{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:14px;
+}
+.purchase-step{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  padding:9px 10px;
+  border-radius:10px;
+  background:#ffffff1b;
+  border:1px solid #ffffff25;
+  color:#fff;
+}
+.purchase-step span{
+  font-size:21px;
+  flex-shrink:0;
+}
+.purchase-step strong{
+  font-size:11px;
+  line-height:1.3;
+}
+.purchase-step-last{
+  grid-column:1/-1;
+}
 </style>
 </head>
 <body>
@@ -250,10 +278,33 @@ body.dark-theme .footer{color:#8295a6}
 
 <main id="customerArea"><div class="container">
 <section id="customer-home" class="customer-view active">
-  <div class="customer-hero"><div class="hero-kicker">FATIH RELOAD WIFI</div><h1>Pilih Paket<br>Voucher WiFi</h1><p>Pilih paket voucher WiFi favoritmu. Pembelian mudah, pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.</p><div class="hero-pills"><span>⚡ Proses mudah</span><span>🔐 Pembayaran aman</span><span>📶 Voucher WiFi</span></div></div>
-  <div class="section-title"><h2>Pilih Paket Internet</h2><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Perbarui</button></div>
-  <div id="packageGrid" class="grid package-grid"><div class="empty" style="grid-column:1/-1">Memuat paket voucher...</div></div>
-  <div class="notice" style="margin-top:18px">💡 Pilih paket, masukkan nomor WhatsApp, lalu lanjutkan pesanan.</div>
+  <div class="customer-hero">
+  <div class="hero-kicker">FATIH RELOAD WIFI</div>
+  <h1>Cara Pembelian</h1>
+
+  <div class="purchase-steps">
+    <div class="purchase-step">
+      <span>📦</span>
+      <strong>Pilih paket</strong>
+    </div>
+    <div class="purchase-step">
+      <span>📱</span>
+      <strong>Masukkan WA</strong>
+    </div>
+    <div class="purchase-step">
+      <span>💳</span>
+      <strong>Bayar</strong>
+    </div>
+    <div class="purchase-step">
+      <span>⏳</span>
+      <strong>Verifikasi</strong>
+    </div>
+    <div class="purchase-step purchase-step-last">
+      <span>📶</span>
+      <strong>Voucher siap digunakan!</strong>
+    </div>
+  </div>
+</div>
 </section>
 <section id="customer-orders" class="customer-view">
   <div class="section-title"><h2>Pesanan Saya</h2></div>
