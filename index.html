@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -219,7 +220,7 @@ td .btn{margin:2px}
   <div class="customer-hero">
     <div class="hero-content">
       <div class="hero-kicker">FATIH RELOAD WIFI</div>
-      <h1>Internet lancar,<br>harga bersahabat!</h1>
+      <h1>Pilih Paket<br>Voucher WiFi</h1>
       <p>Pilih paket voucher WiFi favoritmu. Pembelian mudah, pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.</p>
       <div class="hero-pills">
         <span>⚡ Proses mudah</span><span>🔐 Pembayaran aman</span><span>📶 Voucher WiFi</span>
@@ -241,8 +242,23 @@ td .btn{margin:2px}
 
 <section id="customer-orders" class="customer-view">
   <div class="section-title"><h2>Pesanan Saya</h2></div>
-  <div class="card">
-    <h3 style="margin:0 0 5px;color:var(--navy)">Cek status pesanan</h3>
+
+  <!-- URUTAN 1: PEMBAYARAN PESANAN -->
+  <div id="paymentPanel" class="card hidden">
+    <h3 style="margin:0 0 5px;color:var(--navy)">Pembayaran Pesanan</h3>
+    <div id="paymentContent"></div>
+  </div>
+
+  <!-- URUTAN 2: PESANAN SEDANG DIPROSES -->
+  <div class="card" style="margin-top:15px">
+    <h3 style="margin:0 0 5px;color:var(--navy)">Pesanan yang Sedang Diproses</h3>
+    <p class="muted small">Jika kamu baru saja membuat pesanan di perangkat ini, detailnya akan muncul di bawah.</p>
+    <div id="currentOrderPanel"><div class="empty">Belum ada pesanan aktif di halaman ini.</div></div>
+  </div>
+
+  <!-- URUTAN 3: CEK STATUS PESANAN -->
+  <div class="card" style="margin-top:15px">
+    <h3 style="margin:0 0 5px;color:var(--navy)">Cek Status Pesanan</h3>
     <p class="muted small" style="margin-top:0">Masukkan nomor pesanan dan nomor WhatsApp yang digunakan saat membeli.</p>
     <div class="field">
       <label for="checkOrderId">Nomor Pesanan</label>
@@ -254,17 +270,6 @@ td .btn{margin:2px}
     </div>
     <button class="btn btn-primary btn-block" onclick="manualCheckOrder()">Periksa Pesanan</button>
     <div id="checkResult" style="margin-top:14px"></div>
-  </div>
-
-  <div class="card" style="margin-top:15px">
-    <h3 style="margin:0 0 5px;color:var(--navy)">Pesanan yang sedang diproses</h3>
-    <p class="muted small">Jika kamu baru saja membuat pesanan di perangkat ini, detailnya akan muncul di bawah.</p>
-    <div id="currentOrderPanel"><div class="empty">Belum ada pesanan aktif di halaman ini.</div></div>
-  </div>
-
-  <div id="paymentPanel" class="card hidden" style="margin-top:15px">
-    <h3 style="margin:0 0 5px;color:var(--navy)">Pembayaran Pesanan</h3>
-    <div id="paymentContent"></div>
   </div>
 </section>
 
@@ -616,7 +621,10 @@ window.showCustomerView=function(view){
   document.querySelectorAll("[data-customer-view]").forEach(el=>{
     el.classList.toggle("active",el.dataset.customerView===view);
   });
-  if(view==="customer-orders")renderCurrentOrderPanel();
+  if(view==="customer-orders"){
+    renderCurrentOrderPanel();
+    renderPaymentPanel();
+  }
 };
 
 window.showAdminView=function(view){
@@ -663,11 +671,6 @@ function renderPackageOptions(){
   }
 }
 
-/*
-  PERBAIKAN STOK:
-  Mendukung stock_count sebagai nama kolom utama,
-  serta beberapa nama kolom alternatif untuk kompatibilitas.
-*/
 function findStock(packageId){
   const row=packageStocks.find(s=>
     String(s.package_id??s.id)===String(packageId)
@@ -1163,6 +1166,7 @@ window.loadAvailableVouchers=async function(){
   if(!list||!total)return;
 
   const packageId=$("manageVoucherPackage")?.value||"";
+  total.textContent="Memuat data...";
   list.innerHTML=`<div class="empty" style="grid-column:1/-1">Memuat voucher...</div>`;
 
   try{
@@ -1210,7 +1214,9 @@ window.deleteVoucher=async function(voucherId){
     if(error)throw error;
 
     const payload=unwrapData(data);
-    showToast(payload?.message||"Voucher berhasil dihapus.");
+    const deleted=payload?.deleted_count??payload?.deleted;
+    const skipped=payload?.skipped_count??payload?.skipped;
+    showToast(payload?.message||(deleted!==undefined?`Voucher dihapus: ${deleted}${skipped!==undefined?`, dilewati: ${skipped}`:""}`:"Voucher berhasil dihapus."));
     await loadAvailableVouchers();
     await loadStock();
   }catch(error){
@@ -1441,18 +1447,8 @@ setInterval(()=>updatePaymentHours(),30000);
 $("yearNow").textContent=new Date().getFullYear();
 updatePaymentHours();
 
-/*
-  PENTING:
-  Selalu muat paket untuk pelanggan.
-  Jangan otomatis membuka dashboard admin hanya karena
-  browser masih memiliki sesi login Supabase.
-*/
 loadPackages();
 
-/*
-  Listener hanya mengatur status sesi.
-  Perpindahan ke dashboard dilakukan melalui tombol Admin.
-*/
 db.auth.onAuthStateChange((_event,session)=>{
   if(!session){
     adminDataLoadedForSession=false;
@@ -1460,9 +1456,6 @@ db.auth.onAuthStateChange((_event,session)=>{
   }
 });
 
-/*
-  Tampilan pertama website SELALU halaman pelanggan.
-*/
 showCustomer();
 
 /* SERVICE WORKER */
