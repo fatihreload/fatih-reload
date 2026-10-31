@@ -498,13 +498,13 @@ function showApprovedVoucherInAdmin(orderInfo,voucherCode){
   const waNumber=toWhatsAppNumber(phone);
   const packageName=orderInfo?.package_name||orderInfo?.packages?.name||orderInfo?.package?.name||"";
   const message=[
-    "Halo! Terima kasih telah membeli voucher WiFi Fatih Reload.",
-    "Pembayaran Anda sudah berhasil diverifikasi.",
+    "Terima kasih telah membeli voucher Fatih Reload!",
+    "",
     packageName?"Paket: "+packageName:"",
     "Kode Voucher: "+voucherCode,
-    "Silakan masukkan kode voucher pada halaman login WiFi.",
-    "Terima kasih."
-  ].filter(Boolean).join("\\n\\n");
+    "",
+    "Selamat menikmati WiFi 😊"
+  ].filter((line,index)=>line!=="" || (index>0 && index<5)).join("\\n");
   const waUrl=waNumber.length>=10&&waNumber.length<=15
     ? "https://wa.me/"+waNumber+"?text="+encodeURIComponent(message)
     : "";
