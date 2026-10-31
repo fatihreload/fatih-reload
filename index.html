@@ -485,7 +485,7 @@ window.loadAdminPayments=async function(){
 };
 
 function toWhatsAppNumber(phone){
-  let number=String(phone||"").replace(/\\D/g,"");
+  let number=String(phone||"").replace(/\D/g,"");
   if(number.startsWith("0"))number="62"+number.slice(1);
   else if(number.startsWith("8"))number="62"+number;
   return number;
@@ -504,12 +504,12 @@ function showApprovedVoucherInAdmin(orderInfo,voucherCode){
     "Kode Voucher: "+voucherCode,
     "",
     "Selamat menikmati WiFi 😊"
-  ].filter((line,index)=>line!=="" || (index>0 && index<5)).join("\\n");
+  ].filter((line,index)=>line!=="" || (index>0 && index<5)).join("\n");
   const waUrl=waNumber.length>=10&&waNumber.length<=15
     ? "https://wa.me/"+waNumber+"?text="+encodeURIComponent(message)
     : "";
   const shareAction=waUrl
-    ? `<a class="btn btn-success btn-sm" href="${escapeHTML(waUrl)}" target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>`
+    ? `<a class="btn btn-success wa-share-btn" href="${escapeHTML(waUrl)}" target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>`
     : `<div class="notice warning" style="margin-top:10px">Nomor WhatsApp pelanggan tidak tersedia atau tidak valid. Periksa nomor pada data pesanan.</div>`;
   box.insertAdjacentHTML("afterbegin",`<div class="notice success" style="margin-bottom:14px;padding:15px">
     <strong>✓ Pembayaran berhasil disetujui</strong>
