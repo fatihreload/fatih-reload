@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -62,6 +63,40 @@ footer{text-align:center;padding:16px;color:#66798a;font-size:12px}
 .proof-link{display:inline-block;margin-top:8px;color:#1769aa;font-weight:700}
 .voucher-box{background:white;border:1px solid #b7e2c4;border-radius:10px;padding:15px;margin-top:12px;text-align:center}
 .voucher-code{font-size:25px;font-weight:900;letter-spacing:1px;margin:8px 0;overflow-wrap:anywhere}
+
+/* KELOLA VOUCHER */
+.voucher-list-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-bottom:1px solid #e2eaf2;
+  cursor:pointer;
+}
+.voucher-list-item:hover{background:#f5f9fc}
+.voucher-list-item input{
+  width:19px;
+  height:19px;
+  flex-shrink:0;
+  cursor:pointer;
+}
+.voucher-list-code{
+  font-family:monospace;
+  font-size:14px;
+  overflow-wrap:anywhere;
+}
+.btn-delete{background:#b42318;color:white}
+.voucher-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.voucher-toolbar button{flex:1}
+.voucher-count{font-size:13px;color:#66798a;margin:10px 0}
+.voucher-empty{
+  padding:15px;
+  text-align:center;
+  background:#f7fafc;
+  border-radius:10px;
+  color:#66798a;
+}
+.voucher-message{font-size:13px;margin-top:10px}
 
 @media(max-width:650px){
   .wrap{margin-top:12px;padding:0 11px}
@@ -234,6 +269,46 @@ footer{text-align:center;padding:16px;color:#66798a;font-size:12px}
         <div id="admintable">Memuat stok...</div>
       </div>
 
+      <!-- KELOLA VOUCHER -->
+      <div class="card" id="manage-vouchers">
+        <h3>Kelola Voucher</h3>
+        <p class="muted">
+          Lihat dan hapus voucher yang belum terjual.
+          Voucher yang sudah terjual tidak dapat dihapus.
+        </p>
+
+        <div class="field">
+          <label for="voucher-package">Pilih Paket</label>
+          <select id="voucher-package">
+            <option value="">Memuat paket...</option>
+          </select>
+        </div>
+
+        <div class="voucher-toolbar">
+          <button type="button" id="voucher-load">Tampilkan Voucher</button>
+          <button type="button" id="voucher-select-all">Pilih Semua</button>
+        </div>
+
+        <p id="voucher-total" class="voucher-count">
+          Belum ada daftar voucher.
+        </p>
+
+        <div id="voucher-list" style="max-height:300px;overflow:auto">
+          <div class="voucher-empty">Pilih paket terlebih dahulu.</div>
+        </div>
+
+        <button
+          type="button"
+          id="voucher-delete"
+          class="btn-delete wide"
+          style="margin-top:12px"
+        >
+          Hapus Voucher Terpilih
+        </button>
+
+        <p id="voucher-message" class="voucher-message muted"></p>
+      </div>
+
       <!-- VERIFIKASI PEMBAYARAN -->
       <div class="card">
         <div class="row">
@@ -289,24 +364,6 @@ const SUPABASE_KEY = "sb_publishable_L8-uxzioNXR4bwx6nWQb_Q_rewY_iD4";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// REALTIME PEMBARUAN STOK
-const stockChannel = db
-  .channel("fatih-reload-stock")
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "stock_updates"
-    },
-    async () => {
-      console.log("Perubahan stok terdeteksi.");
-      await refreshStock();
-    }
-  )
-  .subscribe((status) => {
-    console.log("Status realtime stok:", status);
-  });
 const WALLET_NUMBER = "089601293092";
 const WALLET_NAME = "MUHAMAD IMRON";
 
@@ -321,6 +378,8 @@ let proofSubmitted = false;
 let orderPollingTimer = null;
 let orderPollingActive = false;
 let orderPollingBusy = false;
+
+let availableVouchers = [];
 
 const $ = id => document.getElementById(id);
 const rupiah = n => "Rp" + Number(n).toLocaleString("id-ID");
@@ -402,6 +461,38 @@ function updatePaymentHours() {
   }
 }
 
+// MENGISI PILIHAN PAKET ADMIN
+function renderPackageOptions() {
+  const target = $("target");
+  const voucherPackage = $("voucher-package");
+
+  const previousTarget = target.value;
+  const previousVoucherPackage = voucherPackage.value;
+
+  target.innerHTML = "";
+  voucherPackage.innerHTML = "";
+
+  packagesData.forEach(p => {
+    const option1 = document.createElement("option");
+    option1.value = p.id;
+    option1.textContent = `${p.name} — ${rupiah(p.price_idr)}`;
+    target.appendChild(option1);
+
+    const option2 = document.createElement("option");
+    option2.value = p.id;
+    option2.textContent = `${p.name} — ${rupiah(p.price_idr)}`;
+    voucherPackage.appendChild(option2);
+  });
+
+  if (packagesData.some(p => p.id === previousTarget)) {
+    target.value = previousTarget;
+  }
+
+  if (packagesData.some(p => p.id === previousVoucherPackage)) {
+    voucherPackage.value = previousVoucherPackage;
+  }
+}
+
 // MENAMPILKAN PAKET DAN STOK
 function renderPackages() {
   $("packages").innerHTML = packagesData.length
@@ -457,12 +548,7 @@ function renderPackages() {
     });
   });
 
-  $("target").innerHTML = packagesData.map(p =>
-    `<option value="${p.id}">
-      ${escapeHtml(p.name)} — ${rupiah(p.price_idr)}
-    </option>`
-  ).join("");
-
+  renderPackageOptions();
   renderAdminStock();
   renderChoice();
 }
@@ -563,6 +649,7 @@ async function loadPackages() {
   }
 
   packagesData = data || [];
+  renderPackageOptions();
 
   try {
     await loadStock();
@@ -598,6 +685,9 @@ async function updateAdminUI() {
     refreshStock();
   } else {
     $("payment-list").textContent = "Silakan login sebagai admin.";
+    availableVouchers = [];
+    $("voucher-list").innerHTML =
+      '<div class="voucher-empty">Silakan login sebagai admin.</div>';
   }
 }
 
@@ -675,6 +765,11 @@ $("import").onclick = async () => {
 
     await refreshStock();
 
+    // Jika paket yang sedang ditampilkan sama, muat ulang daftar voucher
+    if ($("voucher-package").value === packageId) {
+      await loadAvailableVouchers();
+    }
+
   } catch (e) {
     console.error(e);
     showMessage("msg", "Gagal impor: " + (e.message || "Periksa login dan pengaturan Edge Function."), true);
@@ -683,7 +778,227 @@ $("import").onclick = async () => {
   $("import").disabled = false;
 };
 
+// ======================================
+// KELOLA VOUCHER ADMIN
+// ======================================
+
+// MEMUAT DAFTAR VOUCHER TERSEDIA
+async function loadAvailableVouchers() {
+  const packageId = $("voucher-package").value;
+  const button = $("voucher-load");
+
+  if (!packageId) {
+    return showMessage("voucher-message", "Pilih paket terlebih dahulu.", true);
+  }
+
+  button.disabled = true;
+  button.textContent = "Memuat...";
+
+  $("voucher-list").innerHTML =
+    '<div class="voucher-empty">Sedang memuat voucher...</div>';
+
+  $("voucher-total").textContent = "Memuat daftar voucher...";
+  showMessage("voucher-message", "");
+
+  try {
+    const { data, error } = await db.functions.invoke("admin-vouchers", {
+      body: {
+        action: "list",
+        package_id: packageId
+      }
+    });
+
+    if (error) throw error;
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Gagal memuat voucher.");
+    }
+
+    availableVouchers = data.vouchers || [];
+
+    $("voucher-total").textContent =
+      `Total voucher tersedia: ${availableVouchers.length}`;
+
+    if (availableVouchers.length === 0) {
+      $("voucher-list").innerHTML =
+        '<div class="voucher-empty">Tidak ada voucher tersedia untuk paket ini.</div>';
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    availableVouchers.forEach(voucher => {
+      const label = document.createElement("label");
+      label.className = "voucher-list-item";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "voucher-check";
+      checkbox.value = voucher.id;
+
+      const code = document.createElement("span");
+      code.className = "voucher-list-code";
+      code.textContent = voucher.code;
+
+      label.appendChild(checkbox);
+      label.appendChild(code);
+      fragment.appendChild(label);
+    });
+
+    $("voucher-list").replaceChildren(fragment);
+
+  } catch (error) {
+    console.error("Load voucher error:", error);
+
+    availableVouchers = [];
+
+    $("voucher-list").innerHTML =
+      '<div class="voucher-empty">Gagal memuat daftar voucher.</div>';
+
+    showMessage(
+      "voucher-message",
+      error.message || "Terjadi kesalahan saat memuat voucher.",
+      true
+    );
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Tampilkan Voucher";
+  }
+}
+
+// TOMBOL TAMPILKAN VOUCHER
+$("voucher-load").addEventListener("click", loadAvailableVouchers);
+
+// JIKA PAKET DIGANTI, KOSONGKAN DAFTAR LAMA
+$("voucher-package").addEventListener("change", () => {
+  availableVouchers = [];
+
+  $("voucher-list").innerHTML =
+    '<div class="voucher-empty">Klik Tampilkan Voucher untuk melihat daftar.</div>';
+
+  $("voucher-total").textContent = "Belum ada daftar voucher.";
+  showMessage("voucher-message", "");
+});
+
+// PILIH SEMUA / BATALKAN PILIH SEMUA
+$("voucher-select-all").addEventListener("click", () => {
+  const checks = [
+    ...$("voucher-list").querySelectorAll(".voucher-check")
+  ];
+
+  if (!checks.length) {
+    return alert("Belum ada daftar voucher.");
+  }
+
+  const allChecked = checks.every(item => item.checked);
+
+  checks.forEach(item => {
+    item.checked = !allChecked;
+  });
+
+  $("voucher-select-all").textContent =
+    allChecked ? "Pilih Semua" : "Batalkan Pilihan";
+});
+
+// MENGHAPUS VOUCHER TERPILIH
+$("voucher-delete").addEventListener("click", async () => {
+  const selected = [
+    ...$("voucher-list").querySelectorAll(".voucher-check:checked")
+  ].map(item => item.value);
+
+  if (selected.length === 0) {
+    return alert("Pilih minimal satu voucher yang ingin dihapus.");
+  }
+
+  const confirmation = confirm(
+    `Apakah kamu yakin ingin menghapus ${selected.length} voucher terpilih?\n\n` +
+    "Voucher yang sudah terjual atau terhubung dengan transaksi tidak akan dihapus."
+  );
+
+  if (!confirmation) return;
+
+  const button = $("voucher-delete");
+  button.disabled = true;
+  button.textContent = "Menghapus...";
+
+  showMessage("voucher-message", "Sedang menghapus voucher...");
+
+  try {
+    const { data, error } = await db.functions.invoke("admin-vouchers", {
+      body: {
+        action: "delete",
+        voucher_ids: selected
+      }
+    });
+
+    if (error) throw error;
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Gagal menghapus voucher.");
+    }
+
+    const deleted = Number(data.deleted || 0);
+    const skipped = Number(data.skipped || 0);
+
+    showMessage(
+      "voucher-message",
+      `Selesai. Berhasil dihapus: ${deleted} voucher. Tidak dihapus: ${skipped} voucher.`
+    );
+
+    // Perbarui stok setelah penghapusan
+    await refreshStock();
+
+    // Muat kembali daftar voucher terbaru
+    await loadAvailableVouchers();
+
+    // Tampilkan hasil setelah daftar dimuat ulang
+    showMessage(
+      "voucher-message",
+      `Selesai. Berhasil dihapus: ${deleted} voucher. Tidak dihapus: ${skipped} voucher.`
+    );
+
+  } catch (error) {
+    console.error("Delete voucher error:", error);
+
+    showMessage(
+      "voucher-message",
+      error.message || "Terjadi kesalahan saat menghapus voucher.",
+      true
+    );
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Hapus Voucher Terpilih";
+  }
+});
+
+// ======================================
+// REALTIME PEMBARUAN STOK
+// ======================================
+
+const stockChannel = db
+  .channel("fatih-reload-stock")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "stock_updates"
+    },
+    async () => {
+      console.log("Perubahan stok terdeteksi.");
+      await refreshStock();
+    }
+  )
+  .subscribe((status) => {
+    console.log("Status realtime stok:", status);
+  });
+
+// ======================================
 // MEMBUAT PESANAN
+// ======================================
+
 $("pay").onclick = async () => {
   const p = packagesData.find(x => x.id === selectedId);
   const phone = $("wa").value.trim();
