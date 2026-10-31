@@ -92,7 +92,7 @@ let availableVouchers=[], historyCurrentPage=1, historyTotalPages=1;
 const historyLimit=20;
 let currentAdminView="admin-home", currentCustomerView="customer-home";
 let adminDataLoadedForSession=false, adminVerified=false;
-let orderPollingTimer=null, toastTimer=null;
+let orderPollingTimer=null, toastTimer=null, proofUploading=false;
 
 function money(v){return "Rp "+Number(v||0).toLocaleString("id-ID")}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
@@ -115,25 +115,17 @@ window.showCustomer=function(){
   $("customerBottomNav").classList.remove("hidden");$("mainFooter").classList.remove("hidden");
   showCustomerView(currentCustomerView);
 };
-/* BUKA LOGIN ADMIN — TIDAK BOLEH OTOMATIS MASUK DASHBOARD */
-window.showAdmin=function(){
-  // Sembunyikan seluruh halaman pelanggan
-  $("customerArea").classList.add("hidden");
-  $("customerBottomNav").classList.add("hidden");
-  $("mainFooter").classList.add("hidden");
-
-  // Dashboard selalu disembunyikan terlebih dahulu
-  $("adminArea").classList.add("hidden");
-
-  // Wajib tampilkan halaman login
-  $("adminLoginScreen").classList.remove("hidden");
-
-  // Belum memberikan akses admin sebelum login ulang
-  adminVerified=false;
-
-  // Bersihkan pesan dan password sebelumnya
-  $("loginMessage").textContent="";
-  $("adminPassword").value="";
+window.showAdmin=async function(){
+  $("customerArea").classList.add("hidden");$("customerBottomNav").classList.add("hidden");$("mainFooter").classList.add("hidden");
+  $("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");
+  try{
+    const {data,error}=await db.auth.getUser();
+    if(error||!data.user){adminVerified=false;return}
+    if(data.user.id!==ADMIN_ID){adminVerified=false;await db.auth.signOut();$("loginMessage").textContent="Akun ini tidak memiliki akses admin.";return}
+    adminVerified=true;
+    $("adminLoginScreen").classList.add("hidden");$("adminArea").classList.remove("hidden");
+    const ok=await updateAdminUI();if(ok)showAdminView(currentAdminView);
+  }catch(e){console.error(e);adminVerified=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden")}
 };
 window.showCustomerView=function(v){currentCustomerView=v;document.querySelectorAll(".customer-view").forEach(e=>e.classList.remove("active"));$(v)?.classList.add("active");document.querySelectorAll("[data-customer-view]").forEach(e=>e.classList.toggle("active",e.dataset.customerView===v));if(v==="customer-orders"){renderCurrentOrderPanel();renderPaymentPanel()}};
 window.showAdminView=function(v){
@@ -176,132 +168,56 @@ window.createOrder=async function(){
   try{const {data,error}=await db.functions.invoke("create-order",{body:{package_id:selectedPackageId,phone}});if(error)throw error;const p=unwrapData(data),id=getOrderId(p);if(!id)throw new Error(p?.message||"ID pesanan tidak ditemukan.");currentOrder=p.order||p;currentOrderId=id;currentPhone=phone;currentOrderStatus=getOrderStatus(p);proofSubmitted=false;renderCurrentOrderPanel();renderPaymentPanel();showCustomerView("customer-orders");startOrderPolling();showToast("Pesanan berhasil dibuat.")}catch(e){console.error(e);showToast("Gagal membuat pesanan: "+getErrorMessage(e))}finally{setLoading(b,false)}
 };
 function renderPaymentPanel(){
-  const previousProvider = $("paymentProvider")?.value || "DANA";
-  const previousProofFile = $("paymentProof")?.files?.[0] || null;
-  const panel = $("paymentPanel");
-  const content = $("paymentContent");
-
-  if(!currentOrderId || !panel || !content) return;
-
+  const panel=$("paymentPanel"),content=$("paymentContent");
+  if(!currentOrderId||!panel||!content)return;
   panel.classList.remove("hidden");
-
-  const p = packages.find(x =>
-    String(x.id) === String(currentOrder?.package_id || selectedPackageId)
-  );
-
-  const amount = currentOrder?.amount_idr ?? p?.price_idr ?? 0;
-
+  const oldProvider=$("paymentProvider")?.value||"DANA";
+  const oldFile=$("paymentProof")?.files?.[0]||null;
+  const p=packages.find(x=>String(x.id)===String(currentOrder?.package_id||selectedPackageId));
+  const amount=currentOrder?.amount_idr??p?.price_idr??0;
   if(["paid","completed","delivered"].includes(String(currentOrderStatus).toLowerCase())){
-    const code = getVoucherCode(
-      currentOrder?.voucher_code ||
-      currentOrder?.voucher ||
-      currentOrder?.code
-    );
-
-    content.innerHTML = `
-      <div class="notice success">Pembayaran telah disetujui.</div>
-      ${code ? `
-        <div class="code-box">
-          <span class="small">KODE VOUCHER ANDA</span>
-          <strong>${escapeHTML(code)}</strong>
-          <button class="btn btn-secondary btn-sm"
-            style="margin-top:10px"
-            onclick="copyVoucher('${String(code).replace(/'/g,"\\'")}')">
-            Salin Voucher
-          </button>
-        </div>
-      ` : ""}
-      <div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>
-    `;
+    const code=getVoucherCode(currentOrder?.voucher_code||currentOrder?.voucher||currentOrder?.code);
+    content.innerHTML=`<div class="notice success">Pembayaran telah disetujui.</div>${code?`<div class="code-box"><span class="small">KODE VOUCHER ANDA</span><strong>${escapeHTML(code)}</strong><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="copyVoucher('${String(code).replace(/'/g,"\\'")}')">Salin Voucher</button></div>`:""}<div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;
     return;
   }
-
   if(["rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){
-    content.innerHTML = `
-      <div class="notice warning">
-        Status pesanan: ${escapeHTML(currentOrderStatus)}.
-      </div>
-      <p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p>
-      <div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>
-    `;
+    content.innerHTML=`<div class="notice warning">Status pesanan: ${escapeHTML(currentOrderStatus)}.</div><p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p><div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;
     return;
   }
-
-  content.innerHTML = `
-    <div class="notice warning">
-      Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer.
-    </div>
-
-    <div class="payment-info">
-      <div class="small muted">Total pembayaran</div>
-      <div class="wallet-number">${money(amount)}</div>
-      <hr>
-      <div class="small muted">Transfer melalui DANA / GoPay</div>
-      <div class="wallet-number">${WALLET_NUMBER}</div>
-      <div class="wallet-name">a.n. ${WALLET_NAME}</div>
-    </div>
-
-    <div class="small muted" style="margin-bottom:12px">
-      ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong>
-    </div>
-
-    <div class="field">
-      <label>Metode pembayaran</label>
-      <select id="paymentProvider">
-        <option value="DANA">DANA</option>
-        <option value="GoPay">GoPay</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Upload bukti pembayaran</label>
-      <input type="file" id="paymentProof" accept="image/*">
-    </div>
-
-    <button class="btn btn-primary btn-block"
-      id="submitProofBtn"
-      onclick="submitPaymentProof()">
-      Kirim Bukti Pembayaran
-    </button>
-
-    <div class="small muted" style="margin-top:10px">
-      Pastikan gambar bukti transfer jelas dan nominal sesuai.
-    </div>
-
-    ${proofSubmitted ? `
-      <div class="notice success" style="margin-top:12px">
-        Bukti pembayaran sudah dikirim. Menunggu verifikasi admin.
-      </div>
-    ` : ""}
-  `;
-
-  // Pulihkan pilihan metode pembayaran setelah panel diperbarui
-  const providerSelect = $("paymentProvider");
-  if(providerSelect){
-    providerSelect.value = previousProvider;
-  }
-
-  // Pulihkan file bukti jika panel diperbarui sebelum dikirim
-  if(previousProofFile){
-    try{
-      const dt = new DataTransfer();
-      dt.items.add(previousProofFile);
-      const fileInput = $("paymentProof");
-      if(fileInput) fileInput.files = dt.files;
-    }catch(e){
-      console.warn("Gagal memulihkan file bukti:",e);
-    }
-  }
+  content.innerHTML=`<div class="notice warning">Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer. Bukti dapat diganti selama pesanan belum diproses.</div><div class="payment-info"><div class="small muted">Total pembayaran</div><div class="wallet-number">${money(amount)}</div><hr><div class="small muted">Transfer melalui DANA / GoPay</div><div class="wallet-number">${WALLET_NUMBER}</div><div class="wallet-name">a.n. ${WALLET_NAME}</div></div><div class="small muted" style="margin-bottom:12px">ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong></div><div class="field"><label>Metode pembayaran</label><select id="paymentProvider"><option value="DANA">DANA</option><option value="GoPay">GoPay</option></select></div><div class="field"><label>Upload / ganti bukti pembayaran</label><input type="file" id="paymentProof" accept="image/jpeg,image/png,image/webp,application/pdf"></div><button class="btn btn-primary btn-block" id="submitProofBtn" onclick="submitPaymentProof()" ${proofUploading?"disabled":""}>${proofUploading?"Mengirim bukti...":proofSubmitted?"Kirim / Ganti Bukti Pembayaran":"Kirim Bukti Pembayaran"}</button><div class="small muted" style="margin-top:10px">Format JPG, PNG, WEBP, atau PDF. Maksimal 5 MB.</div>${proofSubmitted?`<div class="notice success" style="margin-top:12px">Bukti pembayaran sudah dikirim. Jika salah, pilih bukti baru lalu kirim kembali. Menunggu verifikasi admin.</div>`:""}`;
+  const providerSelect=$("paymentProvider");
+  if(providerSelect)providerSelect.value=oldProvider;
+  if(oldFile){try{const dt=new DataTransfer();dt.items.add(oldFile);$("paymentProof").files=dt.files;}catch(e){console.warn("File bukti tidak dapat dipulihkan:",e)}}
 }
 window.submitPaymentProof=async function(){
-  if(!currentOrderId||!currentPhone){showToast("Data pesanan tidak ditemukan.");return}const f=$("paymentProof")?.files?.[0],provider=$("paymentProvider")?.value||"DANA";
-  if(!f){showToast("Pilih gambar bukti pembayaran.");return}if(!f.type.startsWith("image/")){showToast("File harus berupa gambar.");return}if(f.size>5*1024*1024){showToast("Ukuran gambar maksimal 5 MB.");return}
-  const b=$("submitProofBtn");setLoading(b,true,"Mengirim bukti...");
-  try{const fd=new FormData();fd.append("order_id",currentOrderId);fd.append("phone",currentPhone);fd.append("provider",provider);fd.append("proof",f);const {data,error}=await db.functions.invoke("submit-payment-proof",{body:fd});if(error)throw error;proofSubmitted=true;
-$("paymentProof").value="";
-showToast(data?.message||"Bukti pembayaran berhasil dikirim.");
-renderPaymentPanel();
-startOrderPolling();}catch(e){console.error(e);showToast("Gagal mengirim bukti: "+getErrorMessage(e))}finally{setLoading(b,false)}
+  if(proofUploading)return;
+  if(!currentOrderId||!currentPhone){showToast("Data pesanan tidak ditemukan.");return}
+  const f=$("paymentProof")?.files?.[0],provider=$("paymentProvider")?.value||"DANA";
+  if(!f){showToast("Pilih gambar atau PDF bukti pembayaran.");return}
+  const allowed=["image/jpeg","image/png","image/webp","application/pdf"];
+  if(!allowed.includes(f.type)){showToast("Format harus JPG, PNG, WEBP, atau PDF.");return}
+  if(f.size<=0||f.size>5*1024*1024){showToast("Ukuran file maksimal 5 MB.");return}
+  proofUploading=true;
+  const b=$("submitProofBtn");
+  if(b){b.disabled=true;b.textContent="Mengirim bukti..."}
+  try{
+    const fd=new FormData();
+    fd.append("order_id",currentOrderId);fd.append("phone",currentPhone);fd.append("provider",provider);fd.append("proof",f,f.name);
+    const {data,error}=await db.functions.invoke("submit-payment-proof",{body:fd});
+    if(error)throw error;
+    const result=unwrapData(data);
+    if(result?.success===false)throw new Error(result.error||"Bukti pembayaran gagal dikirim.");
+    proofSubmitted=true;
+    showToast(result?.message||"Bukti pembayaran berhasil dikirim.");
+    renderPaymentPanel();
+  }catch(e){
+    console.error("Upload bukti pembayaran:",e);
+    showToast("Gagal mengirim bukti: "+getErrorMessage(e));
+  }finally{
+    proofUploading=false;
+    const button=$("submitProofBtn");
+    if(button){button.disabled=false;button.textContent=proofSubmitted?"Kirim / Ganti Bukti Pembayaran":"Kirim Bukti Pembayaran"}
+  }
 };
 
 /* CEK STATUS PESANAN PELANGGAN */
@@ -311,7 +227,7 @@ function renderOrderResultHTML(d){const st=getOrderStatus(d),code=getVoucherCode
 window.copyVoucher=async function(c){try{await navigator.clipboard.writeText(c);showToast("Kode voucher berhasil disalin.")}catch{showToast("Tidak dapat menyalin kode voucher.")}}
 function renderCurrentOrderPanel(){const e=$("currentOrderPanel");if(!e)return;if(!currentOrderId){e.innerHTML=`<div class="empty">Belum ada pesanan aktif.</div>`;return}e.innerHTML=`<div class="order-result"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>Pesanan aktif</strong>${statusBadge(currentOrderStatus)}</div><div class="small muted" style="margin-top:8px">ID Pesanan</div><strong style="word-break:break-all">${escapeHTML(currentOrderId)}</strong><div class="small muted" style="margin-top:8px">Nomor WhatsApp</div><strong>${escapeHTML(currentPhone)}</strong><button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="refreshCurrentOrder()">Perbarui Status</button></div>`}
 window.refreshCurrentOrder=async function(){if(!currentOrderId)return;try{const d=await checkOrderRequest(currentOrderId,currentPhone);currentOrder={...currentOrder,...(d.order||d)};currentOrderStatus=getOrderStatus(d);renderCurrentOrderPanel();renderPaymentPanel();showToast("Status pesanan diperbarui.")}catch(e){showToast(getErrorMessage(e))}}
-function startOrderPolling(){clearInterval(orderPollingTimer);if(!currentOrderId)return;orderPollingTimer=setInterval(async()=>{try{const d=await checkOrderRequest(currentOrderId,currentPhone);currentOrder={...currentOrder,...(d.order||d)};currentOrderStatus=getOrderStatus(d);renderCurrentOrderPanel();renderPaymentPanel();if(["paid","completed","delivered","rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase()))clearInterval(orderPollingTimer)}catch(e){console.warn("Polling pesanan:",e)}},3000)}
+function startOrderPolling(){clearInterval(orderPollingTimer);if(!currentOrderId)return;orderPollingTimer=setInterval(async()=>{try{const d=await checkOrderRequest(currentOrderId,currentPhone);const nextStatus=getOrderStatus(d);currentOrder={...currentOrder,...(d.order||d)};if(String(nextStatus)!==String(currentOrderStatus)){currentOrderStatus=nextStatus;renderCurrentOrderPanel();renderPaymentPanel()}if(["paid","completed","delivered","rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase()))clearInterval(orderPollingTimer)}catch(e){console.warn("Polling pesanan:",e)}},5000)}
 
 /* LOGIN ADMIN - UID HARUS COCOK */
 window.adminLogin=async function(){
@@ -381,62 +297,15 @@ window.loadAdminPayments=async function(){
     box.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Pesanan</th><th>Pelanggan</th><th>Nominal</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead><tbody>${rows.map(o=>{const id=o.id||o.order_id,proof=o.payment_proof_url||o.proof_url||o.payment_proof||"";return `<tr><td><strong>${escapeHTML(String(id||"-").slice(0,12))}</strong><div class="small muted">${formatDate(o.created_at)}</div></td><td>${escapeHTML(o.customer_phone||o.phone||"-")}</td><td><strong>${money(o.amount_idr||o.amount||0)}</strong></td><td>${statusBadge(o.status)}</td><td>${proof?`<a href="${escapeHTML(proof)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Lihat Bukti</a>`:"Belum ada"}</td><td><button class="btn btn-success btn-sm" onclick="approvePayment('${String(id).replace(/'/g,"")}')">Setujui</button> <button class="btn btn-danger btn-sm" onclick="rejectPayment('${String(id).replace(/'/g,"")}')">Tolak</button></td></tr>`}).join("")}</tbody></table></div>`
   }catch(e){console.error(e);box.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}
 };
-async function processPaymentAction(action,id){
-  if(!confirm(action==="approve"
-    ?"Setujui pembayaran dan terbitkan voucher?"
-    :"Tolak pembayaran ini?"
-  )) return;
-
-  try{
-    const {data,error}=await db.functions.invoke("admin-payments",{
-      body:{action,order_id:id}
-    });
-
-    if(error)throw error;
-
-    const result=unwrapData(data);
-
-    if(!result?.success){
-      throw new Error(result?.error||"Pembayaran gagal diproses.");
-    }
-
-    if(action==="approve"){
-      const code=result.voucher_code||"";
-
-      if(code){
-        alert(
-          "PEMBAYARAN BERHASIL DISETUJUI\n\n"+
-          "KODE VOUCHER:\n"+
-          code+
-          "\n\nSilakan salin dan simpan kode voucher ini."
-        );
-      }else{
-        alert("Pembayaran disetujui, tetapi kode voucher tidak diterima dari server.");
-      }
-    }else{
-      showToast(result.message||"Pembayaran ditolak.");
-    }
-
-    await loadAdminPayments();
-    await loadTransactionHistory();
-    await refreshAdminDashboard();
-    await loadStock();
-
-  }catch(e){
-    console.error(e);
-    showToast("Gagal memproses pembayaran: "+getErrorMessage(e));
-  }
-}
-
-window.approvePayment=id=>processPaymentAction("approve",id);
-window.rejectPayment=id=>processPaymentAction("reject",id);
+async function processPaymentAction(action,id){if(!requireAdmin())return;if(!confirm(`Yakin ingin ${action==="approve"?"menyetujui":"menolak"} pembayaran ini?`))return;try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action,order_id:id}});if(error)throw error;showToast(unwrapData(data)?.message||"Pembayaran berhasil diproses.");await loadAdminPayments();await loadTransactionHistory();await refreshAdminDashboard();await loadStock()}catch(e){console.error(e);showToast("Gagal memproses pembayaran: "+getErrorMessage(e))}}
+window.approvePayment=id=>processPaymentAction("approve",id);window.rejectPayment=id=>processPaymentAction("reject",id);
 
 /* RIWAYAT TRANSAKSI */
-function initializeHistoryDates(){const d=new Date(),s=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");if($("historyDateFrom")&&!$("historyDateFrom").value)$("historyDateFrom").value=s;if($("historyDateTo")&&!$("historyDateTo").value)$("historyDateTo").value=s}
+function initializeHistoryDates(){/* Kosong = tampilkan seluruh riwayat, bukan hanya hari ini. */}
 window.changeHistoryPage=function(dir){const n=historyCurrentPage+dir;if(n<1||n>historyTotalPages)return;historyCurrentPage=n;loadTransactionHistory()};
 window.loadTransactionHistory=async function(){
   if(!requireAdmin())return;const box=$("historyTable");if(!box)return;const from=$("historyDateFrom")?.value||"",to=$("historyDateTo")?.value||"",status=$("historyStatus")?.value||"";box.innerHTML=`<div class="empty">Memuat riwayat...</div>`;
-  try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"history",date_from:from,date_to:to,status,page:historyCurrentPage,limit:historyLimit}});if(error)throw error;const p=unwrapData(data),rows=getRows(p,["orders","history","data","items"]),s=p?.summary||p?.stats||{},total=p?.total??p?.count??rows.length;historyTotalPages=Math.max(1,Math.ceil(Number(total)/historyLimit));$("historyPageInfo").textContent=`Halaman ${historyCurrentPage} dari ${historyTotalPages}`;$("historySummary").textContent=`Total pesanan: ${s.total_orders??p?.total_orders??"-"} | Dibayar: ${s.paid_orders??p?.paid_orders??"-"} | Voucher terkirim: ${s.vouchers_delivered??p?.vouchers_delivered??"-"} | Pendapatan: ${money(s.revenue_idr??p?.revenue_idr??0)}`;
+  try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"history",date_from:from,date_to:to,status,page:historyCurrentPage,limit:historyLimit}});if(error)throw error;const p=unwrapData(data),rows=getRows(p,["orders","history","data","items"]),s=p?.summary||p?.stats||{},total=p?.pagination?.total??p?.total??p?.count??rows.length;historyTotalPages=Math.max(1,Math.ceil(Number(total)/historyLimit));$("historyPageInfo").textContent=`Halaman ${historyCurrentPage} dari ${historyTotalPages}`;$("historySummary").textContent=`Total pesanan: ${s.total_orders??p?.total_orders??"-"} | Dibayar: ${s.paid_orders??p?.paid_orders??"-"} | Voucher terkirim: ${s.vouchers_delivered??p?.vouchers_delivered??"-"} | Pendapatan: ${money(s.revenue_idr??p?.revenue_idr??0)}`;
     if(!rows.length){box.innerHTML=`<div class="empty">Tidak ada transaksi pada rentang tanggal tersebut.</div>`;return}
     box.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID Pesanan</th><th>Nomor Pelanggan</th><th>Nominal</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${formatDate(r.created_at)}</td><td><strong>${escapeHTML(String(r.id||r.order_id||"-").slice(0,15))}</strong></td><td>${escapeHTML(r.customer_phone||r.phone||"-")}</td><td>${money(r.amount_idr||r.amount||0)}</td><td>${statusBadge(r.status)}</td></tr>`).join("")}</tbody></table></div>`
   }catch(e){console.error(e);box.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}
@@ -444,8 +313,25 @@ window.loadTransactionHistory=async function(){
 
 /* DASHBOARD */
 async function refreshAdminDashboard(){
-  if(!requireAdmin())return;const d=new Date(),date=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-  try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"history",date_from:date,date_to:date,status:"",page:1,limit:1}});if(error)throw error;const p=unwrapData(data),s=p?.summary||p?.stats||{};$("statOrders").textContent=s.total_orders??p?.total_orders??p?.total??"-";$("statPaid").textContent=s.paid_orders??p?.paid_orders??"-";$("statVouchers").textContent=s.vouchers_delivered??p?.vouchers_delivered??"-";$("statRevenue").textContent=money(s.revenue_idr??p?.revenue_idr??0)}catch(e){console.warn("Dashboard:",e);["statOrders","statPaid","statVouchers"].forEach(id=>$(id).textContent="-");$("statRevenue").textContent="-"}
+  if(!requireAdmin())return;
+  const d=new Date(),date=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  try{
+    const [allResult,todayResult]=await Promise.all([
+      db.functions.invoke("admin-payments",{body:{action:"history",date_from:null,date_to:null,status:"all",page:1,limit:1}}),
+      db.functions.invoke("admin-payments",{body:{action:"history",date_from:date,date_to:date,status:"all",page:1,limit:1}})
+    ]);
+    if(allResult.error)throw allResult.error;
+    if(todayResult.error)throw todayResult.error;
+    const all=unwrapData(allResult.data),today=unwrapData(todayResult.data);
+    const a=all?.summary||{},t=today?.summary||{};
+    $("statOrders").textContent=a.total_orders??"0";
+    $("statPaid").textContent=a.paid_orders??"0";
+    $("statVouchers").textContent=a.vouchers_delivered??"0";
+    $("statRevenue").textContent=money(t.revenue_idr??0);
+  }catch(e){
+    console.warn("Dashboard:",e);
+    ["statOrders","statPaid","statVouchers","statRevenue"].forEach(id=>$(id).textContent="-");
+  }
 }
 
 /* CEK PESANAN DARI MENU ADMIN */
