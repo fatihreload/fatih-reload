@@ -115,17 +115,25 @@ window.showCustomer=function(){
   $("customerBottomNav").classList.remove("hidden");$("mainFooter").classList.remove("hidden");
   showCustomerView(currentCustomerView);
 };
-window.showAdmin=async function(){
-  $("customerArea").classList.add("hidden");$("customerBottomNav").classList.add("hidden");$("mainFooter").classList.add("hidden");
-  $("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");
-  try{
-    const {data,error}=await db.auth.getUser();
-    if(error||!data.user){adminVerified=false;return}
-    if(data.user.id!==ADMIN_ID){adminVerified=false;await db.auth.signOut();$("loginMessage").textContent="Akun ini tidak memiliki akses admin.";return}
-    adminVerified=true;
-    $("adminLoginScreen").classList.add("hidden");$("adminArea").classList.remove("hidden");
-    const ok=await updateAdminUI();if(ok)showAdminView(currentAdminView);
-  }catch(e){console.error(e);adminVerified=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden")}
+/* BUKA LOGIN ADMIN — TIDAK BOLEH OTOMATIS MASUK DASHBOARD */
+window.showAdmin=function(){
+  // Sembunyikan seluruh halaman pelanggan
+  $("customerArea").classList.add("hidden");
+  $("customerBottomNav").classList.add("hidden");
+  $("mainFooter").classList.add("hidden");
+
+  // Dashboard selalu disembunyikan terlebih dahulu
+  $("adminArea").classList.add("hidden");
+
+  // Wajib tampilkan halaman login
+  $("adminLoginScreen").classList.remove("hidden");
+
+  // Belum memberikan akses admin sebelum login ulang
+  adminVerified=false;
+
+  // Bersihkan pesan dan password sebelumnya
+  $("loginMessage").textContent="";
+  $("adminPassword").value="";
 };
 window.showCustomerView=function(v){currentCustomerView=v;document.querySelectorAll(".customer-view").forEach(e=>e.classList.remove("active"));$(v)?.classList.add("active");document.querySelectorAll("[data-customer-view]").forEach(e=>e.classList.toggle("active",e.dataset.customerView===v));if(v==="customer-orders"){renderCurrentOrderPanel();renderPaymentPanel()}};
 window.showAdminView=function(v){
