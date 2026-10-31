@@ -289,6 +289,24 @@ const SUPABASE_KEY = "sb_publishable_L8-uxzioNXR4bwx6nWQb_Q_rewY_iD4";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// REALTIME PEMBARUAN STOK
+const stockChannel = db
+  .channel("fatih-reload-stock")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "stock_updates"
+    },
+    async () => {
+      console.log("Perubahan stok terdeteksi.");
+      await refreshStock();
+    }
+  )
+  .subscribe((status) => {
+    console.log("Status realtime stok:", status);
+  });
 const WALLET_NUMBER = "089601293092";
 const WALLET_NAME = "MUHAMAD IMRON";
 
