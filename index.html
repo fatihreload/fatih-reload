@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="id">
 <head>
@@ -7,1466 +6,292 @@
 <meta name="theme-color" content="#102a43">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Fatih Reload WiFi</title>
-
 <style>
-:root{
-  --navy:#102a43;--blue:#1769aa;--blue2:#2186d5;
-  --light:#f2f6fa;--white:#fff;--text:#243b53;
-  --muted:#829ab1;--border:#e2eaf1;--green:#15966b;
-  --red:#d64545;--orange:#d9822b;
-  --shadow:0 8px 28px rgba(16,42,67,.07);--radius:18px;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--light);color:var(--text);font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-.muted{color:var(--muted)}
-.small{font-size:12px}
-.container{width:min(1160px,calc(100% - 32px));margin:auto}
-.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
-.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 14px}
-.section-title h2{font-size:18px;margin:0;color:var(--navy)}
-.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.btn-primary{background:var(--blue);color:#fff}
-.btn-primary:hover{background:#12578e}
-.btn-secondary{background:#e8f2fb;color:var(--blue)}
-.btn-light{background:#f1f5f9;color:var(--text)}
-.btn-danger{background:#fff0f0;color:var(--red)}
-.btn-success{background:#e8f8f1;color:var(--green)}
-.btn-block{width:100%}
-.btn-sm{padding:7px 10px;font-size:12px;border-radius:9px}
-input,select,textarea{width:100%;border:1px solid #d8e2eb;background:#fff;border-radius:11px;padding:12px;color:var(--text);outline:none;min-width:0}
-input:focus,select:focus,textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #d9edff}
-label{font-size:13px;font-weight:700;display:block;margin-bottom:6px}
-.field{margin-bottom:14px}
-.grid{display:grid;gap:16px}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:800;background:#edf2f7;color:#52667a}
-.badge.green{background:#e5f7ef;color:#13835e}
-.badge.red{background:#ffeded;color:#c43e3e}
-.badge.orange{background:#fff4e5;color:#a96512}
-.badge.blue{background:#e6f2ff;color:#1769aa}
-.empty{text-align:center;padding:28px 15px;color:var(--muted);border:1px dashed #cfdae4;border-radius:14px}
-hr{border:0;border-top:1px solid var(--border);margin:18px 0}
-
-/* HEADER */
-.topbar{background:var(--navy);color:white;position:sticky;top:0;z-index:50;box-shadow:0 4px 18px #102a4325}
-.topbar-inner{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:11px;color:white}
-.brand-logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#38a5ed,#1769aa);display:grid;place-items:center;font-size:21px;font-weight:900;box-shadow:0 5px 15px #0002}
-.brand-name{font-size:17px;font-weight:900;letter-spacing:.3px}
-.brand-sub{font-size:10px;color:#b8d4e9;letter-spacing:1.4px}
-.header-actions{display:flex;align-items:center;gap:8px}
-.header-btn{border:1px solid #ffffff35;background:#ffffff12;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700}
-
-/* CUSTOMER */
-.customer-hero{background:linear-gradient(125deg,#102a43,#1769aa 70%,#278bd0);color:white;border-radius:24px;padding:26px;margin:24px 0 20px;position:relative;overflow:hidden}
-.customer-hero:after{content:"";position:absolute;width:220px;height:220px;border:35px solid #ffffff12;border-radius:50%;right:-65px;top:-90px}
-.hero-content{position:relative;z-index:1;max-width:600px}
-.hero-kicker{font-size:12px;color:#c5e5ff;font-weight:800;letter-spacing:1.4px}
-.customer-hero h1{font-size:27px;line-height:1.2;margin:8px 0}
-.customer-hero p{color:#d6e9f8;margin:8px 0 0;font-size:14px}
-.hero-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-.hero-pills span{background:#ffffff1b;border:1px solid #ffffff25;border-radius:30px;padding:7px 11px;font-size:11px;font-weight:700}
-.package-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.package-card{border:1px solid var(--border);background:white;border-radius:17px;padding:16px;position:relative;box-shadow:0 4px 16px #102a4308;display:flex;flex-direction:column;min-height:180px}
-.package-card.selected{border:2px solid var(--blue);padding:15px}
-.package-icon{width:38px;height:38px;border-radius:12px;background:#e7f3fd;color:var(--blue);display:grid;place-items:center;font-size:19px;margin-bottom:10px}
-.package-card h3{font-size:15px;margin:0 0 4px;color:var(--navy)}
-.package-desc{font-size:11px;color:var(--muted);min-height:30px}
-.package-price{font-size:20px;font-weight:900;color:var(--blue);margin:10px 0 3px}
-.package-stock{font-size:11px;color:var(--muted)}
-.package-card .btn{margin-top:auto}
-.customer-layout{display:grid;grid-template-columns:1fr 340px;gap:18px}
-.order-box{position:sticky;top:88px;height:max-content}
-.notice{border-radius:13px;padding:13px 14px;font-size:12px;background:#edf6ff;color:#245d8b;border:1px solid #d5eaff}
-.notice.warning{background:#fff7e9;color:#95601d;border-color:#ffe7bd}
-.notice.success{background:#e9f8f0;color:#137653;border-color:#c9efdc}
-.payment-info{border:1px dashed #b7cce0;background:#f7fbff;border-radius:14px;padding:15px;margin:14px 0}
-.wallet-number{font-size:22px;font-weight:900;letter-spacing:1px;color:var(--navy)}
-.wallet-name{font-size:12px;color:var(--muted)}
-.order-result{background:#f4f9fd;border:1px solid #dceaf5;border-radius:14px;padding:15px;margin-top:15px}
-.code-box{background:var(--navy);color:#fff;border-radius:12px;padding:15px;text-align:center;margin:12px 0}
-.code-box strong{font-size:22px;letter-spacing:1px;display:block;word-break:break-all}
-.customer-view{display:none;padding-bottom:90px}
-.customer-view.active{display:block}
-.bottom-nav{display:none;position:fixed;z-index:60;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:8px 8px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px #102a4310}
-.bottom-nav-inner{display:grid;grid-template-columns:repeat(3,1fr);max-width:520px;margin:auto}
-.nav-item{border:0;background:transparent;color:#829ab1;padding:6px 4px;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px}
-.nav-item .nav-icon{font-size:20px;line-height:1.2}
-.nav-item.active{color:var(--blue)}
-
-/* ADMIN */
-.admin-shell{display:grid;grid-template-columns:235px minmax(0,1fr);min-height:calc(100vh - 68px)}
-.admin-sidebar{background:#fff;border-right:1px solid var(--border);padding:22px 14px;position:sticky;top:68px;height:calc(100vh - 68px);overflow:auto}
-.sidebar-label{color:#9aabba;font-size:10px;font-weight:900;letter-spacing:1.2px;padding:12px 12px 7px}
-.admin-nav{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:#52667a;padding:12px;border-radius:11px;text-align:left;font-weight:700;font-size:13px;margin:3px 0}
-.admin-nav .ico{width:22px;text-align:center;font-size:17px}
-.admin-nav.active{background:#eaf4fc;color:var(--blue)}
-.admin-main{padding:25px;min-width:0;max-width:1450px;width:100%;margin:0 auto}
-.admin-page{display:none}
-.admin-page.active{display:block}
-.admin-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}
-.admin-heading h1{font-size:24px;color:var(--navy);margin:0}
-.admin-heading p{font-size:13px;color:var(--muted);margin:5px 0 0}
-.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:20px}
-.stat-card{padding:18px}
-.stat-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#eaf4fc;color:var(--blue);font-size:18px;margin-bottom:13px}
-.stat-label{font-size:12px;color:var(--muted);font-weight:700}
-.stat-value{font-size:23px;font-weight:900;color:var(--navy);margin-top:3px}
-.admin-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr))}
-.shortcut{border:1px solid var(--border);background:#fff;border-radius:15px;padding:17px;text-align:left;display:flex;align-items:center;gap:12px;color:var(--text)}
-.shortcut:hover{border-color:#9bc8e9;background:#fafdff}
-.shortcut-icon{width:42px;height:42px;border-radius:12px;background:#eaf4fc;color:var(--blue);display:grid;place-items:center;font-size:20px;flex-shrink:0}
-.shortcut strong{display:block;font-size:13px}
-.shortcut small{color:var(--muted);font-size:11px}
-.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:13px}
-table{border-collapse:collapse;width:100%;min-width:650px;background:white}
-th,td{padding:12px 13px;border-bottom:1px solid #edf1f5;text-align:left;font-size:12px}
-th{background:#f7fafc;color:#718096;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
-tr:last-child td{border-bottom:0}
-td .btn{margin:2px}
-.inline-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin-bottom:15px}
-.toolbar .field{margin:0;min-width:150px}
-.toolbar .field.grow{flex:1}
-.login-wrap{max-width:430px;margin:55px auto;padding:0 16px}
-.login-brand{text-align:center;margin-bottom:20px}
-.login-brand .brand-logo{margin:0 auto 10px;width:58px;height:58px;font-size:26px}
-.admin-mobile-nav{display:none}
-.voucher-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.voucher-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px;border:1px solid var(--border);border-radius:11px;background:#fff;font-size:12px}
-.voucher-code{font-family:monospace;font-weight:800;word-break:break-all}
-.pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:15px}
-.toast{position:fixed;z-index:100;left:50%;bottom:25px;transform:translate(-50%,20px);background:#102a43;color:#fff;border-radius:12px;padding:12px 18px;font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 30px);text-align:center}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-.loading{opacity:.6;pointer-events:none}
-.footer{text-align:center;color:#9aabba;font-size:11px;padding:25px 10px}
-.admin-login-screen{min-height:calc(100vh - 68px);padding:1px 0 40px}
-
-@media(max-width:950px){
-.package-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.admin-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(max-width:700px){
-.container{width:calc(100% - 24px)}
-.topbar-inner{min-height:60px}
-.brand-logo{width:37px;height:37px}
-.brand-name{font-size:15px}
-.header-btn{font-size:11px;padding:7px 9px}
-.customer-hero{padding:22px 19px;border-radius:19px;margin:15px 0}
-.customer-hero h1{font-size:23px}
-.package-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.package-card{padding:12px;min-height:170px}
-.package-card.selected{padding:11px}
-.package-price{font-size:18px}
-.customer-layout{grid-template-columns:1fr}
-.order-box{position:static}
-.bottom-nav{display:block}
-.admin-shell{display:block;min-height:0}
-.admin-sidebar{display:none}
-.admin-main{padding:18px 12px 100px}
-.admin-mobile-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-top:1px solid var(--border);padding:7px 5px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -5px 20px #102a4310}
-.admin-mobile-nav .admin-nav{display:flex;flex-direction:column;gap:3px;padding:5px 2px;margin:0;text-align:center;font-size:9px;border-radius:9px}
-.admin-mobile-nav .admin-nav .ico{font-size:18px}
-.admin-heading h1{font-size:21px}
-.admin-heading{margin-bottom:15px}
-.stats-grid{gap:10px}
-.stat-card{padding:13px}
-.stat-value{font-size:19px}
-.admin-shortcuts{gap:9px}
-.shortcut{padding:12px;gap:8px}
-.shortcut-icon{width:35px;height:35px;font-size:17px}
-.shortcut strong{font-size:11px}
-.shortcut small{font-size:10px}
-.voucher-list{grid-template-columns:1fr}
-.inline-fields{grid-template-columns:1fr}
-}
-@media(max-width:380px){
-.brand-sub{display:none}
-.package-card{padding:10px}
-.package-card.selected{padding:9px}
-.package-price{font-size:16px}
-}
+:root{--navy:#102a43;--blue:#1769aa;--blue2:#2186d5;--light:#f2f6fa;--white:#fff;--text:#243b53;--muted:#829ab1;--border:#e2eaf1;--green:#15966b;--red:#d64545;--orange:#d9822b;--shadow:0 8px 28px rgba(16,42,67,.07);--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--light);color:var(--text);font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:12px}.container{width:min(1160px,calc(100% - 32px));margin:auto}.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 14px}.section-title h2{font-size:18px;margin:0;color:var(--navy)}.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn:disabled{opacity:.55;cursor:not-allowed}.btn-primary{background:var(--blue);color:#fff}.btn-secondary{background:#e8f2fb;color:var(--blue)}.btn-light{background:#f1f5f9;color:var(--text)}.btn-danger{background:#fff0f0;color:var(--red)}.btn-success{background:#e8f8f1;color:var(--green)}.btn-block{width:100%}.btn-sm{padding:7px 10px;font-size:12px;border-radius:9px}input,select,textarea{width:100%;border:1px solid #d8e2eb;background:#fff;border-radius:11px;padding:12px;color:var(--text);outline:none;min-width:0}input:focus,select:focus,textarea:focus{border-color:var(--blue2);box-shadow:0 0 0 3px #d9edff}label{font-size:13px;font-weight:700;display:block;margin-bottom:6px}.field{margin-bottom:14px}.grid{display:grid;gap:16px}.badge{display:inline-flex;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:800;background:#edf2f7;color:#52667a}.badge.green{background:#e5f7ef;color:#13835e}.badge.red{background:#ffeded;color:#c43e3e}.badge.orange{background:#fff4e5;color:#a96512}.empty{text-align:center;padding:28px 15px;color:var(--muted);border:1px dashed #cfdae4;border-radius:14px}hr{border:0;border-top:1px solid var(--border);margin:18px 0}
+.topbar{background:var(--navy);color:white;position:sticky;top:0;z-index:50;box-shadow:0 4px 18px #102a4325}.topbar-inner{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{display:flex;align-items:center;gap:11px;color:white}.brand-logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#38a5ed,#1769aa);display:grid;place-items:center;font-size:21px;font-weight:900}.brand-name{font-size:17px;font-weight:900}.brand-sub{font-size:10px;color:#b8d4e9;letter-spacing:1.4px}.header-actions{display:flex;gap:8px}.header-btn{border:1px solid #ffffff35;background:#ffffff12;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700}
+.customer-hero{background:linear-gradient(125deg,#102a43,#1769aa 70%,#278bd0);color:white;border-radius:24px;padding:26px;margin:24px 0 20px}.hero-kicker{font-size:12px;color:#c5e5ff;font-weight:800;letter-spacing:1.4px}.customer-hero h1{font-size:27px;line-height:1.2;margin:8px 0}.customer-hero p{color:#d6e9f8;margin:8px 0 0;font-size:14px}.hero-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.hero-pills span{background:#ffffff1b;border:1px solid #ffffff25;border-radius:30px;padding:7px 11px;font-size:11px;font-weight:700}.package-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.package-card{border:1px solid var(--border);background:white;border-radius:17px;padding:16px;display:flex;flex-direction:column;min-height:180px}.package-card.selected{border:2px solid var(--blue);padding:15px}.package-icon{width:38px;height:38px;border-radius:12px;background:#e7f3fd;color:var(--blue);display:grid;place-items:center;font-size:19px;margin-bottom:10px}.package-card h3{font-size:15px;margin:0 0 4px;color:var(--navy)}.package-desc{font-size:11px;color:var(--muted);min-height:30px}.package-price{font-size:20px;font-weight:900;color:var(--blue);margin:10px 0 3px}.package-stock{font-size:11px;color:var(--muted)}.package-card .btn{margin-top:auto}.notice{border-radius:13px;padding:13px 14px;font-size:12px;background:#edf6ff;color:#245d8b;border:1px solid #d5eaff}.notice.warning{background:#fff7e9;color:#95601d;border-color:#ffe7bd}.notice.success{background:#e9f8f0;color:#137653;border-color:#c9efdc}.payment-info{border:1px dashed #b7cce0;background:#f7fbff;border-radius:14px;padding:15px;margin:14px 0}.wallet-number{font-size:22px;font-weight:900;color:var(--navy)}.wallet-name{font-size:12px;color:var(--muted)}.order-result{background:#f4f9fd;border:1px solid #dceaf5;border-radius:14px;padding:15px;margin-top:15px}.code-box{background:var(--navy);color:#fff;border-radius:12px;padding:15px;text-align:center;margin:12px 0}.code-box strong{font-size:22px;letter-spacing:1px;display:block;word-break:break-all}.customer-view{display:none;padding-bottom:90px}.customer-view.active{display:block}.bottom-nav{display:none;position:fixed;z-index:60;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:8px}.bottom-nav-inner{display:grid;grid-template-columns:repeat(3,1fr);max-width:520px;margin:auto}.nav-item{border:0;background:transparent;color:#829ab1;padding:6px 4px;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px}.nav-item .nav-icon{font-size:20px}.nav-item.active{color:var(--blue)}
+.admin-shell{display:grid;grid-template-columns:235px minmax(0,1fr);min-height:calc(100vh - 68px)}.admin-sidebar{background:#fff;border-right:1px solid var(--border);padding:22px 14px;position:sticky;top:68px;height:calc(100vh - 68px);overflow:auto}.sidebar-label{color:#9aabba;font-size:10px;font-weight:900;letter-spacing:1.2px;padding:12px}.admin-nav{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:#52667a;padding:12px;border-radius:11px;text-align:left;font-weight:700;font-size:13px;margin:3px 0}.admin-nav.active{background:#eaf4fc;color:var(--blue)}.admin-main{padding:25px;min-width:0;max-width:1450px;width:100%;margin:auto}.admin-page{display:none}.admin-page.active{display:block}.admin-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}.admin-heading h1{font-size:24px;color:var(--navy);margin:0}.admin-heading p{font-size:13px;color:var(--muted);margin:5px 0 0}.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:20px}.stat-card{padding:18px}.stat-label{font-size:12px;color:var(--muted);font-weight:700}.stat-value{font-size:23px;font-weight:900;color:var(--navy);margin-top:3px}.admin-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr))}.shortcut{border:1px solid var(--border);background:#fff;border-radius:15px;padding:17px;text-align:left;display:flex;align-items:center;gap:12px;color:var(--text)}.shortcut strong{display:block;font-size:13px}.shortcut small{color:var(--muted);font-size:11px}.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:13px}table{border-collapse:collapse;width:100%;min-width:650px;background:white}th,td{padding:12px 13px;border-bottom:1px solid #edf1f5;text-align:left;font-size:12px}th{background:#f7fafc;color:#718096;font-size:11px;text-transform:uppercase}tr:last-child td{border-bottom:0}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin-bottom:15px}.toolbar .field{margin:0;min-width:150px}.toolbar .field.grow{flex:1}.login-wrap{max-width:430px;margin:55px auto;padding:0 16px}.login-brand{text-align:center;margin-bottom:20px}.admin-mobile-nav{display:none}.voucher-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.voucher-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px;border:1px solid var(--border);border-radius:11px;background:#fff;font-size:12px}.voucher-code{font-family:monospace;font-weight:800;word-break:break-all}.pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:15px}.toast{position:fixed;z-index:100;left:50%;bottom:25px;transform:translate(-50%,20px);background:#102a43;color:#fff;border-radius:12px;padding:12px 18px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 30px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.footer{text-align:center;color:#9aabba;font-size:11px;padding:25px 10px}.admin-login-screen{min-height:calc(100vh - 68px);padding:1px 0 40px}
+@media(max-width:950px){.package-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.container{width:calc(100% - 24px)}.topbar-inner{min-height:60px}.brand-logo{width:37px;height:37px}.brand-name{font-size:15px}.header-btn{font-size:11px;padding:7px 9px}.customer-hero{padding:22px 19px;border-radius:19px;margin:15px 0}.customer-hero h1{font-size:23px}.package-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.package-card{padding:12px;min-height:170px}.package-card.selected{padding:11px}.package-price{font-size:18px}.bottom-nav{display:block}.admin-shell{display:block;min-height:0}.admin-sidebar{display:none}.admin-main{padding:18px 12px 100px}.admin-mobile-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;bottom:0;left:0;right:0;z-index:60;background:#fff;border-top:1px solid var(--border);padding:7px 5px}.admin-mobile-nav .admin-nav{display:flex;flex-direction:column;gap:3px;padding:5px 2px;margin:0;text-align:center;font-size:9px}.admin-heading h1{font-size:21px}.stats-grid{gap:10px}.stat-card{padding:13px}.stat-value{font-size:19px}.admin-shortcuts{gap:9px}.shortcut{padding:12px}.voucher-list{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
+<header class="topbar"><div class="container topbar-inner">
+  <div class="brand"><div class="brand-logo">F</div><div><div class="brand-name">FATIH RELOAD</div><div class="brand-sub">WIFI VOUCHER STORE</div></div></div>
+  <div class="header-actions"><button class="header-btn" onclick="showCustomer()">Beranda</button><button class="header-btn" onclick="showAdmin()">Admin</button></div>
+</div></header>
 
-<header class="topbar">
-  <div class="container topbar-inner">
-    <div class="brand">
-      <div class="brand-logo">F</div>
-      <div>
-        <div class="brand-name">FATIH RELOAD</div>
-        <div class="brand-sub">WIFI VOUCHER STORE</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="header-btn" onclick="showCustomer()">Beranda</button>
-      <button class="header-btn" onclick="showAdmin()">Admin</button>
-    </div>
-  </div>
-</header>
-
-<!-- HALAMAN PELANGGAN -->
-<main id="customerArea">
-<div class="container">
-
+<main id="customerArea"><div class="container">
 <section id="customer-home" class="customer-view active">
-  <div class="customer-hero">
-    <div class="hero-content">
-      <div class="hero-kicker">FATIH RELOAD WIFI</div>
-      <h1>Pilih Paket<br>Voucher WiFi</h1>
-      <p>Pilih paket voucher WiFi favoritmu. Pembelian mudah, pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.</p>
-      <div class="hero-pills">
-        <span>⚡ Proses mudah</span><span>🔐 Pembayaran aman</span><span>📶 Voucher WiFi</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-title">
-    <h2>Pilih Paket Internet</h2>
-    <button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Perbarui</button>
-  </div>
-
-  <div id="packageGrid" class="grid package-grid">
-    <div class="empty" style="grid-column:1/-1">Memuat paket voucher...</div>
-  </div>
-
-  <div class="notice" style="margin-top:18px">💡 Pilih paket yang kamu inginkan, masukkan nomor WhatsApp, lalu lanjutkan pesanan.</div>
+  <div class="customer-hero"><div class="hero-kicker">FATIH RELOAD WIFI</div><h1>Pilih Paket<br>Voucher WiFi</h1><p>Pilih paket voucher WiFi favoritmu. Pembelian mudah, pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.</p><div class="hero-pills"><span>⚡ Proses mudah</span><span>🔐 Pembayaran aman</span><span>📶 Voucher WiFi</span></div></div>
+  <div class="section-title"><h2>Pilih Paket Internet</h2><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Perbarui</button></div>
+  <div id="packageGrid" class="grid package-grid"><div class="empty" style="grid-column:1/-1">Memuat paket voucher...</div></div>
+  <div class="notice" style="margin-top:18px">💡 Pilih paket, masukkan nomor WhatsApp, lalu lanjutkan pesanan.</div>
 </section>
-
 <section id="customer-orders" class="customer-view">
   <div class="section-title"><h2>Pesanan Saya</h2></div>
-
-  <!-- URUTAN 1: PEMBAYARAN PESANAN -->
-  <div id="paymentPanel" class="card hidden">
-    <h3 style="margin:0 0 5px;color:var(--navy)">Pembayaran Pesanan</h3>
-    <div id="paymentContent"></div>
-  </div>
-
-  <!-- URUTAN 2: PESANAN SEDANG DIPROSES -->
-  <div class="card" style="margin-top:15px">
-    <h3 style="margin:0 0 5px;color:var(--navy)">Pesanan yang Sedang Diproses</h3>
-    <p class="muted small">Jika kamu baru saja membuat pesanan di perangkat ini, detailnya akan muncul di bawah.</p>
-    <div id="currentOrderPanel"><div class="empty">Belum ada pesanan aktif di halaman ini.</div></div>
-  </div>
-
-  <!-- URUTAN 3: CEK STATUS PESANAN -->
-  <div class="card" style="margin-top:15px">
-    <h3 style="margin:0 0 5px;color:var(--navy)">Cek Status Pesanan</h3>
-    <p class="muted small" style="margin-top:0">Masukkan nomor pesanan dan nomor WhatsApp yang digunakan saat membeli.</p>
-    <div class="field">
-      <label for="checkOrderId">Nomor Pesanan</label>
-      <input id="checkOrderId" placeholder="Masukkan ID pesanan">
-    </div>
-    <div class="field">
-      <label for="checkPhone">Nomor WhatsApp</label>
-      <input id="checkPhone" inputmode="tel" placeholder="Contoh: 08xxxxxxxxxx">
-    </div>
-    <button class="btn btn-primary btn-block" onclick="manualCheckOrder()">Periksa Pesanan</button>
-    <div id="checkResult" style="margin-top:14px"></div>
-  </div>
+  <div id="paymentPanel" class="card hidden"><h3 style="margin:0 0 5px;color:var(--navy)">Pembayaran Pesanan</h3><div id="paymentContent"></div></div>
+  <div class="card" style="margin-top:15px"><h3 style="margin:0 0 5px;color:var(--navy)">Pesanan yang Sedang Diproses</h3><p class="muted small">Detail pesanan pada perangkat ini.</p><div id="currentOrderPanel"><div class="empty">Belum ada pesanan aktif.</div></div></div>
+  <div class="card" style="margin-top:15px"><h3 style="margin:0 0 5px;color:var(--navy)">Cek Status Pesanan</h3><p class="muted small">Masukkan ID pesanan dan nomor WhatsApp saat membeli.</p><div class="field"><label>Nomor Pesanan</label><input id="checkOrderId" placeholder="Masukkan ID pesanan"></div><div class="field"><label>Nomor WhatsApp</label><input id="checkPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><button class="btn btn-primary btn-block" onclick="manualCheckOrder()">Periksa Pesanan</button><div id="checkResult" style="margin-top:14px"></div></div>
 </section>
-
 <section id="customer-help" class="customer-view">
   <div class="section-title"><h2>Pusat Bantuan</h2></div>
-  <div class="card">
-    <h3 style="margin-top:0;color:var(--navy)">Cara membeli voucher</h3>
-    <ol style="padding-left:20px;font-size:13px;line-height:1.9">
-      <li>Pilih paket voucher yang tersedia.</li><li>Masukkan nomor WhatsApp aktif.</li>
-      <li>Tekan tombol Buat Pesanan.</li><li>Transfer sesuai nominal yang tertera.</li>
-      <li>Upload bukti pembayaran.</li><li>Tunggu admin memverifikasi pembayaran.</li>
-      <li>Voucher akan muncul setelah pembayaran disetujui.</li>
-    </ol>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h3 style="margin-top:0;color:var(--navy)">Informasi Pembayaran</h3>
-    <div class="payment-info">
-      <div class="small muted">DANA / GoPay</div>
-      <div class="wallet-number">089601293092</div>
-      <div class="wallet-name">a.n. MUHAMAD IMRON</div>
-    </div>
-    <div id="customerPaymentHours" class="notice">Memeriksa jam pelayanan...</div>
-    <p class="small muted">Pembayaran QRIS belum tersedia. Pastikan nama penerima dan nominal sudah benar sebelum transfer.</p>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h3 style="margin-top:0;color:var(--navy)">Butuh bantuan?</h3>
-    <p class="small muted">Hubungi admin Fatih Reload jika mengalami kendala saat melakukan pemesanan atau pembayaran.</p>
-    <a class="btn btn-success btn-block" href="https://wa.me/6289601293092" target="_blank" rel="noopener">Chat WhatsApp Admin</a>
-  </div>
+  <div class="card"><h3 style="margin-top:0;color:var(--navy)">Cara membeli voucher</h3><ol style="padding-left:20px;font-size:13px;line-height:1.9"><li>Pilih paket voucher.</li><li>Masukkan nomor WhatsApp.</li><li>Buat pesanan.</li><li>Transfer sesuai nominal.</li><li>Upload bukti pembayaran.</li><li>Tunggu verifikasi admin.</li><li>Voucher muncul setelah pembayaran disetujui.</li></ol></div>
+  <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Informasi Pembayaran</h3><div class="payment-info"><div class="small muted">DANA / GoPay</div><div class="wallet-number">089601293092</div><div class="wallet-name">a.n. MUHAMAD IMRON</div></div><div id="customerPaymentHours" class="notice">Memeriksa jam pelayanan...</div><p class="small muted">Pembayaran QRIS belum tersedia. Pastikan nama penerima dan nominal benar.</p></div>
+  <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Butuh bantuan?</h3><p class="small muted">Hubungi admin jika mengalami kendala.</p><a class="btn btn-success btn-block" href="https://wa.me/6289601293092" target="_blank" rel="noopener">Chat WhatsApp Admin</a></div>
 </section>
+</div></main>
+<nav class="bottom-nav" id="customerBottomNav"><div class="bottom-nav-inner">
+<button class="nav-item active" data-customer-view="customer-home" onclick="showCustomerView('customer-home')"><span class="nav-icon">⌂</span>Beranda</button><button class="nav-item" data-customer-view="customer-orders" onclick="showCustomerView('customer-orders')"><span class="nav-icon">▤</span>Pesanan</button><button class="nav-item" data-customer-view="customer-help" onclick="showCustomerView('customer-help')"><span class="nav-icon">ⓘ</span>Bantuan</button>
+</div></nav>
 
-</div>
-</main>
+<section id="adminLoginScreen" class="admin-login-screen hidden"><div class="login-wrap">
+  <div class="login-brand"><div class="brand-logo" style="margin:auto">F</div><h2 style="color:var(--navy);margin:0">Admin Fatih Reload</h2><p class="muted small">Masuk untuk mengelola voucher WiFi</p></div>
+  <div class="card"><h3 style="margin-top:0;color:var(--navy)">Login Admin</h3><div class="field"><label>Email</label><input id="adminEmail" type="email" autocomplete="username" placeholder="Email admin"></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password"></div><button class="btn btn-primary btn-block" id="loginBtn" onclick="adminLogin()">Masuk Dashboard</button><p id="loginMessage" class="small muted" style="text-align:center"></p><button class="btn btn-light btn-block" onclick="showCustomer()">← Kembali ke halaman pelanggan</button></div>
+</div></section>
 
-<nav class="bottom-nav" id="customerBottomNav">
-  <div class="bottom-nav-inner">
-    <button class="nav-item active" data-customer-view="customer-home" onclick="showCustomerView('customer-home')"><span class="nav-icon">⌂</span>Beranda</button>
-    <button class="nav-item" data-customer-view="customer-orders" onclick="showCustomerView('customer-orders')"><span class="nav-icon">▤</span>Pesanan</button>
-    <button class="nav-item" data-customer-view="customer-help" onclick="showCustomerView('customer-help')"><span class="nav-icon">ⓘ</span>Bantuan</button>
-  </div>
-</nav>
-
-<!-- LOGIN ADMIN -->
-<section id="adminLoginScreen" class="admin-login-screen hidden">
-  <div class="login-wrap">
-    <div class="login-brand">
-      <div class="brand-logo">F</div>
-      <h2 style="color:var(--navy);margin:0">Admin Fatih Reload</h2>
-      <p class="muted small">Masuk untuk mengelola voucher WiFi</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0;color:var(--navy)">Login Admin</h3>
-      <div class="field">
-        <label for="adminEmail">Email</label>
-        <input id="adminEmail" type="email" autocomplete="username" placeholder="Email admin">
-      </div>
-      <div class="field">
-        <label for="adminPassword">Password</label>
-        <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Password">
-      </div>
-      <button class="btn btn-primary btn-block" id="loginBtn" onclick="adminLogin()">Masuk Dashboard</button>
-      <p id="loginMessage" class="small muted" style="margin-bottom:0;text-align:center"></p>
-      <button class="btn btn-light btn-block" style="margin-top:12px" onclick="showCustomer()">← Kembali ke halaman pelanggan</button>
-    </div>
-  </div>
-</section>
-
-<!-- AREA ADMIN -->
-<section id="adminArea" class="hidden">
-<div class="admin-shell">
-
+<section id="adminArea" class="hidden"><div class="admin-shell">
 <aside class="admin-sidebar">
-  <div class="sidebar-label">MENU UTAMA</div>
-  <button class="admin-nav active" data-admin-view="admin-home" onclick="showAdminView('admin-home')"><span class="ico">▦</span>Dashboard</button>
-  <button class="admin-nav" data-admin-view="admin-history" onclick="showAdminView('admin-history')"><span class="ico">◷</span>Riwayat Transaksi</button>
-  <div class="sidebar-label">MANAJEMEN VOUCHER</div>
-  <button class="admin-nav" data-admin-view="admin-import" onclick="showAdminView('admin-import')"><span class="ico">⇧</span>Import Stok</button>
-  <button class="admin-nav" data-admin-view="admin-stock" onclick="showAdminView('admin-stock')"><span class="ico">▤</span>Paket & Stok</button>
-  <button class="admin-nav" data-admin-view="admin-vouchers" onclick="showAdminView('admin-vouchers')"><span class="ico">▣</span>Kelola Voucher</button>
-  <div class="sidebar-label">TRANSAKSI</div>
-  <button class="admin-nav" data-admin-view="admin-payments" onclick="showAdminView('admin-payments')"><span class="ico">✓</span>Verifikasi Pembayaran</button>
-  <button class="admin-nav" data-admin-view="admin-check" onclick="showAdminView('admin-check')"><span class="ico">⌕</span>Cek Pesanan</button>
-  <hr>
-  <button class="admin-nav" onclick="adminLogout()"><span class="ico">⇥</span>Keluar</button>
+<div class="sidebar-label">MENU UTAMA</div>
+<button class="admin-nav active" data-admin-view="admin-home" onclick="showAdminView('admin-home')">▦ Dashboard</button><button class="admin-nav" data-admin-view="admin-history" onclick="showAdminView('admin-history')">◷ Riwayat Transaksi</button>
+<div class="sidebar-label">MANAJEMEN VOUCHER</div><button class="admin-nav" data-admin-view="admin-import" onclick="showAdminView('admin-import')">⇧ Import Stok</button><button class="admin-nav" data-admin-view="admin-stock" onclick="showAdminView('admin-stock')">▤ Paket & Stok</button><button class="admin-nav" data-admin-view="admin-vouchers" onclick="showAdminView('admin-vouchers')">▣ Kelola Voucher</button>
+<div class="sidebar-label">TRANSAKSI</div><button class="admin-nav" data-admin-view="admin-payments" onclick="showAdminView('admin-payments')">✓ Verifikasi Pembayaran</button><button class="admin-nav" data-admin-view="admin-check" onclick="showAdminView('admin-check')">⌕ Cek Pesanan</button><hr><button class="admin-nav" onclick="adminLogout()">⇥ Keluar</button>
 </aside>
-
 <main class="admin-main">
-
-<section id="admin-home" class="admin-page active">
-  <div class="admin-heading">
-    <div><h1>Dashboard</h1><p>Ringkasan aktivitas Fatih Reload WiFi.</p></div>
-    <button class="btn btn-light btn-sm" onclick="refreshAdminDashboard()">↻ Refresh</button>
-  </div>
-  <div class="grid stats-grid">
-    <div class="card stat-card"><div class="stat-icon">▤</div><div class="stat-label">Total Pesanan Hari Ini</div><div class="stat-value" id="statOrders">-</div></div>
-    <div class="card stat-card"><div class="stat-icon">✓</div><div class="stat-label">Pesanan Dibayar</div><div class="stat-value" id="statPaid">-</div></div>
-    <div class="card stat-card"><div class="stat-icon">▣</div><div class="stat-label">Voucher Terjual</div><div class="stat-value" id="statVouchers">-</div></div>
-    <div class="card stat-card"><div class="stat-icon">Rp</div><div class="stat-label">Pendapatan Hari Ini</div><div class="stat-value" id="statRevenue">-</div></div>
-  </div>
-  <div class="section-title"><h2>Akses Cepat</h2></div>
-  <div class="grid admin-shortcuts">
-    <button class="shortcut" onclick="showAdminView('admin-payments')"><span class="shortcut-icon">✓</span><span><strong>Verifikasi Pembayaran</strong><small>Periksa bukti transfer pelanggan</small></span></button>
-    <button class="shortcut" onclick="showAdminView('admin-import')"><span class="shortcut-icon">⇧</span><span><strong>Import Stok Voucher</strong><small>Tambahkan kode voucher baru</small></span></button>
-    <button class="shortcut" onclick="showAdminView('admin-stock')"><span class="shortcut-icon">▤</span><span><strong>Paket & Stok</strong><small>Lihat stok setiap paket</small></span></button>
-    <button class="shortcut" onclick="showAdminView('admin-vouchers')"><span class="shortcut-icon">▣</span><span><strong>Kelola Voucher</strong><small>Lihat dan hapus voucher tersedia</small></span></button>
-    <button class="shortcut" onclick="showAdminView('admin-history')"><span class="shortcut-icon">◷</span><span><strong>Riwayat Transaksi</strong><small>Lihat transaksi berdasarkan tanggal</small></span></button>
-    <button class="shortcut" onclick="showAdminView('admin-check')"><span class="shortcut-icon">⌕</span><span><strong>Cek Pesanan</strong><small>Periksa pesanan berdasarkan ID</small></span></button>
-  </div>
-  <div class="section-title"><h2>Informasi Sistem</h2></div>
-  <div class="card">
-    <div class="notice success">Sistem voucher terhubung ke Supabase. Gunakan menu di samping untuk mengelola transaksi dan stok.</div>
-    <p class="small muted" style="margin-bottom:0">Data dashboard diambil dari riwayat transaksi dan stok yang tersedia di server.</p>
-  </div>
+<section id="admin-home" class="admin-page active"><div class="admin-heading"><div><h1>Dashboard</h1><p>Ringkasan aktivitas Fatih Reload WiFi.</p></div><button class="btn btn-light btn-sm" onclick="refreshAdminDashboard()">↻ Refresh</button></div>
+<div class="grid stats-grid"><div class="card stat-card"><div class="stat-label">Total Pesanan Hari Ini</div><div class="stat-value" id="statOrders">-</div></div><div class="card stat-card"><div class="stat-label">Pesanan Dibayar</div><div class="stat-value" id="statPaid">-</div></div><div class="card stat-card"><div class="stat-label">Voucher Terjual</div><div class="stat-value" id="statVouchers">-</div></div><div class="card stat-card"><div class="stat-label">Pendapatan Hari Ini</div><div class="stat-value" id="statRevenue">-</div></div></div>
+<div class="section-title"><h2>Akses Cepat</h2></div><div class="grid admin-shortcuts">
+<button class="shortcut" onclick="showAdminView('admin-payments')"><span>✓</span><span><strong>Verifikasi Pembayaran</strong><small>Periksa bukti transfer</small></span></button><button class="shortcut" onclick="showAdminView('admin-import')"><span>⇧</span><span><strong>Import Stok Voucher</strong><small>Tambahkan kode baru</small></span></button><button class="shortcut" onclick="showAdminView('admin-stock')"><span>▤</span><span><strong>Paket & Stok</strong><small>Lihat stok paket</small></span></button><button class="shortcut" onclick="showAdminView('admin-vouchers')"><span>▣</span><span><strong>Kelola Voucher</strong><small>Lihat dan hapus voucher</small></span></button><button class="shortcut" onclick="showAdminView('admin-history')"><span>◷</span><span><strong>Riwayat Transaksi</strong><small>Lihat transaksi</small></span></button><button class="shortcut" onclick="showAdminView('admin-check')"><span>⌕</span><span><strong>Cek Pesanan</strong><small>Periksa pesanan</small></span></button>
+</div></section>
+<section id="admin-history" class="admin-page"><div class="admin-heading"><div><h1>Riwayat Transaksi</h1><p>Daftar transaksi berdasarkan tanggal dan status.</p></div><button class="btn btn-light btn-sm" onclick="loadTransactionHistory()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field"><label>Dari tanggal</label><input type="date" id="historyDateFrom"></div><div class="field"><label>Sampai tanggal</label><input type="date" id="historyDateTo"></div><div class="field"><label>Status</label><select id="historyStatus"><option value="">Semua status</option><option value="pending">Pending</option><option value="waiting_payment">Menunggu pembayaran</option><option value="paid">Dibayar</option><option value="completed">Selesai</option><option value="rejected">Ditolak</option><option value="expired">Kedaluwarsa</option></select></div><button class="btn btn-primary" onclick="historyCurrentPage=1;loadTransactionHistory()">Tampilkan</button></div><div id="historySummary" class="notice" style="margin-bottom:14px">Pilih tanggal.</div><div id="historyTable" class="empty">Memuat...</div><div class="pagination"><button class="btn btn-light btn-sm" onclick="changeHistoryPage(-1)">← Sebelumnya</button><span id="historyPageInfo" class="small muted">Halaman 1</span><button class="btn btn-light btn-sm" onclick="changeHistoryPage(1)">Berikutnya →</button></div></div></section>
+<section id="admin-import" class="admin-page"><div class="admin-heading"><div><h1>Import Stok Voucher</h1><p>Masukkan banyak kode voucher sekaligus.</p></div></div><div class="card"><div class="field"><label>Pilih Paket</label><select id="importPackage"><option value="">Memuat paket...</option></select></div><div class="field"><label>Daftar Kode Voucher</label><textarea id="voucherCSV" rows="9" placeholder="Satu kode per baris&#10;ABC123&#10;DEF456"></textarea></div><button class="btn btn-primary btn-block" id="importBtn" onclick="importVouchers()">Import Voucher</button><div id="importResult" style="margin-top:14px"></div></div></section>
+<section id="admin-stock" class="admin-page"><div class="admin-heading"><div><h1>Paket & Stok</h1><p>Informasi stok voucher setiap paket.</p></div><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Refresh</button></div><div id="adminStockGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"><div class="empty">Memuat stok...</div></div></section>
+<section id="admin-vouchers" class="admin-page"><div class="admin-heading"><div><h1>Kelola Voucher</h1><p>Lihat dan hapus voucher yang masih tersedia.</p></div><button class="btn btn-light btn-sm" onclick="loadAvailableVouchers()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field grow"><label>Pilih Paket</label><select id="manageVoucherPackage"><option value="">Pilih paket</option></select></div><button class="btn btn-primary" onclick="loadAvailableVouchers()">Tampilkan</button></div><div id="voucher-total" class="notice" style="margin-bottom:14px">Pilih paket.</div><div id="voucher-list" class="voucher-list"><div class="empty">Silakan pilih paket.</div></div></div></section>
+<section id="admin-payments" class="admin-page"><div class="admin-heading"><div><h1>Verifikasi Pembayaran</h1><p>Periksa bukti pembayaran pelanggan.</p></div><button class="btn btn-light btn-sm" onclick="loadAdminPayments()">↻ Refresh</button></div><div class="card"><div id="payment-list"><div class="empty">Memuat...</div></div></div></section>
+<section id="admin-check" class="admin-page"><div class="admin-heading"><div><h1>Cek Pesanan</h1><p>Periksa status transaksi berdasarkan ID pesanan.</p></div></div><div class="card"><div class="field"><label>ID Pesanan</label><input id="adminCheckOrderId" placeholder="ID pesanan"></div><div class="field"><label>Nomor WhatsApp Pelanggan</label><input id="adminCheckPhone" placeholder="Nomor WhatsApp"></div><button class="btn btn-primary btn-block" onclick="adminCheckOrder()">Periksa Pesanan</button><div id="adminCheckResult" style="margin-top:14px"></div></div></section>
+</main></div>
+<nav class="admin-mobile-nav"><button class="admin-nav active" data-admin-view="admin-home" onclick="showAdminView('admin-home')">▦ Home</button><button class="admin-nav" data-admin-view="admin-payments" onclick="showAdminView('admin-payments')">✓ Bayar</button><button class="admin-nav" data-admin-view="admin-stock" onclick="showAdminView('admin-stock')">▤ Stok</button><button class="admin-nav" data-admin-view="admin-history" onclick="showAdminView('admin-history')">◷ Riwayat</button></nav>
 </section>
-
-<section id="admin-history" class="admin-page">
-  <div class="admin-heading">
-    <div><h1>Riwayat Transaksi</h1><p>Daftar transaksi berdasarkan rentang tanggal dan status.</p></div>
-    <button class="btn btn-light btn-sm" onclick="loadTransactionHistory()">↻ Refresh</button>
-  </div>
-  <div class="card">
-    <div class="toolbar">
-      <div class="field"><label>Dari tanggal</label><input type="date" id="historyDateFrom"></div>
-      <div class="field"><label>Sampai tanggal</label><input type="date" id="historyDateTo"></div>
-      <div class="field">
-        <label>Status</label>
-        <select id="historyStatus">
-          <option value="">Semua status</option><option value="pending">Pending</option>
-          <option value="waiting_payment">Menunggu pembayaran</option><option value="paid">Dibayar</option>
-          <option value="completed">Selesai</option><option value="rejected">Ditolak</option><option value="expired">Kedaluwarsa</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="historyCurrentPage=1;loadTransactionHistory()">Tampilkan</button>
-    </div>
-    <div id="historySummary" class="notice" style="margin-bottom:14px">Pilih tanggal untuk melihat ringkasan transaksi.</div>
-    <div id="historyTable" class="empty">Memuat riwayat transaksi...</div>
-    <div class="pagination">
-      <button class="btn btn-light btn-sm" onclick="changeHistoryPage(-1)">← Sebelumnya</button>
-      <span class="small muted" id="historyPageInfo">Halaman 1</span>
-      <button class="btn btn-light btn-sm" onclick="changeHistoryPage(1)">Berikutnya →</button>
-    </div>
-  </div>
-</section>
-
-<section id="admin-import" class="admin-page">
-  <div class="admin-heading"><div><h1>Import Stok Voucher</h1><p>Masukkan banyak kode voucher sekaligus.</p></div></div>
-  <div class="card">
-    <div class="field"><label for="importPackage">Pilih Paket</label><select id="importPackage"><option value="">Memuat paket...</option></select></div>
-    <div class="field">
-      <label for="voucherCSV">Daftar Kode Voucher</label>
-      <textarea id="voucherCSV" rows="9" placeholder="Masukkan kode voucher, satu kode per baris&#10;&#10;Contoh:&#10;ABC123&#10;DEF456&#10;GHI789"></textarea>
-      <div class="small muted" style="margin-top:5px">Bisa menggunakan satu kode per baris atau format CSV.</div>
-    </div>
-    <button class="btn btn-primary btn-block" id="importBtn" onclick="importVouchers()">Import Voucher</button>
-    <div id="importResult" style="margin-top:14px"></div>
-  </div>
-</section>
-
-<section id="admin-stock" class="admin-page">
-  <div class="admin-heading"><div><h1>Paket & Stok</h1><p>Informasi stok voucher setiap paket.</p></div><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Refresh</button></div>
-  <div id="adminStockGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"><div class="empty">Memuat stok...</div></div>
-</section>
-
-<section id="admin-vouchers" class="admin-page">
-  <div class="admin-heading"><div><h1>Kelola Voucher</h1><p>Lihat dan hapus voucher yang masih tersedia.</p></div><button class="btn btn-light btn-sm" onclick="loadAvailableVouchers()">↻ Refresh</button></div>
-  <div class="card">
-    <div class="toolbar">
-      <div class="field grow"><label>Pilih Paket</label><select id="manageVoucherPackage"><option value="">Semua paket</option></select></div>
-      <button class="btn btn-primary" onclick="loadAvailableVouchers()">Tampilkan</button>
-    </div>
-    <div id="voucher-total" class="notice" style="margin-bottom:14px">Belum ada daftar voucher.</div>
-    <div id="voucher-list" class="voucher-list"><div class="empty" style="grid-column:1/-1">Silakan pilih paket.</div></div>
-  </div>
-</section>
-
-<section id="admin-payments" class="admin-page">
-  <div class="admin-heading"><div><h1>Verifikasi Pembayaran</h1><p>Periksa bukti pembayaran dan proses pesanan pelanggan.</p></div><button class="btn btn-light btn-sm" onclick="loadAdminPayments()">↻ Refresh</button></div>
-  <div class="card"><div id="payment-list"><div class="empty">Memuat daftar pembayaran...</div></div></div>
-</section>
-
-<section id="admin-check" class="admin-page">
-  <div class="admin-heading"><div><h1>Cek Pesanan</h1><p>Periksa status transaksi berdasarkan ID pesanan.</p></div></div>
-  <div class="card">
-    <div class="field"><label>ID Pesanan</label><input id="adminCheckOrderId" placeholder="Masukkan ID pesanan"></div>
-    <div class="field"><label>Nomor WhatsApp Pelanggan</label><input id="adminCheckPhone" placeholder="Nomor WhatsApp pelanggan"></div>
-    <button class="btn btn-primary btn-block" onclick="adminCheckOrder()">Periksa Pesanan</button>
-    <div id="adminCheckResult" style="margin-top:14px"></div>
-  </div>
-</section>
-
-</main>
-</div>
-
-<nav class="admin-mobile-nav">
-  <button class="admin-nav active" data-admin-view="admin-home" onclick="showAdminView('admin-home')"><span class="ico">▦</span>Home</button>
-  <button class="admin-nav" data-admin-view="admin-payments" onclick="showAdminView('admin-payments')"><span class="ico">✓</span>Bayar</button>
-  <button class="admin-nav" data-admin-view="admin-stock" onclick="showAdminView('admin-stock')"><span class="ico">▤</span>Stok</button>
-  <button class="admin-nav" data-admin-view="admin-history" onclick="showAdminView('admin-history')"><span class="ico">◷</span>Riwayat</button>
-</nav>
-</section>
-
-<div class="footer" id="mainFooter">© <span id="yearNow"></span> Fatih Reload. All rights reserved.</div>
-<div id="toast" class="toast"></div>
+<div class="footer" id="mainFooter">© <span id="yearNow"></span> Fatih Reload. All rights reserved.</div><div id="toast" class="toast"></div>
 
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* KONFIGURASI SUPABASE */
 const SUPABASE_URL = "https://rxobthqkwhyfmcduuzeu.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_L8-uxzioNXR4bwx6nWQb_Q_rewY_iD4";
-
+const ADMIN_ID = "d49c6f4e-2e64-421f-93fc-7a2d16c44133";
 const WALLET_NUMBER = "089601293092";
 const WALLET_NAME = "MUHAMAD IMRON";
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const $ = id => document.getElementById(id);
 
-let packages = [];
-let packageStocks = [];
-let selectedPackageId = null;
-let currentOrder = null;
-let currentPhone = "";
-let currentOrderId = "";
-let currentOrderStatus = "";
-let proofSubmitted = false;
-let availableVouchers = [];
-let historyCurrentPage = 1;
-const historyLimit = 20;
-let historyTotalPages = 1;
-let currentAdminView = "admin-home";
-let currentCustomerView = "customer-home";
-let adminDataLoadedForSession = false;
-let orderPollingTimer = null;
-let toastTimer = null;
+let packages=[], packageStocks=[], selectedPackageId=null, currentOrder=null;
+let currentPhone="", currentOrderId="", currentOrderStatus="", proofSubmitted=false;
+let availableVouchers=[], historyCurrentPage=1, historyTotalPages=1;
+const historyLimit=20;
+let currentAdminView="admin-home", currentCustomerView="customer-home";
+let adminDataLoadedForSession=false, adminVerified=false;
+let orderPollingTimer=null, toastTimer=null;
 
-/* UTILITAS */
-function money(value){
-  return "Rp " + Number(value || 0).toLocaleString("id-ID");
-}
+function money(v){return "Rp "+Number(v||0).toLocaleString("id-ID")}
+function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function showToast(m){const e=$("toast");e.textContent=m;e.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove("show"),3000)}
+function setLoading(b,on,t){if(!b)return;if(on){b.dataset.oldText=b.textContent;b.textContent=t||"Memproses...";b.disabled=true}else{b.textContent=b.dataset.oldText||t||"Simpan";b.disabled=false}}
+function getErrorMessage(e){return e?.message||e?.error_description||String(e||"Terjadi kesalahan.")}
+function normalizePhone(p){return String(p||"").replace(/[^\d+]/g,"").trim()}
+function formatDate(v){if(!v)return "-";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString("id-ID",{dateStyle:"short",timeStyle:"short"})}
+function getVoucherCode(v){if(!v)return "";if(typeof v==="string")return v;if(Array.isArray(v))return getVoucherCode(v[0]);if(typeof v==="object")return v.code||v.voucher_code||v.voucher||v.token||"";return String(v)}
+function unwrapData(r){return r?.data??r??{}}
+function getRows(r,keys=[]){const d=unwrapData(r);if(Array.isArray(d))return d;for(const k of keys)if(Array.isArray(d?.[k]))return d[k];return []}
+function statusBadge(s){s=String(s||"").toLowerCase();if(["paid","completed","success","approved","delivered"].includes(s))return `<span class="badge green">${escapeHTML(s)}</span>`;if(["rejected","failed","cancelled","expired"].includes(s))return `<span class="badge red">${escapeHTML(s)}</span>`;return `<span class="badge orange">${escapeHTML(s||"pending")}</span>`}
+function getOrderId(d){return d?.order_id||d?.id||d?.order?.id||d?.data?.order_id||d?.data?.id||""}
+function getOrderStatus(d){return d?.status||d?.order?.status||d?.data?.status||"pending"}
+function requireAdmin(){if(!adminVerified){showToast("Akses admin diperlukan. Silakan login kembali.");$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");return false}return true}
 
-function escapeHTML(value){
-  return String(value ?? "").replace(/[&<>"']/g,char=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  })[char]);
-}
-
-function showToast(message){
-  const el=$("toast");
-  el.textContent=message;
-  el.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.classList.remove("show"),3000);
-}
-
-function setLoading(button,loading,text){
-  if(!button)return;
-  if(loading){
-    button.dataset.oldText=button.textContent;
-    button.textContent=text||"Memproses...";
-    button.disabled=true;
-  }else{
-    button.textContent=button.dataset.oldText||text||"Simpan";
-    button.disabled=false;
-  }
-}
-
-function getErrorMessage(error){
-  return error?.message||error?.error_description||String(error||"Terjadi kesalahan.");
-}
-
-function normalizePhone(phone){
-  return String(phone||"").replace(/[^\d+]/g,"").trim();
-}
-
-function formatDate(value){
-  if(!value)return "-";
-  const date=new Date(value);
-  if(Number.isNaN(date.getTime()))return String(value);
-  return date.toLocaleString("id-ID",{dateStyle:"short",timeStyle:"short"});
-}
-
-function getVoucherCode(value){
-  if(!value)return "";
-  if(typeof value==="string")return value;
-  if(Array.isArray(value))return getVoucherCode(value[0]);
-  if(typeof value==="object")return value.code||value.voucher_code||value.voucher||value.token||"";
-  return String(value);
-}
-
-function unwrapData(result){
-  return result?.data??result??{};
-}
-
-function getRows(result,keys=[]){
-  const data=unwrapData(result);
-  if(Array.isArray(data))return data;
-  for(const key of keys){
-    if(Array.isArray(data?.[key]))return data[key];
-  }
-  return [];
-}
-
-function statusBadge(status){
-  const s=String(status||"").toLowerCase();
-  if(["paid","completed","success","approved","delivered"].includes(s))return `<span class="badge green">${escapeHTML(status)}</span>`;
-  if(["rejected","failed","cancelled","expired"].includes(s))return `<span class="badge red">${escapeHTML(status)}</span>`;
-  return `<span class="badge orange">${escapeHTML(status||"pending")}</span>`;
-}
-
-function getOrderId(data){
-  return data?.order_id||data?.id||data?.order?.id||data?.data?.order_id||data?.data?.id||"";
-}
-
-function getOrderStatus(data){
-  return data?.status||data?.order?.status||data?.data?.status||"pending";
-}
-
-/* NAVIGASI */
+/* NAVIGASI PELANGGAN / ADMIN */
 window.showCustomer=function(){
-  $("customerArea").classList.remove("hidden");
-  $("adminLoginScreen").classList.add("hidden");
-  $("adminArea").classList.add("hidden");
-  $("customerBottomNav").classList.remove("hidden");
-  $("mainFooter").classList.remove("hidden");
+  $("customerArea").classList.remove("hidden");$("adminLoginScreen").classList.add("hidden");$("adminArea").classList.add("hidden");
+  $("customerBottomNav").classList.remove("hidden");$("mainFooter").classList.remove("hidden");
   showCustomerView(currentCustomerView);
 };
-
 window.showAdmin=async function(){
-  $("customerArea").classList.add("hidden");
-  $("customerBottomNav").classList.add("hidden");
-  $("mainFooter").classList.add("hidden");
-
-  const {data:{session}}=await db.auth.getSession();
-  if(session){
-    $("adminLoginScreen").classList.add("hidden");
-    $("adminArea").classList.remove("hidden");
-    await updateAdminUI();
-    showAdminView(currentAdminView);
-  }else{
-    $("adminArea").classList.add("hidden");
-    $("adminLoginScreen").classList.remove("hidden");
-  }
+  $("customerArea").classList.add("hidden");$("customerBottomNav").classList.add("hidden");$("mainFooter").classList.add("hidden");
+  $("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");
+  try{
+    const {data,error}=await db.auth.getUser();
+    if(error||!data.user){adminVerified=false;return}
+    if(data.user.id!==ADMIN_ID){adminVerified=false;await db.auth.signOut();$("loginMessage").textContent="Akun ini tidak memiliki akses admin.";return}
+    adminVerified=true;
+    $("adminLoginScreen").classList.add("hidden");$("adminArea").classList.remove("hidden");
+    const ok=await updateAdminUI();if(ok)showAdminView(currentAdminView);
+  }catch(e){console.error(e);adminVerified=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden")}
+};
+window.showCustomerView=function(v){currentCustomerView=v;document.querySelectorAll(".customer-view").forEach(e=>e.classList.remove("active"));$(v)?.classList.add("active");document.querySelectorAll("[data-customer-view]").forEach(e=>e.classList.toggle("active",e.dataset.customerView===v));if(v==="customer-orders"){renderCurrentOrderPanel();renderPaymentPanel()}};
+window.showAdminView=function(v){
+  if(!requireAdmin())return;
+  currentAdminView=v;document.querySelectorAll(".admin-page").forEach(e=>e.classList.remove("active"));$(v)?.classList.add("active");
+  document.querySelectorAll("[data-admin-view]").forEach(e=>e.classList.toggle("active",e.dataset.adminView===v));
+  if(v==="admin-payments")loadAdminPayments();if(v==="admin-history")loadTransactionHistory();if(v==="admin-stock")renderAdminStock();if(v==="admin-vouchers")loadAvailableVouchers();if(v==="admin-home")refreshAdminDashboard();
 };
 
-window.showCustomerView=function(view){
-  currentCustomerView=view;
-  document.querySelectorAll(".customer-view").forEach(el=>el.classList.remove("active"));
-  $(view)?.classList.add("active");
-  document.querySelectorAll("[data-customer-view]").forEach(el=>{
-    el.classList.toggle("active",el.dataset.customerView===view);
-  });
-  if(view==="customer-orders"){
-    renderCurrentOrderPanel();
-    renderPaymentPanel();
-  }
-};
-
-window.showAdminView=function(view){
-  currentAdminView=view;
-  document.querySelectorAll(".admin-page").forEach(el=>el.classList.remove("active"));
-  $(view)?.classList.add("active");
-  document.querySelectorAll("[data-admin-view]").forEach(el=>{
-    el.classList.toggle("active",el.dataset.adminView===view);
-  });
-
-  if(view==="admin-payments")loadAdminPayments();
-  if(view==="admin-history")loadTransactionHistory();
-  if(view==="admin-stock")renderAdminStock();
-  if(view==="admin-vouchers")loadAvailableVouchers();
-  if(view==="admin-home")refreshAdminDashboard();
-};
-
-/* JAM PELAYANAN */
-function isPaymentOpen(){
-  const hour=new Date().getHours();
-  return hour>=7&&hour<24;
-}
-
-function updatePaymentHours(){
-  const open=isPaymentOpen();
-  const message=open
-    ?"🟢 Pelayanan pembayaran sedang buka (07.00–00.00 WIB)."
-    :"🔴 Pelayanan pembayaran sedang tutup. Silakan lanjutkan saat jam pelayanan buka.";
-  const el=$("customerPaymentHours");
-  if(el){
-    el.textContent=message;
-    el.className="notice "+(open?"success":"warning");
-  }
-}
+/* JAM LAYANAN */
+function isPaymentOpen(){const h=new Date().getHours();return h>=7&&h<24}
+function updatePaymentHours(){const open=isPaymentOpen(),el=$("customerPaymentHours");if(el){el.textContent=open?"🟢 Pelayanan pembayaran sedang buka (07.00–00.00 WIB).":"🔴 Pelayanan pembayaran sedang tutup. Silakan lanjutkan saat jam pelayanan buka.";el.className="notice "+(open?"success":"warning")}}
 
 /* PAKET DAN STOK */
 function renderPackageOptions(){
-  const options=packages.map(p=>`<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>`).join("");
-  if($("importPackage"))$("importPackage").innerHTML=`<option value="">Pilih paket</option>${options}`;
-  if($("manageVoucherPackage")){
-    const oldValue=$("manageVoucherPackage").value;
-    $("manageVoucherPackage").innerHTML=`<option value="">Semua paket</option>${options}`;
-    if(oldValue)$("manageVoucherPackage").value=oldValue;
-  }
+  const opts=packages.map(p=>`<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>`).join("");
+  if($("importPackage"))$("importPackage").innerHTML=`<option value="">Pilih paket</option>${opts}`;
+  if($("manageVoucherPackage")){const old=$("manageVoucherPackage").value;$("manageVoucherPackage").innerHTML=`<option value="">Pilih paket</option>${opts}`;if(old)$("manageVoucherPackage").value=old}
 }
-
-function findStock(packageId){
-  const row=packageStocks.find(s=>
-    String(s.package_id??s.id)===String(packageId)
-  );
-  if(!row)return 0;
-
-  const value=
-    row.stock_count ??
-    row.available_stock ??
-    row.available ??
-    row.stock ??
-    row.total_available ??
-    row.available_vouchers ??
-    0;
-
-  return Number(value)||0;
-}
-
+function findStock(id){const r=packageStocks.find(s=>String(s.package_id??s.id)===String(id));if(!r)return 0;return Number(r.stock_count??r.available_stock??r.available??r.stock??r.total_available??r.available_vouchers??0)||0}
 function renderPackages(){
-  const grid=$("packageGrid");
-  if(!grid)return;
-
-  if(!packages.length){
-    grid.innerHTML=`<div class="empty" style="grid-column:1/-1">Belum ada paket yang tersedia.</div>`;
-    return;
-  }
-
-  grid.innerHTML=packages.map(p=>{
-    const stock=findStock(p.id);
-    const selected=String(selectedPackageId)===String(p.id);
-    return `
-      <article class="package-card ${selected?"selected":""}">
-        <div class="package-icon">📶</div>
-        <h3>${escapeHTML(p.name)}</h3>
-        <div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div>
-        <div class="package-price">${money(p.price_idr)}</div>
-        <div class="package-stock">${stock>0?`Stok tersedia: ${stock}`:"Stok habis"}</div>
-        <button class="btn ${stock>0?"btn-primary":"btn-light"} btn-block"
-          ${stock<=0?"disabled":""}
-          onclick="selectPackage('${String(p.id).replace(/'/g,"")}')">
-          ${selected?"Paket Dipilih":stock>0?"Pilih Paket":"Stok Habis"}
-        </button>
-      </article>`;
-  }).join("");
+  const g=$("packageGrid");if(!g)return;
+  if(!packages.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1">Belum ada paket yang tersedia.</div>`;return}
+  g.innerHTML=packages.map(p=>{const st=findStock(p.id),sel=String(selectedPackageId)===String(p.id);return `<article class="package-card ${sel?"selected":""}"><div class="package-icon">📶</div><h3>${escapeHTML(p.name)}</h3><div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div><div class="package-price">${money(p.price_idr)}</div><div class="package-stock">${st>0?`Stok tersedia: ${st}`:"Stok habis"}</div><button class="btn ${st>0?"btn-primary":"btn-light"} btn-block" ${st<=0?"disabled":""} onclick="selectPackage('${String(p.id).replace(/'/g,"")}')">${sel?"Paket Dipilih":st>0?"Pilih Paket":"Stok Habis"}</button></article>`}).join("");
 }
-
-function renderChoice(){
-  renderPackages();
-}
-
-function renderAdminStock(){
-  const el=$("adminStockGrid");
-  if(!el)return;
-
-  if(!packages.length){
-    el.innerHTML=`<div class="empty">Belum ada paket.</div>`;
-    return;
-  }
-
-  el.innerHTML=packages.map(p=>{
-    const stock=findStock(p.id);
-    return `
-      <div class="card">
-        <div class="package-icon">📶</div>
-        <strong style="color:var(--navy)">${escapeHTML(p.name)}</strong>
-        <div class="small muted">${money(p.price_idr)}</div>
-        <div style="font-size:28px;font-weight:900;color:var(--blue);margin:12px 0 2px">${stock}</div>
-        <div class="small muted">Voucher tersedia</div>
-      </div>`;
-  }).join("");
-}
-
-async function loadStock(){
-  const {data,error}=await db.rpc("get_package_stock");
-
-  if(error){
-    console.error("Gagal mengambil stok:",error);
-    return false;
-  }
-
-  packageStocks=Array.isArray(data)?data:[];
-  renderPackages();
-  renderAdminStock();
-  return true;
-}
-
-async function refreshStock(){
-  const success=await loadStock();
-  if(success)showToast("Stok berhasil diperbarui.");
-  else showToast("Gagal memperbarui stok. Periksa koneksi.");
-}
-
+function renderAdminStock(){if(!requireAdmin())return;const e=$("adminStockGrid");if(!e)return;if(!packages.length){e.innerHTML=`<div class="empty">Belum ada paket.</div>`;return}e.innerHTML=packages.map(p=>`<div class="card"><div class="package-icon">📶</div><strong>${escapeHTML(p.name)}</strong><div class="small muted">${money(p.price_idr)}</div><div style="font-size:28px;font-weight:900;color:var(--blue);margin:12px 0 2px">${findStock(p.id)}</div><div class="small muted">Voucher tersedia</div></div>`).join("")}
+async function loadStock(){const {data,error}=await db.rpc("get_package_stock");if(error){console.error("Gagal mengambil stok:",error);return false}packageStocks=Array.isArray(data)?data:[];renderPackages();if(adminVerified)renderAdminStock();return true}
+async function refreshStock(){const ok=await loadStock();showToast(ok?"Stok berhasil diperbarui.":"Gagal memperbarui stok. Periksa koneksi.")}
 async function loadPackages(){
-  const {data,error}=await db
-    .from("packages")
-    .select("id,name,slug,price_idr,description,is_active")
-    .eq("is_active",true)
-    .order("price_idr",{ascending:true});
-
-  if(error){
-    console.error("Gagal memuat paket:",error);
-    $("packageGrid").innerHTML=`<div class="empty" style="grid-column:1/-1">Gagal memuat paket. Silakan muat ulang halaman.</div>`;
-    return;
-  }
-
-  packages=data||[];
-  renderPackageOptions();
-  await loadStock();
-  renderPackages();
+  const {data,error}=await db.from("packages").select("id,name,slug,price_idr,description,is_active").eq("is_active",true).order("price_idr",{ascending:true});
+  if(error){console.error(error);$("packageGrid").innerHTML=`<div class="empty" style="grid-column:1/-1">Gagal memuat paket. Silakan muat ulang halaman.</div>`;return}
+  packages=data||[];renderPackageOptions();await loadStock();renderPackages();
 }
 
-/* BUAT PESANAN */
-window.selectPackage=function(id){
-  selectedPackageId=id;
-  renderPackages();
-
-  const packageItem=packages.find(p=>String(p.id)===String(id));
-  if(!packageItem)return;
-
-  showCustomerView("customer-orders");
-  $("paymentPanel").classList.remove("hidden");
-  $("paymentContent").innerHTML=`
-    <div class="notice">Paket dipilih: <strong>${escapeHTML(packageItem.name)}</strong> — ${money(packageItem.price_idr)}</div>
-    <div class="field" style="margin-top:14px">
-      <label>Nomor WhatsApp</label>
-      <input id="customerPhone" inputmode="tel" placeholder="08xxxxxxxxxx">
-    </div>
-    <button class="btn btn-primary btn-block" onclick="createOrder()">Buat Pesanan</button>`;
-};
-
+/* PEMESANAN */
+window.selectPackage=function(id){selectedPackageId=id;renderPackages();const p=packages.find(x=>String(x.id)===String(id));if(!p)return;showCustomerView("customer-orders");$("paymentPanel").classList.remove("hidden");$("paymentContent").innerHTML=`<div class="notice">Paket dipilih: <strong>${escapeHTML(p.name)}</strong> — ${money(p.price_idr)}</div><div class="field" style="margin-top:14px"><label>Nomor WhatsApp</label><input id="customerPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><button class="btn btn-primary btn-block" onclick="createOrder()">Buat Pesanan</button>`};
 window.createOrder=async function(){
-  const phoneInput=$("customerPhone");
-  const phone=normalizePhone(phoneInput?.value);
-
-  if(!selectedPackageId){
-    showToast("Silakan pilih paket terlebih dahulu.");
-    return;
-  }
-  if(phone.length<9){
-    showToast("Masukkan nomor WhatsApp yang benar.");
-    phoneInput?.focus();
-    return;
-  }
-
-  const button=document.querySelector("#paymentContent button");
-  setLoading(button,true,"Membuat pesanan...");
-
-  try{
-    const {data,error}=await db.functions.invoke("create-order",{
-      body:{package_id:selectedPackageId,phone}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    const orderId=getOrderId(payload);
-    if(!orderId)throw new Error(payload?.message||"ID pesanan tidak ditemukan dari server.");
-
-    currentOrder=payload.order||payload;
-    currentOrderId=orderId;
-    currentPhone=phone;
-    currentOrderStatus=getOrderStatus(payload);
-    proofSubmitted=false;
-
-    renderCurrentOrderPanel();
-    renderPaymentPanel();
-    showCustomerView("customer-orders");
-    startOrderPolling();
-    showToast("Pesanan berhasil dibuat.");
-  }catch(error){
-    console.error(error);
-    showToast("Gagal membuat pesanan: "+getErrorMessage(error));
-  }finally{
-    setLoading(button,false);
-  }
+  const input=$("customerPhone"),phone=normalizePhone(input?.value);if(!selectedPackageId){showToast("Pilih paket terlebih dahulu.");return}if(phone.length<9){showToast("Masukkan nomor WhatsApp yang benar.");input?.focus();return}
+  const b=document.querySelector("#paymentContent button");setLoading(b,true,"Membuat pesanan...");
+  try{const {data,error}=await db.functions.invoke("create-order",{body:{package_id:selectedPackageId,phone}});if(error)throw error;const p=unwrapData(data),id=getOrderId(p);if(!id)throw new Error(p?.message||"ID pesanan tidak ditemukan.");currentOrder=p.order||p;currentOrderId=id;currentPhone=phone;currentOrderStatus=getOrderStatus(p);proofSubmitted=false;renderCurrentOrderPanel();renderPaymentPanel();showCustomerView("customer-orders");startOrderPolling();showToast("Pesanan berhasil dibuat.")}catch(e){console.error(e);showToast("Gagal membuat pesanan: "+getErrorMessage(e))}finally{setLoading(b,false)}
 };
-
-/* PEMBAYARAN DAN UPLOAD BUKTI */
 function renderPaymentPanel(){
-  const panel=$("paymentPanel");
-  const content=$("paymentContent");
-  if(!currentOrderId||!panel||!content)return;
-
-  panel.classList.remove("hidden");
-  const packageItem=packages.find(p=>String(p.id)===String(currentOrder?.package_id||selectedPackageId));
-  const amount=currentOrder?.amount_idr??packageItem?.price_idr??0;
-
-  if(["paid","completed","delivered"].includes(String(currentOrderStatus).toLowerCase())){
-    const code=getVoucherCode(currentOrder?.voucher_code||currentOrder?.voucher||currentOrder?.code);
-    content.innerHTML=`
-      <div class="notice success">Pembayaran telah disetujui.</div>
-      ${code?`<div class="code-box"><span class="small">KODE VOUCHER ANDA</span><strong>${escapeHTML(code)}</strong><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="copyVoucher('${String(code).replace(/'/g,"\\'")}')">Salin Voucher</button></div>`:""}
-      <div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;
-    return;
-  }
-
-  if(["rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){
-    content.innerHTML=`
-      <div class="notice warning">Status pesanan: ${escapeHTML(currentOrderStatus)}.</div>
-      <p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p>
-      <div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;
-    return;
-  }
-
-  content.innerHTML=`
-    <div class="notice warning">Selesaikan pembayaran sesuai nominal di bawah, lalu upload bukti transfer.</div>
-    <div class="payment-info">
-      <div class="small muted">Total pembayaran</div>
-      <div class="wallet-number">${money(amount)}</div>
-      <hr>
-      <div class="small muted">Transfer melalui DANA / GoPay</div>
-      <div class="wallet-number">${WALLET_NUMBER}</div>
-      <div class="wallet-name">a.n. ${WALLET_NAME}</div>
-    </div>
-    <div class="small muted" style="margin-bottom:12px">ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong></div>
-    <div class="field">
-      <label>Metode pembayaran</label>
-      <select id="paymentProvider"><option value="DANA">DANA</option><option value="GoPay">GoPay</option></select>
-    </div>
-    <div class="field">
-      <label>Upload bukti pembayaran</label>
-      <input type="file" id="paymentProof" accept="image/*">
-    </div>
-    <button class="btn btn-primary btn-block" id="submitProofBtn" onclick="submitPaymentProof()">Kirim Bukti Pembayaran</button>
-    <div class="small muted" style="margin-top:10px">Pastikan gambar bukti transfer terlihat jelas dan nominal sesuai pesanan.</div>
-    ${proofSubmitted?`<div class="notice success" style="margin-top:12px">Bukti pembayaran sudah dikirim. Menunggu verifikasi admin.</div>`:""}`;
+  const panel=$("paymentPanel"),content=$("paymentContent");if(!currentOrderId||!panel||!content)return;panel.classList.remove("hidden");
+  const p=packages.find(x=>String(x.id)===String(currentOrder?.package_id||selectedPackageId)),amount=currentOrder?.amount_idr??p?.price_idr??0;
+  if(["paid","completed","delivered"].includes(String(currentOrderStatus).toLowerCase())){const code=getVoucherCode(currentOrder?.voucher_code||currentOrder?.voucher||currentOrder?.code);content.innerHTML=`<div class="notice success">Pembayaran telah disetujui.</div>${code?`<div class="code-box"><span class="small">KODE VOUCHER ANDA</span><strong>${escapeHTML(code)}</strong><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="copyVoucher('${String(code).replace(/'/g,"\\'")}')">Salin Voucher</button></div>`:""}<div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;return}
+  if(["rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){content.innerHTML=`<div class="notice warning">Status pesanan: ${escapeHTML(currentOrderStatus)}.</div><p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p><div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;return}
+  content.innerHTML=`<div class="notice warning">Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer.</div><div class="payment-info"><div class="small muted">Total pembayaran</div><div class="wallet-number">${money(amount)}</div><hr><div class="small muted">Transfer melalui DANA / GoPay</div><div class="wallet-number">${WALLET_NUMBER}</div><div class="wallet-name">a.n. ${WALLET_NAME}</div></div><div class="small muted" style="margin-bottom:12px">ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong></div><div class="field"><label>Metode pembayaran</label><select id="paymentProvider"><option value="DANA">DANA</option><option value="GoPay">GoPay</option></select></div><div class="field"><label>Upload bukti pembayaran</label><input type="file" id="paymentProof" accept="image/*"></div><button class="btn btn-primary btn-block" id="submitProofBtn" onclick="submitPaymentProof()">Kirim Bukti Pembayaran</button><div class="small muted" style="margin-top:10px">Pastikan gambar bukti transfer jelas dan nominal sesuai.</div>${proofSubmitted?`<div class="notice success" style="margin-top:12px">Bukti pembayaran sudah dikirim. Menunggu verifikasi admin.</div>`:""}`;
 }
-
 window.submitPaymentProof=async function(){
-  if(!currentOrderId||!currentPhone){
-    showToast("Data pesanan tidak ditemukan.");
-    return;
-  }
-
-  const file=$("paymentProof")?.files?.[0];
-  const provider=$("paymentProvider")?.value||"DANA";
-
-  if(!file){showToast("Pilih gambar bukti pembayaran terlebih dahulu.");return;}
-  if(!file.type.startsWith("image/")){showToast("File harus berupa gambar.");return;}
-  if(file.size>5*1024*1024){showToast("Ukuran gambar maksimal 5 MB.");return;}
-
-  const button=$("submitProofBtn");
-  setLoading(button,true,"Mengirim bukti...");
-
-  try{
-    const formData=new FormData();
-    formData.append("order_id",currentOrderId);
-    formData.append("phone",currentPhone);
-    formData.append("provider",provider);
-    formData.append("proof",file);
-
-    const {data,error}=await db.functions.invoke("submit-payment-proof",{body:formData});
-    if(error)throw error;
-
-    proofSubmitted=true;
-    showToast(data?.message||"Bukti pembayaran berhasil dikirim.");
-    renderPaymentPanel();
-    startOrderPolling();
-  }catch(error){
-    console.error(error);
-    showToast("Gagal mengirim bukti: "+getErrorMessage(error));
-  }finally{
-    setLoading(button,false);
-  }
+  if(!currentOrderId||!currentPhone){showToast("Data pesanan tidak ditemukan.");return}const f=$("paymentProof")?.files?.[0],provider=$("paymentProvider")?.value||"DANA";
+  if(!f){showToast("Pilih gambar bukti pembayaran.");return}if(!f.type.startsWith("image/")){showToast("File harus berupa gambar.");return}if(f.size>5*1024*1024){showToast("Ukuran gambar maksimal 5 MB.");return}
+  const b=$("submitProofBtn");setLoading(b,true,"Mengirim bukti...");
+  try{const fd=new FormData();fd.append("order_id",currentOrderId);fd.append("phone",currentPhone);fd.append("provider",provider);fd.append("proof",f);const {data,error}=await db.functions.invoke("submit-payment-proof",{body:fd});if(error)throw error;proofSubmitted=true;showToast(data?.message||"Bukti pembayaran berhasil dikirim.");renderPaymentPanel();startOrderPolling()}catch(e){console.error(e);showToast("Gagal mengirim bukti: "+getErrorMessage(e))}finally{setLoading(b,false)}
 };
 
-/* CEK PESANAN */
-async function checkOrderRequest(orderId,phone){
-  const {data,error}=await db.functions.invoke("check-order",{
-    body:{order_id:orderId,phone}
-  });
-  if(error)throw error;
-  return unwrapData(data);
-}
+/* CEK STATUS PESANAN PELANGGAN */
+async function checkOrderRequest(id,phone){const {data,error}=await db.functions.invoke("check-order",{body:{order_id:id,phone}});if(error)throw error;return unwrapData(data)}
+window.manualCheckOrder=async function(){const id=$("checkOrderId").value.trim(),phone=normalizePhone($("checkPhone").value),out=$("checkResult");if(!id||!phone){showToast("Isi ID pesanan dan nomor WhatsApp.");return}out.innerHTML=`<div class="notice">Memeriksa pesanan...</div>`;try{out.innerHTML=renderOrderResultHTML(await checkOrderRequest(id,phone))}catch(e){out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}};
+function renderOrderResultHTML(d){const st=getOrderStatus(d),code=getVoucherCode(d?.order?.voucher_code||d?.voucher_code||d?.voucher||d?.code);return `<div class="order-result"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><strong>Status Pesanan</strong>${statusBadge(st)}</div><div class="small muted" style="margin-top:10px">ID: ${escapeHTML(getOrderId(d)||d?.order_id||"-")}</div>${code?`<div class="code-box"><span class="small">KODE VOUCHER</span><strong>${escapeHTML(code)}</strong></div>`:""}${d?.message?`<p class="small">${escapeHTML(d.message)}</p>`:""}</div>`}
+window.copyVoucher=async function(c){try{await navigator.clipboard.writeText(c);showToast("Kode voucher berhasil disalin.")}catch{showToast("Tidak dapat menyalin kode voucher.")}}
+function renderCurrentOrderPanel(){const e=$("currentOrderPanel");if(!e)return;if(!currentOrderId){e.innerHTML=`<div class="empty">Belum ada pesanan aktif.</div>`;return}e.innerHTML=`<div class="order-result"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>Pesanan aktif</strong>${statusBadge(currentOrderStatus)}</div><div class="small muted" style="margin-top:8px">ID Pesanan</div><strong style="word-break:break-all">${escapeHTML(currentOrderId)}</strong><div class="small muted" style="margin-top:8px">Nomor WhatsApp</div><strong>${escapeHTML(currentPhone)}</strong><button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="refreshCurrentOrder()">Perbarui Status</button></div>`}
+window.refreshCurrentOrder=async function(){if(!currentOrderId)return;try{const d=await checkOrderRequest(currentOrderId,currentPhone);currentOrder={...currentOrder,...(d.order||d)};currentOrderStatus=getOrderStatus(d);renderCurrentOrderPanel();renderPaymentPanel();showToast("Status pesanan diperbarui.")}catch(e){showToast(getErrorMessage(e))}}
+function startOrderPolling(){clearInterval(orderPollingTimer);if(!currentOrderId)return;orderPollingTimer=setInterval(async()=>{try{const d=await checkOrderRequest(currentOrderId,currentPhone);currentOrder={...currentOrder,...(d.order||d)};currentOrderStatus=getOrderStatus(d);renderCurrentOrderPanel();renderPaymentPanel();if(["paid","completed","delivered","rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase()))clearInterval(orderPollingTimer)}catch(e){console.warn("Polling pesanan:",e)}},3000)}
 
-window.manualCheckOrder=async function(){
-  const orderId=$("checkOrderId").value.trim();
-  const phone=normalizePhone($("checkPhone").value);
-  const result=$("checkResult");
-
-  if(!orderId||!phone){showToast("Isi ID pesanan dan nomor WhatsApp.");return;}
-  result.innerHTML=`<div class="notice">Memeriksa pesanan...</div>`;
-
-  try{
-    const data=await checkOrderRequest(orderId,phone);
-    result.innerHTML=renderOrderResultHTML(data);
-  }catch(error){
-    console.error(error);
-    result.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(error))}</div>`;
-  }
-};
-
-function renderOrderResultHTML(data){
-  const status=getOrderStatus(data);
-  const code=getVoucherCode(data?.voucher_code||data?.voucher||data?.code||data?.order?.voucher_code);
-
-  return `
-    <div class="order-result">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
-        <strong>Status Pesanan</strong>${statusBadge(status)}
-      </div>
-      <div class="small muted" style="margin-top:10px">ID: ${escapeHTML(getOrderId(data)||data?.order_id||"-")}</div>
-      ${code?`<div class="code-box"><span class="small">KODE VOUCHER</span><strong>${escapeHTML(code)}</strong></div>`:""}
-      ${data?.message?`<p class="small">${escapeHTML(data.message)}</p>`:""}
-    </div>`;
-}
-
-window.copyVoucher=async function(code){
-  try{
-    await navigator.clipboard.writeText(code);
-    showToast("Kode voucher berhasil disalin.");
-  }catch{
-    showToast("Tidak dapat menyalin kode voucher.");
-  }
-};
-
-function renderCurrentOrderPanel(){
-  const panel=$("currentOrderPanel");
-  if(!panel)return;
-
-  if(!currentOrderId){
-    panel.innerHTML=`<div class="empty">Belum ada pesanan aktif di halaman ini.</div>`;
-    return;
-  }
-
-  panel.innerHTML=`
-    <div class="order-result">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <strong>Pesanan aktif</strong>${statusBadge(currentOrderStatus)}
-      </div>
-      <div class="small muted" style="margin-top:8px">ID Pesanan</div>
-      <strong style="word-break:break-all">${escapeHTML(currentOrderId)}</strong>
-      <div class="small muted" style="margin-top:8px">Nomor WhatsApp</div>
-      <strong>${escapeHTML(currentPhone)}</strong>
-      <button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="refreshCurrentOrder()">Perbarui Status</button>
-    </div>`;
-}
-
-window.refreshCurrentOrder=async function(){
-  if(!currentOrderId)return;
-  try{
-    const data=await checkOrderRequest(currentOrderId,currentPhone);
-    currentOrder={...currentOrder,...data};
-    currentOrderStatus=getOrderStatus(data);
-    renderCurrentOrderPanel();
-    renderPaymentPanel();
-    showToast("Status pesanan diperbarui.");
-  }catch(error){
-    showToast(getErrorMessage(error));
-  }
-};
-
-function startOrderPolling(){
-  clearInterval(orderPollingTimer);
-  if(!currentOrderId)return;
-
-  orderPollingTimer=setInterval(async()=>{
-    try{
-      const data=await checkOrderRequest(currentOrderId,currentPhone);
-      currentOrder={...currentOrder,...data};
-      currentOrderStatus=getOrderStatus(data);
-      renderCurrentOrderPanel();
-      renderPaymentPanel();
-
-      if(["paid","completed","delivered","rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){
-        clearInterval(orderPollingTimer);
-      }
-    }catch(error){
-      console.warn("Polling pesanan:",error);
-    }
-  },3000);
-};
-
-/* LOGIN ADMIN */
+/* LOGIN ADMIN - UID HARUS COCOK */
 window.adminLogin=async function(){
-  const email=$("adminEmail").value.trim();
-  const password=$("adminPassword").value;
-  const button=$("loginBtn");
-  const message=$("loginMessage");
-
-  if(!email||!password){
-    message.textContent="Email dan password harus diisi.";
-    return;
-  }
-
-  setLoading(button,true,"Memeriksa...");
-  message.textContent="";
-
+  const email=$("adminEmail").value.trim(),password=$("adminPassword").value,b=$("loginBtn"),msg=$("loginMessage");
+  if(!email||!password){msg.textContent="Email dan password harus diisi.";return}
+  setLoading(b,true,"Memeriksa...");msg.textContent="";
   try{
-    const {data,error}=await db.auth.signInWithPassword({email,password});
-    if(error)throw error;
-    if(!data.session)throw new Error("Login belum berhasil.");
-
-    message.textContent="Login berhasil.";
-    adminDataLoadedForSession=false;
-    $("adminLoginScreen").classList.add("hidden");
-    $("adminArea").classList.remove("hidden");
-    await updateAdminUI();
-    showAdminView("admin-home");
-    showToast("Berhasil masuk sebagai admin.");
-  }catch(error){
-    message.textContent=getErrorMessage(error);
-  }finally{
-    setLoading(button,false);
-  }
+    const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;
+    if(!data.session||!data.user)throw new Error("Login belum berhasil.");
+    if(data.user.id!==ADMIN_ID){await db.auth.signOut();adminVerified=false;throw new Error("Akun ini bukan administrator Fatih Reload.")}
+    adminVerified=true;adminDataLoadedForSession=false;
+    $("adminLoginScreen").classList.add("hidden");$("adminArea").classList.remove("hidden");
+    const ok=await updateAdminUI();if(!ok)throw new Error("Verifikasi admin gagal.");
+    showAdminView("admin-home");msg.textContent="Login berhasil.";showToast("Berhasil masuk sebagai admin.");
+  }catch(e){adminVerified=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");msg.textContent=getErrorMessage(e)}
+  finally{setLoading(b,false)}
 };
-
 window.adminLogout=async function(){
-  const {error}=await db.auth.signOut();
-  if(error){showToast(getErrorMessage(error));return;}
-
-  adminDataLoadedForSession=false;
-  $("adminArea").classList.add("hidden");
-  $("adminLoginScreen").classList.add("hidden");
-  $("adminPassword").value="";
-  $("loginMessage").textContent="";
-  showCustomer();
-  showToast("Berhasil keluar.");
+  adminVerified=false;adminDataLoadedForSession=false;availableVouchers=[];
+  $("adminArea").classList.add("hidden");$("adminLoginScreen").classList.add("hidden");$("adminPassword").value="";$("loginMessage").textContent="";
+  $("voucher-list").innerHTML=`<div class="empty">Silakan login sebagai admin.</div>`;$("payment-list").innerHTML=`<div class="empty">Silakan login sebagai admin.</div>`;$("voucher-total").textContent="Belum ada daftar voucher.";
+  const {error}=await db.auth.signOut();if(error){showToast(getErrorMessage(error));return}showCustomer();showToast("Berhasil keluar.")
 };
-
 async function updateAdminUI(){
-  const {data:{session}}=await db.auth.getSession();
-  const loggedIn=!!session;
-
-  if(!loggedIn){
-    $("adminArea").classList.add("hidden");
-    $("adminLoginScreen").classList.remove("hidden");
-    $("payment-list").textContent="Silakan login sebagai admin.";
-    availableVouchers=[];
-    $("voucher-list").innerHTML=`<div class="voucher-empty">Silakan login sebagai admin.</div>`;
-    $("voucher-total").textContent="Belum ada daftar voucher.";
-    adminDataLoadedForSession=false;
-    return;
+  const {data,error}=await db.auth.getUser();
+  if(error||!data.user||data.user.id!==ADMIN_ID){
+    adminVerified=false;adminDataLoadedForSession=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");availableVouchers=[];
+    $("payment-list").textContent="Silakan login sebagai admin.";$("voucher-list").innerHTML=`<div class="empty">Akses admin diperlukan.</div>`;$("voucher-total").textContent="Belum ada daftar voucher.";return false
   }
-
-  $("adminLoginScreen").classList.add("hidden");
-  $("adminArea").classList.remove("hidden");
-
-  if(!adminDataLoadedForSession){
-    adminDataLoadedForSession=true;
-    await loadPackages();
-    initializeHistoryDates();
-    await Promise.allSettled([
-      loadAdminPayments(),
-      loadTransactionHistory(),
-      refreshAdminDashboard()
-    ]);
-  }
-}
+  adminVerified=true;$("adminLoginScreen").classList.add("hidden");$("adminArea").classList.remove("hidden");
+  if(!adminDataLoadedForSession){adminDataLoadedForSession=true;await loadPackages();initializeHistoryDates();await Promise.allSettled([loadAdminPayments(),loadTransactionHistory(),refreshAdminDashboard()])}
+  return true
+};
 
 /* IMPORT VOUCHER */
 window.importVouchers=async function(){
-  const packageId=$("importPackage").value;
-  const csv=$("voucherCSV").value.trim();
-  const button=$("importBtn");
-  const result=$("importResult");
-
-  if(!packageId){showToast("Pilih paket terlebih dahulu.");return;}
-  if(!csv){showToast("Masukkan daftar kode voucher.");return;}
-
-  setLoading(button,true,"Mengimpor...");
-  result.innerHTML="";
-
-  try{
-    const {data,error}=await db.functions.invoke("import-vouchers",{
-      body:{package_id:packageId,csv}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    const count=payload?.imported_count??payload?.inserted??payload?.count??payload?.imported??"-";
-
-    result.innerHTML=`
-      <div class="notice success">
-        <strong>Import selesai.</strong><br>
-        ${escapeHTML(payload?.message||`Jumlah voucher yang berhasil diproses: ${count}`)}
-      </div>`;
-
-    $("voucherCSV").value="";
-    await loadStock();
-    showToast("Import voucher selesai.");
-  }catch(error){
-    console.error(error);
-    result.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(error))}</div>`;
-  }finally{
-    setLoading(button,false);
-  }
+  if(!requireAdmin())return;const packageId=$("importPackage").value,csv=$("voucherCSV").value.trim(),b=$("importBtn"),out=$("importResult");
+  if(!packageId){showToast("Pilih paket terlebih dahulu.");return}if(!csv){showToast("Masukkan daftar kode voucher.");return}
+  setLoading(b,true,"Mengimpor...");out.innerHTML="";
+  try{const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});if(error)throw error;const p=unwrapData(data),count=p?.imported_count??p?.inserted??p?.count??p?.imported??"-";out.innerHTML=`<div class="notice success"><strong>Import selesai.</strong><br>${escapeHTML(p?.message||`Jumlah voucher yang berhasil diproses: ${count}`)}</div>`;$("voucherCSV").value="";await loadStock();showToast("Import voucher selesai.")}catch(e){console.error(e);out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}finally{setLoading(b,false)}
 };
 
-/* KELOLA VOUCHER */
+/* KELOLA VOUCHER - API MENERIMA SATU package_id UUID */
 window.loadAvailableVouchers=async function(){
-  const list=$("voucher-list");
-  const total=$("voucher-total");
-  if(!list||!total)return;
-
+  const list=$("voucher-list"),total=$("voucher-total");if(!list||!total)return;
+  if(!requireAdmin())return;
   const packageId=$("manageVoucherPackage")?.value||"";
-  total.textContent="Memuat data...";
-  list.innerHTML=`<div class="empty" style="grid-column:1/-1">Memuat voucher...</div>`;
-
+  if(!packageId){availableVouchers=[];list.innerHTML=`<div class="empty" style="grid-column:1/-1">Silakan pilih paket terlebih dahulu.</div>`;total.textContent="Pilih paket untuk melihat voucher.";return}
+  total.textContent="Memuat data...";list.innerHTML=`<div class="empty" style="grid-column:1/-1">Memuat voucher...</div>`;
   try{
-    const {data,error}=await db.functions.invoke("admin-vouchers",{
-      body:{action:"list",package_id:packageId||null}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    availableVouchers=getRows(payload,["vouchers","data","items"]);
-    total.textContent=`Jumlah voucher tersedia: ${availableVouchers.length}`;
-
-    if(!availableVouchers.length){
-      list.innerHTML=`<div class="empty" style="grid-column:1/-1">Tidak ada voucher tersedia untuk paket ini.</div>`;
-      return;
-    }
-
-    list.innerHTML=availableVouchers.map(v=>{
-      const code=getVoucherCode(v);
-      const id=v.id;
-      const packageName=v.package_name||v.package?.name||"";
-      return `
-        <div class="voucher-item">
-          <div style="min-width:0">
-            <div class="voucher-code">${escapeHTML(code||"-")}</div>
-            <div class="small muted">${escapeHTML(packageName)}</div>
-          </div>
-          <button class="btn btn-danger btn-sm" onclick="deleteVoucher('${String(id).replace(/'/g,"")}')">Hapus</button>
-        </div>`;
-    }).join("");
-  }catch(error){
-    console.error(error);
-    list.innerHTML=`<div class="notice warning" style="grid-column:1/-1">${escapeHTML(getErrorMessage(error))}</div>`;
-    total.textContent="Gagal memuat voucher.";
-  }
+    const {data,error}=await db.functions.invoke("admin-vouchers",{body:{action:"list",package_id:packageId}});if(error)throw error;
+    const p=unwrapData(data);availableVouchers=getRows(p,["vouchers","data","items"]);total.textContent=`Jumlah voucher tersedia: ${p?.total??availableVouchers.length}`;
+    if(!availableVouchers.length){list.innerHTML=`<div class="empty" style="grid-column:1/-1">Tidak ada voucher tersedia untuk paket ini.</div>`;return}
+    list.innerHTML=availableVouchers.map(v=>`<div class="voucher-item"><div style="min-width:0"><div class="voucher-code">${escapeHTML(getVoucherCode(v)||"-")}</div><div class="small muted">${escapeHTML(v.package_name||v.package?.name||"")}</div></div><button class="btn btn-danger btn-sm" onclick="deleteVoucher('${String(v.id).replace(/'/g,"")}')">Hapus</button></div>`).join("")
+  }catch(e){console.error(e);list.innerHTML=`<div class="notice warning" style="grid-column:1/-1">${escapeHTML(getErrorMessage(e))}</div>`;total.textContent="Gagal memuat voucher."}
 };
-
-window.deleteVoucher=async function(voucherId){
-  if(!confirm("Yakin ingin menghapus voucher ini?"))return;
-
-  try{
-    const {data,error}=await db.functions.invoke("admin-vouchers",{
-      body:{action:"delete",voucher_id:voucherId}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    const deleted=payload?.deleted_count??payload?.deleted;
-    const skipped=payload?.skipped_count??payload?.skipped;
-    showToast(payload?.message||(deleted!==undefined?`Voucher dihapus: ${deleted}${skipped!==undefined?`, dilewati: ${skipped}`:""}`:"Voucher berhasil dihapus."));
-    await loadAvailableVouchers();
-    await loadStock();
-  }catch(error){
-    console.error(error);
-    showToast("Gagal menghapus voucher: "+getErrorMessage(error));
-  }
+window.deleteVoucher=async function(id){
+  if(!requireAdmin())return;if(!id||!confirm("Yakin ingin menghapus voucher ini?"))return;
+  try{const {data,error}=await db.functions.invoke("admin-vouchers",{body:{action:"delete",voucher_ids:[id]}});if(error)throw error;const p=unwrapData(data),deleted=p?.deleted_count??p?.deleted,skipped=p?.skipped_count??p?.skipped;showToast(p?.pesan||p?.message||(deleted!==undefined?`Voucher dihapus: ${deleted}${skipped!==undefined?`, dilewati: ${skipped}`:""}`:"Voucher berhasil diproses."));await loadAvailableVouchers();await loadStock()}catch(e){console.error(e);showToast("Gagal menghapus voucher: "+getErrorMessage(e))}
 };
 
 /* VERIFIKASI PEMBAYARAN */
 window.loadAdminPayments=async function(){
-  const container=$("payment-list");
-  if(!container)return;
-
-  container.innerHTML=`<div class="empty">Memuat daftar pembayaran...</div>`;
-
-  try{
-    const {data,error}=await db.functions.invoke("admin-payments",{
-      body:{action:"list"}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    const rows=getRows(payload,["orders","payments","data","items"]);
-
-    if(!rows.length){
-      container.innerHTML=`<div class="empty">Tidak ada pembayaran yang menunggu verifikasi.</div>`;
-      return;
-    }
-
-    container.innerHTML=`
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Pesanan</th><th>Pelanggan</th><th>Nominal</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead>
-          <tbody>
-            ${rows.map(order=>{
-              const id=order.id||order.order_id;
-              const phone=order.customer_phone||order.phone||"-";
-              const amount=order.amount_idr||order.amount||0;
-              const proof=order.payment_proof_url||order.proof_url||order.payment_proof||"";
-              const status=order.status||"pending";
-              return `
-                <tr>
-                  <td><strong>${escapeHTML(String(id||"-").slice(0,12))}</strong><div class="small muted">${formatDate(order.created_at)}</div></td>
-                  <td>${escapeHTML(phone)}</td>
-                  <td><strong>${money(amount)}</strong></td>
-                  <td>${statusBadge(status)}</td>
-                  <td>${proof?`<a href="${escapeHTML(proof)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Lihat Bukti</a>`:`<span class="muted">Belum ada</span>`}</td>
-                  <td>
-                    <button class="btn btn-success btn-sm" onclick="approvePayment('${String(id).replace(/'/g,"")}')">Setujui</button>
-                    <button class="btn btn-danger btn-sm" onclick="rejectPayment('${String(id).replace(/'/g,"")}')">Tolak</button>
-                  </td>
-                </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>`;
-  }catch(error){
-    console.error(error);
-    container.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(error))}</div>`;
-  }
+  if(!requireAdmin())return;const box=$("payment-list");if(!box)return;box.innerHTML=`<div class="empty">Memuat daftar pembayaran...</div>`;
+  try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"list"}});if(error)throw error;const p=unwrapData(data),rows=getRows(p,["orders","payments","data","items"]);
+    if(!rows.length){box.innerHTML=`<div class="empty">Tidak ada pembayaran yang menunggu verifikasi.</div>`;return}
+    box.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Pesanan</th><th>Pelanggan</th><th>Nominal</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead><tbody>${rows.map(o=>{const id=o.id||o.order_id,proof=o.payment_proof_url||o.proof_url||o.payment_proof||"";return `<tr><td><strong>${escapeHTML(String(id||"-").slice(0,12))}</strong><div class="small muted">${formatDate(o.created_at)}</div></td><td>${escapeHTML(o.customer_phone||o.phone||"-")}</td><td><strong>${money(o.amount_idr||o.amount||0)}</strong></td><td>${statusBadge(o.status)}</td><td>${proof?`<a href="${escapeHTML(proof)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Lihat Bukti</a>`:"Belum ada"}</td><td><button class="btn btn-success btn-sm" onclick="approvePayment('${String(id).replace(/'/g,"")}')">Setujui</button> <button class="btn btn-danger btn-sm" onclick="rejectPayment('${String(id).replace(/'/g,"")}')">Tolak</button></td></tr>`}).join("")}</tbody></table></div>`
+  }catch(e){console.error(e);box.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}
 };
-
-async function processPaymentAction(action,orderId){
-  const label=action==="approve"?"menyetujui":"menolak";
-  if(!confirm(`Yakin ingin ${label} pembayaran ini?`))return;
-
-  try{
-    const {data,error}=await db.functions.invoke("admin-payments",{
-      body:{action,order_id:orderId}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    showToast(payload?.message||"Pembayaran berhasil diproses.");
-    await loadAdminPayments();
-    await loadTransactionHistory();
-    await refreshAdminDashboard();
-    await loadStock();
-  }catch(error){
-    console.error(error);
-    showToast("Gagal memproses pembayaran: "+getErrorMessage(error));
-  }
-}
-
-window.approvePayment=id=>processPaymentAction("approve",id);
-window.rejectPayment=id=>processPaymentAction("reject",id);
+async function processPaymentAction(action,id){if(!requireAdmin())return;if(!confirm(`Yakin ingin ${action==="approve"?"menyetujui":"menolak"} pembayaran ini?`))return;try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action,order_id:id}});if(error)throw error;showToast(unwrapData(data)?.message||"Pembayaran berhasil diproses.");await loadAdminPayments();await loadTransactionHistory();await refreshAdminDashboard();await loadStock()}catch(e){console.error(e);showToast("Gagal memproses pembayaran: "+getErrorMessage(e))}}
+window.approvePayment=id=>processPaymentAction("approve",id);window.rejectPayment=id=>processPaymentAction("reject",id);
 
 /* RIWAYAT TRANSAKSI */
-function initializeHistoryDates(){
-  const today=new Date();
-  const date=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
-
-  if($("historyDateFrom")&&!$("historyDateFrom").value)$("historyDateFrom").value=date;
-  if($("historyDateTo")&&!$("historyDateTo").value)$("historyDateTo").value=date;
-}
-
-window.changeHistoryPage=function(direction){
-  const next=historyCurrentPage+direction;
-  if(next<1||next>historyTotalPages)return;
-  historyCurrentPage=next;
-  loadTransactionHistory();
-};
-
+function initializeHistoryDates(){const d=new Date(),s=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");if($("historyDateFrom")&&!$("historyDateFrom").value)$("historyDateFrom").value=s;if($("historyDateTo")&&!$("historyDateTo").value)$("historyDateTo").value=s}
+window.changeHistoryPage=function(dir){const n=historyCurrentPage+dir;if(n<1||n>historyTotalPages)return;historyCurrentPage=n;loadTransactionHistory()};
 window.loadTransactionHistory=async function(){
-  const table=$("historyTable");
-  if(!table)return;
-
-  const dateFrom=$("historyDateFrom")?.value||"";
-  const dateTo=$("historyDateTo")?.value||"";
-  const status=$("historyStatus")?.value||"";
-
-  table.innerHTML=`<div class="empty">Memuat riwayat transaksi...</div>`;
-
-  try{
-    const {data,error}=await db.functions.invoke("admin-payments",{
-      body:{
-        action:"history",
-        date_from:dateFrom,
-        date_to:dateTo,
-        status,
-        page:historyCurrentPage,
-        limit:historyLimit
-      }
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    const rows=getRows(payload,["orders","history","data","items"]);
-    const summary=payload?.summary||payload?.stats||{};
-    const total=payload?.total??payload?.count??rows.length;
-
-    historyTotalPages=Math.max(1,Math.ceil(Number(total)/historyLimit));
-    $("historyPageInfo").textContent=`Halaman ${historyCurrentPage} dari ${historyTotalPages}`;
-
-    $("historySummary").textContent=
-      `Total pesanan: ${summary.total_orders??payload?.total_orders??"-"} | `+
-      `Dibayar: ${summary.paid_orders??payload?.paid_orders??"-"} | `+
-      `Voucher terkirim: ${summary.vouchers_delivered??payload?.vouchers_delivered??"-"} | `+
-      `Pendapatan: ${money(summary.revenue_idr??payload?.revenue_idr??0)}`;
-
-    if(!rows.length){
-      table.innerHTML=`<div class="empty">Tidak ada transaksi pada rentang tanggal tersebut.</div>`;
-      return;
-    }
-
-    table.innerHTML=`
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Tanggal</th><th>ID Pesanan</th><th>Nomor Pelanggan</th><th>Nominal</th><th>Status</th></tr></thead>
-          <tbody>
-            ${rows.map(row=>`
-              <tr>
-                <td>${formatDate(row.created_at)}</td>
-                <td><strong>${escapeHTML(String(row.id||row.order_id||"-").slice(0,15))}</strong></td>
-                <td>${escapeHTML(row.customer_phone||row.phone||"-")}</td>
-                <td>${money(row.amount_idr||row.amount||0)}</td>
-                <td>${statusBadge(row.status)}</td>
-              </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>`;
-  }catch(error){
-    console.error(error);
-    table.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(error))}</div>`;
-  }
+  if(!requireAdmin())return;const box=$("historyTable");if(!box)return;const from=$("historyDateFrom")?.value||"",to=$("historyDateTo")?.value||"",status=$("historyStatus")?.value||"";box.innerHTML=`<div class="empty">Memuat riwayat...</div>`;
+  try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"history",date_from:from,date_to:to,status,page:historyCurrentPage,limit:historyLimit}});if(error)throw error;const p=unwrapData(data),rows=getRows(p,["orders","history","data","items"]),s=p?.summary||p?.stats||{},total=p?.total??p?.count??rows.length;historyTotalPages=Math.max(1,Math.ceil(Number(total)/historyLimit));$("historyPageInfo").textContent=`Halaman ${historyCurrentPage} dari ${historyTotalPages}`;$("historySummary").textContent=`Total pesanan: ${s.total_orders??p?.total_orders??"-"} | Dibayar: ${s.paid_orders??p?.paid_orders??"-"} | Voucher terkirim: ${s.vouchers_delivered??p?.vouchers_delivered??"-"} | Pendapatan: ${money(s.revenue_idr??p?.revenue_idr??0)}`;
+    if(!rows.length){box.innerHTML=`<div class="empty">Tidak ada transaksi pada rentang tanggal tersebut.</div>`;return}
+    box.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID Pesanan</th><th>Nomor Pelanggan</th><th>Nominal</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${formatDate(r.created_at)}</td><td><strong>${escapeHTML(String(r.id||r.order_id||"-").slice(0,15))}</strong></td><td>${escapeHTML(r.customer_phone||r.phone||"-")}</td><td>${money(r.amount_idr||r.amount||0)}</td><td>${statusBadge(r.status)}</td></tr>`).join("")}</tbody></table></div>`
+  }catch(e){console.error(e);box.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}
 };
 
-/* DASHBOARD ADMIN */
+/* DASHBOARD */
 async function refreshAdminDashboard(){
-  const today=new Date();
-  const date=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
-
-  try{
-    const {data,error}=await db.functions.invoke("admin-payments",{
-      body:{action:"history",date_from:date,date_to:date,status:"",page:1,limit:1}
-    });
-    if(error)throw error;
-
-    const payload=unwrapData(data);
-    const summary=payload?.summary||payload?.stats||{};
-
-    $("statOrders").textContent=summary.total_orders??payload?.total_orders??payload?.total??"-";
-    $("statPaid").textContent=summary.paid_orders??payload?.paid_orders??"-";
-    $("statVouchers").textContent=summary.vouchers_delivered??payload?.vouchers_delivered??"-";
-    $("statRevenue").textContent=money(summary.revenue_idr??payload?.revenue_idr??0);
-  }catch(error){
-    console.warn("Dashboard summary:",error);
-    $("statOrders").textContent="-";
-    $("statPaid").textContent="-";
-    $("statVouchers").textContent="-";
-    $("statRevenue").textContent="-";
-  }
+  if(!requireAdmin())return;const d=new Date(),date=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  try{const {data,error}=await db.functions.invoke("admin-payments",{body:{action:"history",date_from:date,date_to:date,status:"",page:1,limit:1}});if(error)throw error;const p=unwrapData(data),s=p?.summary||p?.stats||{};$("statOrders").textContent=s.total_orders??p?.total_orders??p?.total??"-";$("statPaid").textContent=s.paid_orders??p?.paid_orders??"-";$("statVouchers").textContent=s.vouchers_delivered??p?.vouchers_delivered??"-";$("statRevenue").textContent=money(s.revenue_idr??p?.revenue_idr??0)}catch(e){console.warn("Dashboard:",e);["statOrders","statPaid","statVouchers"].forEach(id=>$(id).textContent="-");$("statRevenue").textContent="-"}
 }
 
-/* CEK PESANAN ADMIN */
-window.adminCheckOrder=async function(){
-  const orderId=$("adminCheckOrderId").value.trim();
-  const phone=normalizePhone($("adminCheckPhone").value);
-  const result=$("adminCheckResult");
-
-  if(!orderId||!phone){showToast("Isi ID pesanan dan nomor WhatsApp.");return;}
-  result.innerHTML=`<div class="notice">Memeriksa pesanan...</div>`;
-
-  try{
-    const data=await checkOrderRequest(orderId,phone);
-    result.innerHTML=renderOrderResultHTML(data);
-  }catch(error){
-    console.error(error);
-    result.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(error))}</div>`;
-  }
-};
+/* CEK PESANAN DARI MENU ADMIN */
+window.adminCheckOrder=async function(){if(!requireAdmin())return;const id=$("adminCheckOrderId").value.trim(),phone=normalizePhone($("adminCheckPhone").value),out=$("adminCheckResult");if(!id||!phone){showToast("Isi ID pesanan dan nomor WhatsApp.");return}out.innerHTML=`<div class="notice">Memeriksa pesanan...</div>`;try{out.innerHTML=renderOrderResultHTML(await checkOrderRequest(id,phone))}catch(e){out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}};
 
 /* REALTIME DAN PEMBARUAN OTOMATIS */
-db.channel("fatih-reload-stock")
-  .on("postgres_changes",{
-    event:"*",
-    schema:"public",
-    table:"stock_updates"
-  },async()=>{
-    await loadStock();
-  })
-  .subscribe();
+db.channel("fatih-reload-stock").on("postgres_changes",{event:"*",schema:"public",table:"stock_updates"},async()=>{await loadStock()}).subscribe();
+setInterval(()=>loadStock(),30000);setInterval(updatePaymentHours,30000);
 
-setInterval(()=>loadStock(),30000);
-setInterval(()=>updatePaymentHours(),30000);
-
-/* INISIALISASI */
-$("yearNow").textContent=new Date().getFullYear();
-updatePaymentHours();
-
-loadPackages();
-
-db.auth.onAuthStateChange((_event,session)=>{
-  if(!session){
-    adminDataLoadedForSession=false;
-    $("adminArea").classList.add("hidden");
-  }
+/* INISIALISASI: SELALU MULAI DARI HALAMAN PELANGGAN */
+$("yearNow").textContent=new Date().getFullYear();updatePaymentHours();showCustomer();loadPackages();
+db.auth.onAuthStateChange((event,session)=>{
+  if(!session){adminVerified=false;adminDataLoadedForSession=false;$("adminArea").classList.add("hidden");if(event==="SIGNED_OUT"&&!$("adminLoginScreen").classList.contains("hidden"))showCustomer()}
 });
-
-showCustomer();
-
-/* SERVICE WORKER */
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("./sw.js").catch(error=>{
-      console.warn("Service worker tidak dapat didaftarkan:",error);
-    });
-  });
-}
+/* Service worker */
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("Service worker:",e)))}
 </script>
-
 </body>
 </html>
