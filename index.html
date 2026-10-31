@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="id">
 <head>
@@ -97,7 +96,57 @@ footer{text-align:center;padding:16px;color:#66798a;font-size:12px}
   color:#66798a;
 }
 .voucher-message{font-size:13px;margin-top:10px}
+/* RIWAYAT TRANSAKSI */
+.history-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin:12px 0;
+}
+.history-stat{
+  background:#f3f8fc;
+  border:1px solid #e2eaf2;
+  border-radius:10px;
+  padding:12px;
+}
+.history-stat b{
+  display:block;
+  font-size:20px;
+  color:#1769aa;
+  overflow-wrap:anywhere;
+}
+.history-stat small{display:block;margin-bottom:5px}
+.history-filter{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+.history-table-wrap{overflow-x:auto}
+.history-table-wrap table{min-width:650px}
+.history-pagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:14px;
+}
+.history-pagination button{padding:9px 13px}
+.history-status{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:800;
+}
+.status-paid{background:#eaf8ef;color:#176b35}
+.status-pending{background:#fff8e8;color:#8a6100}
+.status-expired{background:#f0f3f6;color:#66798a}
+.status-cancelled{background:#fff0f0;color:#b42318}
 
+@media(max-width:650px){
+  .history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .history-filter{grid-template-columns:1fr}
+}
 @media(max-width:650px){
   .wrap{margin-top:12px;padding:0 11px}
   header{padding:15px 16px 19px}
@@ -236,7 +285,87 @@ footer{text-align:center;padding:16px;color:#66798a;font-size:12px}
       <button id="login">Login</button>
       <p id="loginmsg" class="muted"></p>
     </div>
+<!-- RIWAYAT TRANSAKSI -->
+<div class="card" id="transaction-history">
+  <div class="row">
+    <h3>Riwayat Transaksi</h3>
+    <button id="history-refresh" type="button">Muat ulang</button>
+  </div>
 
+  <p class="muted">
+    Lihat transaksi pelanggan dan pendapatan Fatih Reload.
+  </p>
+
+  <div class="history-filter">
+    <div class="field">
+      <label for="history-from">Tanggal mulai</label>
+      <input id="history-from" type="date">
+    </div>
+
+    <div class="field">
+      <label for="history-to">Tanggal akhir</label>
+      <input id="history-to" type="date">
+    </div>
+
+    <div class="field">
+      <label for="history-status">Status transaksi</label>
+      <select id="history-status">
+        <option value="all">Semua status</option>
+        <option value="paid">Berhasil</option>
+        <option value="pending">Menunggu</option>
+        <option value="expired">Kedaluwarsa</option>
+        <option value="cancelled">Dibatalkan</option>
+      </select>
+    </div>
+  </div>
+
+  <button type="button" id="history-search" class="wide">
+    Tampilkan Riwayat
+  </button>
+
+  <div class="history-summary">
+    <div class="history-stat">
+      <small>Total transaksi</small>
+      <b id="history-total">0</b>
+    </div>
+
+    <div class="history-stat">
+      <small>Transaksi berhasil</small>
+      <b id="history-paid">0</b>
+    </div>
+
+    <div class="history-stat">
+      <small>Voucher terkirim</small>
+      <b id="history-vouchers">0</b>
+    </div>
+
+    <div class="history-stat">
+      <small>Total pendapatan</small>
+      <b id="history-revenue">Rp0</b>
+    </div>
+  </div>
+
+  <p id="history-message" class="muted">
+    Pilih tanggal untuk melihat riwayat transaksi.
+  </p>
+
+  <div class="history-table-wrap" id="history-table">
+    Belum ada data.
+  </div>
+
+  <div class="history-pagination">
+    <button id="history-prev" type="button" disabled>
+      Sebelumnya
+    </button>
+
+    <span id="history-page" class="muted">Halaman 1</span>
+
+    <button id="history-next" type="button" disabled>
+      Berikutnya
+    </button>
+  </div>
+</div>
+<!-- AKHIR RIWAYAT TRANSAKSI -->
     <div id="adminarea" class="hidden">
 
       <!-- IMPOR VOUCHER -->
@@ -681,8 +810,13 @@ async function updateAdminUI() {
   $("logout").classList.toggle("hidden", !loggedIn);
 
   if (loggedIn) {
-    loadAdminPayments();
-    refreshStock();
+  loadAdminPayments();
+  refreshStock();
+
+  initializeHistoryDates();
+  historyCurrentPage = 1;
+  loadTransactionHistory();
+}
   } else {
     $("payment-list").textContent = "Silakan login sebagai admin.";
     availableVouchers = [];
@@ -1582,7 +1716,300 @@ $("check-button").addEventListener("click", async () => {
     button.textContent = "Periksa Pesanan";
   }
 });
+// ======================================
+// RIWAYAT TRANSAKSI ADMIN
+// ======================================
 
+let historyCurrentPage = 1;
+const historyLimit = 20;
+let historyTotalPages = 1;
+
+// TANGGAL LOKAL YYYY-MM-DD
+function getLocalDateValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+// INISIALISASI TANGGAL
+function initializeHistoryDates() {
+  const today = getLocalDateValue();
+
+  if (!$("history-from").value) {
+    $("history-from").value = today;
+  }
+
+  if (!$("history-to").value) {
+    $("history-to").value = today;
+  }
+}
+
+// FORMAT STATUS
+function historyStatusLabel(status) {
+  const labels = {
+    paid: "Berhasil",
+    pending: "Menunggu",
+    expired: "Kedaluwarsa",
+    cancelled: "Dibatalkan"
+  };
+
+  return labels[status] || status || "-";
+}
+
+function historyStatusClass(status) {
+  const classes = {
+    paid: "status-paid",
+    pending: "status-pending",
+    expired: "status-expired",
+    cancelled: "status-cancelled"
+  };
+
+  return classes[status] || "";
+}
+
+// FORMAT TANGGAL
+function formatHistoryDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+// MEMUAT RIWAYAT
+async function loadTransactionHistory() {
+  const from = $("history-from").value;
+  const to = $("history-to").value;
+  const status = $("history-status").value;
+
+  if (!from || !to) {
+    return showMessage(
+      "history-message",
+      "Tanggal mulai dan akhir harus diisi.",
+      true
+    );
+  }
+
+  if (from > to) {
+    return showMessage(
+      "history-message",
+      "Tanggal mulai tidak boleh melewati tanggal akhir.",
+      true
+    );
+  }
+
+  const searchButton = $("history-search");
+  const refreshButton = $("history-refresh");
+
+  searchButton.disabled = true;
+  refreshButton.disabled = true;
+
+  $("history-table").textContent = "Memuat riwayat transaksi...";
+  showMessage("history-message", "Mengambil data transaksi...");
+
+  try {
+    const { data, error } = await db.functions.invoke(
+      "admin-payments",
+      {
+        body: {
+          action: "history",
+          date_from: from,
+          date_to: to,
+          status: status,
+          page: historyCurrentPage,
+          limit: historyLimit
+        }
+      }
+    );
+
+    if (error) throw error;
+
+    if (!data?.success) {
+      throw new Error(
+        data?.error || "Gagal mengambil riwayat transaksi."
+      );
+    }
+
+    const orders = Array.isArray(data.orders)
+      ? data.orders
+      : [];
+
+    // RINGKASAN
+    const summary = data.summary || data.stats || data;
+
+    $("history-total").textContent =
+      Number(summary.total_orders ?? 0).toLocaleString("id-ID");
+
+    $("history-paid").textContent =
+      Number(summary.paid_orders ?? 0).toLocaleString("id-ID");
+
+    $("history-vouchers").textContent =
+      Number(summary.vouchers_delivered ?? 0).toLocaleString("id-ID");
+
+    $("history-revenue").textContent =
+      rupiah(summary.revenue_idr ?? 0);
+
+    // TOTAL HALAMAN
+    const pagination = data.pagination || {};
+
+    const totalPages = Number(
+      pagination.total_pages ??
+      data.total_pages ??
+      Math.max(
+        1,
+        Math.ceil(
+          Number(
+            pagination.total ??
+            data.total ??
+            orders.length
+          ) / historyLimit
+        )
+      )
+    );
+
+    historyTotalPages = Math.max(1, totalPages);
+
+    const currentPage = Number(
+      pagination.page ?? data.page ?? historyCurrentPage
+    );
+
+    historyCurrentPage = currentPage;
+
+    // TABEL
+    if (orders.length === 0) {
+      $("history-table").innerHTML = `
+        <div class="voucher-empty">
+          Tidak ada transaksi pada periode dan status tersebut.
+        </div>
+      `;
+    } else {
+      $("history-table").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Pelanggan</th>
+              <th>Paket</th>
+              <th>Nominal</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${orders.map(order => `
+              <tr>
+                <td>
+                  ${escapeHtml(formatHistoryDate(order.created_at))}
+                </td>
+
+                <td>
+                  ${escapeHtml(order.customer_phone || "-")}
+                  <br>
+                  <small>${escapeHtml(order.id || "")}</small>
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    order.packages?.name ||
+                    order.package_name ||
+                    "-"
+                  )}
+                </td>
+
+                <td>
+                  <b>${rupiah(order.amount_idr || 0)}</b>
+                </td>
+
+                <td>
+                  <span class="history-status ${
+                    historyStatusClass(order.status)
+                  }">
+                    ${escapeHtml(historyStatusLabel(order.status))}
+                  </span>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    $("history-page").textContent =
+      `Halaman ${historyCurrentPage} dari ${historyTotalPages}`;
+
+    $("history-prev").disabled =
+      historyCurrentPage <= 1;
+
+    $("history-next").disabled =
+      historyCurrentPage >= historyTotalPages;
+
+    showMessage(
+      "history-message",
+      `Menampilkan ${orders.length} transaksi. Periode ${from} sampai ${to}.`
+    );
+
+  } catch (error) {
+    console.error("History error:", error);
+
+    $("history-table").innerHTML = `
+      <div class="notice">
+        Gagal memuat riwayat transaksi.<br>
+        ${escapeHtml(error.message || "Terjadi kesalahan.")}
+      </div>
+    `;
+
+    showMessage(
+      "history-message",
+      error.message || "Gagal memuat riwayat transaksi.",
+      true
+    );
+
+  } finally {
+    searchButton.disabled = false;
+    refreshButton.disabled = false;
+  }
+}
+
+// CARI RIWAYAT
+$("history-search").addEventListener("click", () => {
+  historyCurrentPage = 1;
+  loadTransactionHistory();
+});
+
+// MUAT ULANG RIWAYAT
+$("history-refresh").addEventListener("click", () => {
+  loadTransactionHistory();
+});
+
+// HALAMAN SEBELUMNYA
+$("history-prev").addEventListener("click", () => {
+  if (historyCurrentPage <= 1) return;
+
+  historyCurrentPage--;
+  loadTransactionHistory();
+});
+
+// HALAMAN BERIKUTNYA
+$("history-next").addEventListener("click", () => {
+  if (historyCurrentPage >= historyTotalPages) return;
+
+  historyCurrentPage++;
+  loadTransactionHistory();
+});
+
+// INISIALISASI TANGGAL
+initializeHistoryDates();
 // MEMANTAU LOGIN
 db.auth.onAuthStateChange(() => {
   updateAdminUI();
