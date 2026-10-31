@@ -176,24 +176,122 @@ window.createOrder=async function(){
   try{const {data,error}=await db.functions.invoke("create-order",{body:{package_id:selectedPackageId,phone}});if(error)throw error;const p=unwrapData(data),id=getOrderId(p);if(!id)throw new Error(p?.message||"ID pesanan tidak ditemukan.");currentOrder=p.order||p;currentOrderId=id;currentPhone=phone;currentOrderStatus=getOrderStatus(p);proofSubmitted=false;renderCurrentOrderPanel();renderPaymentPanel();showCustomerView("customer-orders");startOrderPolling();showToast("Pesanan berhasil dibuat.")}catch(e){console.error(e);showToast("Gagal membuat pesanan: "+getErrorMessage(e))}finally{setLoading(b,false)}
 };
 function renderPaymentPanel(){
-  const previousProvider=$("paymentProvider")?.value||"DANA";
-  const previousProofFile=$("paymentProof")?.files?.[0]||null;
-  const panel=$("paymentPanel"),content=$("paymentContent");
-  const previousProofFile=$("paymentProof")?.files?.[0]||null;
-  const panel=$("paymentPanel"),content=$("paymentContent");if(!currentOrderId||!panel||!content)return;panel.classList.remove("hidden");
-  const p=packages.find(x=>String(x.id)===String(currentOrder?.package_id||selectedPackageId)),amount=currentOrder?.amount_idr??p?.price_idr??0;
-  if(["paid","completed","delivered"].includes(String(currentOrderStatus).toLowerCase())){const code=getVoucherCode(currentOrder?.voucher_code||currentOrder?.voucher||currentOrder?.code);content.innerHTML=`<div class="notice success">Pembayaran telah disetujui.</div>${code?`<div class="code-box"><span class="small">KODE VOUCHER ANDA</span><strong>${escapeHTML(code)}</strong><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="copyVoucher('${String(code).replace(/'/g,"\\'")}')">Salin Voucher</button></div>`:""}<div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;return}
-  if(["rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){content.innerHTML=`<div class="notice warning">Status pesanan: ${escapeHTML(currentOrderStatus)}.</div><p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p><div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;return}
-  content.innerHTML=`<div class="notice warning">Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer.</div><div class="payment-info"><div class="small muted">Total pembayaran</div><div class="wallet-number">${money(amount)}</div><hr><div class="small muted">Transfer melalui DANA / GoPay</div><div class="wallet-number">${WALLET_NUMBER}</div><div class="wallet-name">a.n. ${WALLET_NAME}</div></div><div class="small muted" style="margin-bottom:12px">ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong></div><div class="field"><label>Metode pembayaran</label><select id="paymentProvider"><option value="DANA">DANA</option><option value="GoPay">GoPay</option></select></div><div class="field"><label>Upload bukti pembayaran</label><input type="file" id="paymentProof" accept="image/*"></div><button class="btn btn-primary btn-block" id="submitProofBtn" onclick="submitPaymentProof()">Kirim Bukti Pembayaran</button><div class="small muted" style="margin-top:10px">Pastikan gambar bukti transfer jelas dan nominal sesuai.</div>${proofSubmitted?`<div class="notice success" style="margin-top:12px">Bukti pembayaran sudah dikirim. Menunggu verifikasi admin.</div>`:""}`;if(previousProofFile){
-  try{
-    const dt=new DataTransfer();
-    dt.items.add(previousProofFile);
-    const fileInput=$("paymentProof");
-    if(fileInput)fileInput.files=dt.files;
-  }catch(e){
-    console.warn("Gagal memulihkan file bukti:",e);
+  const previousProvider = $("paymentProvider")?.value || "DANA";
+  const previousProofFile = $("paymentProof")?.files?.[0] || null;
+  const panel = $("paymentPanel");
+  const content = $("paymentContent");
+
+  if(!currentOrderId || !panel || !content) return;
+
+  panel.classList.remove("hidden");
+
+  const p = packages.find(x =>
+    String(x.id) === String(currentOrder?.package_id || selectedPackageId)
+  );
+
+  const amount = currentOrder?.amount_idr ?? p?.price_idr ?? 0;
+
+  if(["paid","completed","delivered"].includes(String(currentOrderStatus).toLowerCase())){
+    const code = getVoucherCode(
+      currentOrder?.voucher_code ||
+      currentOrder?.voucher ||
+      currentOrder?.code
+    );
+
+    content.innerHTML = `
+      <div class="notice success">Pembayaran telah disetujui.</div>
+      ${code ? `
+        <div class="code-box">
+          <span class="small">KODE VOUCHER ANDA</span>
+          <strong>${escapeHTML(code)}</strong>
+          <button class="btn btn-secondary btn-sm"
+            style="margin-top:10px"
+            onclick="copyVoucher('${String(code).replace(/'/g,"\\'")}')">
+            Salin Voucher
+          </button>
+        </div>
+      ` : ""}
+      <div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>
+    `;
+    return;
   }
-}
+
+  if(["rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){
+    content.innerHTML = `
+      <div class="notice warning">
+        Status pesanan: ${escapeHTML(currentOrderStatus)}.
+      </div>
+      <p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p>
+      <div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>
+    `;
+    return;
+  }
+
+  content.innerHTML = `
+    <div class="notice warning">
+      Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer.
+    </div>
+
+    <div class="payment-info">
+      <div class="small muted">Total pembayaran</div>
+      <div class="wallet-number">${money(amount)}</div>
+      <hr>
+      <div class="small muted">Transfer melalui DANA / GoPay</div>
+      <div class="wallet-number">${WALLET_NUMBER}</div>
+      <div class="wallet-name">a.n. ${WALLET_NAME}</div>
+    </div>
+
+    <div class="small muted" style="margin-bottom:12px">
+      ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong>
+    </div>
+
+    <div class="field">
+      <label>Metode pembayaran</label>
+      <select id="paymentProvider">
+        <option value="DANA">DANA</option>
+        <option value="GoPay">GoPay</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Upload bukti pembayaran</label>
+      <input type="file" id="paymentProof" accept="image/*">
+    </div>
+
+    <button class="btn btn-primary btn-block"
+      id="submitProofBtn"
+      onclick="submitPaymentProof()">
+      Kirim Bukti Pembayaran
+    </button>
+
+    <div class="small muted" style="margin-top:10px">
+      Pastikan gambar bukti transfer jelas dan nominal sesuai.
+    </div>
+
+    ${proofSubmitted ? `
+      <div class="notice success" style="margin-top:12px">
+        Bukti pembayaran sudah dikirim. Menunggu verifikasi admin.
+      </div>
+    ` : ""}
+  `;
+
+  // Pulihkan pilihan metode pembayaran setelah panel diperbarui
+  const providerSelect = $("paymentProvider");
+  if(providerSelect){
+    providerSelect.value = previousProvider;
+  }
+
+  // Pulihkan file bukti jika panel diperbarui sebelum dikirim
+  if(previousProofFile){
+    try{
+      const dt = new DataTransfer();
+      dt.items.add(previousProofFile);
+      const fileInput = $("paymentProof");
+      if(fileInput) fileInput.files = dt.files;
+    }catch(e){
+      console.warn("Gagal memulihkan file bukti:",e);
+    }
+  }
 }
 window.submitPaymentProof=async function(){
   if(!currentOrderId||!currentPhone){showToast("Data pesanan tidak ditemukan.");return}const f=$("paymentProof")?.files?.[0],provider=$("paymentProvider")?.value||"DANA";
