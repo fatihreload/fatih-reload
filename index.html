@@ -139,6 +139,10 @@ th,td{padding:9px 10px;font-size:11px}
   .card{padding:11px}
   .admin-heading{gap:8px}
 }
+
+/* Pemilih file CSV pada menu admin */
+#voucherFile{display:block;width:100%;padding:10px;background:#f8fbff;border:1px dashed #b8cde0;border-radius:10px;font-size:12px}
+#voucherFile::file-selector-button{border:0;border-radius:8px;background:#e7f3fd;color:#1769aa;padding:8px 11px;margin-right:10px;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
@@ -190,7 +194,7 @@ th,td{padding:9px 10px;font-size:11px}
 <button class="shortcut" onclick="showAdminView('admin-payments')"><span>✓</span><span><strong>Verifikasi Pembayaran</strong><small>Periksa bukti transfer</small></span></button><button class="shortcut" onclick="showAdminView('admin-import')"><span>⇧</span><span><strong>Import Stok Voucher</strong><small>Tambahkan kode baru</small></span></button><button class="shortcut" onclick="showAdminView('admin-stock')"><span>▤</span><span><strong>Paket & Stok</strong><small>Lihat stok paket</small></span></button><button class="shortcut" onclick="showAdminView('admin-vouchers')"><span>▣</span><span><strong>Kelola Voucher</strong><small>Lihat dan hapus voucher</small></span></button><button class="shortcut" onclick="showAdminView('admin-history')"><span>◷</span><span><strong>Riwayat Transaksi</strong><small>Lihat transaksi</small></span></button><button class="shortcut" onclick="showAdminView('admin-check')"><span>⌕</span><span><strong>Cek Pesanan</strong><small>Periksa pesanan</small></span></button>
 </div></section>
 <section id="admin-history" class="admin-page"><div class="admin-heading"><div><h1>Riwayat Transaksi</h1><p>Daftar transaksi berdasarkan tanggal dan status.</p></div><button class="btn btn-light btn-sm" onclick="loadTransactionHistory()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field"><label>Dari tanggal</label><input type="date" id="historyDateFrom"></div><div class="field"><label>Sampai tanggal</label><input type="date" id="historyDateTo"></div><div class="field"><label>Status</label><select id="historyStatus"><option value="">Semua status</option><option value="pending">Pending</option><option value="waiting_payment">Menunggu pembayaran</option><option value="paid">Dibayar</option><option value="completed">Selesai</option><option value="rejected">Ditolak</option><option value="expired">Kedaluwarsa</option></select></div><button class="btn btn-primary" onclick="historyCurrentPage=1;loadTransactionHistory()">Tampilkan</button></div><div id="historySummary" class="notice" style="margin-bottom:14px">Pilih tanggal.</div><div id="historyTable" class="empty">Memuat...</div><div class="pagination"><button class="btn btn-light btn-sm" onclick="changeHistoryPage(-1)">← Sebelumnya</button><span id="historyPageInfo" class="small muted">Halaman 1</span><button class="btn btn-light btn-sm" onclick="changeHistoryPage(1)">Berikutnya →</button></div></div></section>
-<section id="admin-import" class="admin-page"><div class="admin-heading"><div><h1>Import Stok Voucher</h1><p>Masukkan banyak kode voucher sekaligus.</p></div></div><div class="card"><div class="field"><label>Pilih Paket</label><select id="importPackage"><option value="">Memuat paket...</option></select></div><div class="field"><label>Daftar Kode Voucher</label><textarea id="voucherCSV" rows="9" placeholder="Satu kode per baris&#10;ABC123&#10;DEF456"></textarea></div><button class="btn btn-primary btn-block" id="importBtn" onclick="importVouchers()">Import Voucher</button><div id="importResult" style="margin-top:14px"></div></div></section>
+<section id="admin-import" class="admin-page"><div class="admin-heading"><div><h1>Import Stok Voucher</h1><p>Tambahkan stok voucher menggunakan file CSV seperti sebelumnya.</p></div></div><div class="card"><div class="field"><label for="importPackage">Pilih Paket</label><select id="importPackage"><option value="">Memuat paket...</option></select></div><div class="field"><label for="voucherFile">Pilih File Voucher (CSV)</label><input id="voucherFile" type="file" accept=".csv,text/csv,application/vnd.ms-excel" onchange="loadVoucherCSV(this)"><div id="voucherFileInfo" class="notice" style="margin-top:9px">Belum ada file dipilih. Pilih file berformat .csv dari HP atau komputer.</div><textarea id="voucherCSV" class="hidden" aria-hidden="true" tabindex="-1"></textarea></div><button class="btn btn-primary btn-block" id="importBtn" onclick="importVouchers()">Import Voucher</button><div id="importResult" style="margin-top:14px"></div></div></section>
 <section id="admin-stock" class="admin-page"><div class="admin-heading"><div><h1>Paket & Stok</h1><p>Informasi stok voucher setiap paket.</p></div><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Refresh</button></div><div id="adminStockGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"><div class="empty">Memuat stok...</div></div></section>
 <section id="admin-vouchers" class="admin-page"><div class="admin-heading"><div><h1>Kelola Voucher</h1><p>Lihat dan hapus voucher yang masih tersedia.</p></div><button class="btn btn-light btn-sm" onclick="loadAvailableVouchers()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field grow"><label>Pilih Paket</label><select id="manageVoucherPackage"><option value="">Pilih paket</option></select></div><button class="btn btn-primary" onclick="loadAvailableVouchers()">Tampilkan</button></div><div id="voucher-total" class="notice" style="margin-bottom:14px">Pilih paket.</div><div id="voucher-list" class="voucher-list"><div class="empty">Silakan pilih paket.</div></div></div></section>
 <section id="admin-payments" class="admin-page"><div class="admin-heading"><div><h1>Verifikasi Pembayaran</h1><p>Periksa bukti pembayaran pelanggan.</p></div><button class="btn btn-light btn-sm" onclick="loadAdminPayments()">↻ Refresh</button></div><div class="card"><div id="payment-list"><div class="empty">Memuat...</div></div></div></section>
@@ -387,12 +391,32 @@ async function updateAdminUI(){
   return true
 };
 
+/* BACA FILE CSV VOUCHER - isi file dikirim ke fungsi impor yang sudah ada */
+window.loadVoucherCSV=async function(input){
+  const file=input?.files?.[0],info=$("voucherFileInfo"),csvField=$("voucherCSV"),out=$("importResult");
+  if(!file)return;
+  if(!file.name.toLowerCase().endsWith(".csv") && file.type!=="text/csv"){
+    input.value="";csvField.value="";info.className="notice warning";info.textContent="Format file tidak sesuai. Silakan pilih file .csv.";return;
+  }
+  try{
+    const csv=(await file.text()).replace(/^\uFEFF/,"").trim();
+    if(!csv)throw new Error("File CSV kosong atau tidak dapat dibaca.");
+    csvField.value=csv;
+    const lines=csv.split(/\r?\n/).filter(line=>line.trim()).length;
+    info.className="notice success";
+    info.textContent=`File siap diimpor: ${file.name} · ${lines.toLocaleString("id-ID")} baris · ${(file.size/1024).toFixed(1)} KB`;
+    if(out)out.innerHTML="";
+  }catch(e){
+    input.value="";csvField.value="";info.className="notice warning";info.textContent=e.message||"Gagal membaca file CSV.";
+  }
+};
+
 /* IMPORT VOUCHER */
 window.importVouchers=async function(){
   if(!requireAdmin())return;const packageId=$("importPackage").value,csv=$("voucherCSV").value.trim(),b=$("importBtn"),out=$("importResult");
   if(!packageId){showToast("Pilih paket terlebih dahulu.");return}if(!csv){showToast("Masukkan daftar kode voucher.");return}
   setLoading(b,true,"Mengimpor...");out.innerHTML="";
-  try{const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});if(error)throw error;const p=unwrapData(data),count=p?.imported_count??p?.inserted??p?.count??p?.imported??"-";out.innerHTML=`<div class="notice success"><strong>Import selesai.</strong><br>${escapeHTML(p?.message||`Jumlah voucher yang berhasil diproses: ${count}`)}</div>`;$("voucherCSV").value="";await loadStock();showToast("Import voucher selesai.")}catch(e){console.error(e);out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}finally{setLoading(b,false)}
+  try{const {data,error}=await db.functions.invoke("import-vouchers",{body:{package_id:packageId,csv}});if(error)throw error;const p=unwrapData(data),count=p?.imported_count??p?.inserted??p?.count??p?.imported??"-";out.innerHTML=`<div class="notice success"><strong>Import selesai.</strong><br>${escapeHTML(p?.message||`Jumlah voucher yang berhasil diproses: ${count}`)}</div>`;$("voucherCSV").value="";if($("voucherFile"))$("voucherFile").value="";if($("voucherFileInfo")){ $("voucherFileInfo").className="notice";$("voucherFileInfo").textContent="Belum ada file dipilih. Pilih file berformat .csv dari HP atau komputer.";}await loadStock();showToast("Import voucher selesai.")}catch(e){console.error(e);out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}finally{setLoading(b,false)}
 };
 
 /* KELOLA VOUCHER - API MENERIMA SATU package_id UUID */
