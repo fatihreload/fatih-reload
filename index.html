@@ -171,12 +171,81 @@ th,td{padding:9px 10px;font-size:11px}
 .voucher-item .voucher-info{min-width:0;flex:1}
 @media(max-width:700px){.voucher-bulk-toolbar .btn{font-size:11px;padding:8px 10px}}
 
+
+/* MODE SIANG / MALAM */
+.theme-toggle{min-width:42px;font-size:17px;padding:7px 10px}
+body.dark-theme{
+  --light:#101820;
+  --white:#18232d;
+  --text:#e5edf5;
+  --muted:#9aabba;
+  --border:#30404e;
+  --shadow:0 8px 28px rgba(0,0,0,.22);
+  background:var(--light);
+  color:var(--text);
+}
+body.dark-theme .card,
+body.dark-theme .package-card,
+body.dark-theme .voucher-item,
+body.dark-theme .admin-sidebar,
+body.dark-theme .shortcut,
+body.dark-theme .bottom-nav,
+body.dark-theme .admin-mobile-nav,
+body.dark-theme .table-wrap,
+body.dark-theme table{
+  background:#18232d;
+  color:var(--text);
+  border-color:var(--border);
+}
+body.dark-theme .section-title h2,
+body.dark-theme .package-card h3,
+body.dark-theme .admin-heading h1,
+body.dark-theme .stat-value,
+body.dark-theme .wallet-number,
+body.dark-theme .card h3,
+body.dark-theme .login-brand h2{
+  color:#e5edf5!important;
+}
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea{
+  background:#111c25;
+  color:#e5edf5;
+  border-color:#3b4c5b;
+}
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder{color:#8295a6}
+body.dark-theme .btn-light,
+body.dark-theme .btn-secondary{background:#263746;color:#d9e9f7}
+body.dark-theme .admin-nav{color:#c0ccd7}
+body.dark-theme .admin-nav.active{background:#203b50;color:#80c5ff}
+body.dark-theme .nav-item{color:#9aabba}
+body.dark-theme .nav-item.active{color:#80c5ff}
+body.dark-theme th{background:#22313d;color:#b6c5d2}
+body.dark-theme td{border-bottom-color:#30404e;color:#e0e8ef}
+body.dark-theme .notice{background:#1d3548;color:#c7e5fb;border-color:#31536b}
+body.dark-theme .notice.warning{background:#44351f;color:#ffdda4;border-color:#66502b}
+body.dark-theme .notice.success{background:#183b30;color:#b8f0d7;border-color:#285b48}
+body.dark-theme .payment-info,
+body.dark-theme .order-result{background:#1c2b37;border-color:#3b5264}
+body.dark-theme .empty{border-color:#405363;color:#9aabba}
+body.dark-theme hr{border-top-color:#30404e}
+body.dark-theme #voucherFile{background:#111c25;color:#e5edf5;border-color:#3b5264}
+body.dark-theme .badge{background:#293845;color:#d0dbe5}
+body.dark-theme .badge.green{background:#1b4034;color:#a8e8cd}
+body.dark-theme .badge.red{background:#482929;color:#ffc0c0}
+body.dark-theme .badge.orange{background:#49371f;color:#ffdaa0}
+body.dark-theme .bottom-nav,
+body.dark-theme .admin-mobile-nav{border-top-color:#30404e}
+body.dark-theme .footer{color:#8295a6}
+@media(max-width:700px){.theme-toggle{min-width:36px;padding:6px 8px}}
+
 </style>
 </head>
 <body>
 <header class="topbar"><div class="container topbar-inner">
   <div class="brand"><div class="brand-logo">F</div><div><div class="brand-name">FATIH RELOAD</div><div class="brand-sub">WIFI VOUCHER STORE</div></div></div>
-  <div class="header-actions"><button class="header-btn" onclick="showCustomer()">Beranda</button><button class="header-btn" onclick="showAdmin()">Admin</button></div>
+  <div class="header-actions"><button class="header-btn theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti mode tampilan">🌙</button><button class="header-btn" onclick="showCustomer()">Beranda</button><button class="header-btn" onclick="showAdmin()">Admin</button></div>
 </div></header>
 
 <main id="customerArea"><div class="container">
@@ -686,6 +755,31 @@ window.adminCheckOrder=async function(){if(!requireAdmin())return;const id=$("ad
 /* REALTIME DAN PEMBARUAN OTOMATIS */
 db.channel("fatih-reload-stock").on("postgres_changes",{event:"*",schema:"public",table:"stock_updates"},async()=>{await loadStock()}).subscribe();
 setInterval(()=>loadStock(),30000);setInterval(updatePaymentHours,30000);
+
+
+/* PENGATUR MODE SIANG / MALAM */
+function applyTheme(mode){
+  const dark=mode==="dark";
+  document.body.classList.toggle("dark-theme",dark);
+  const button=document.getElementById("themeToggle");
+  if(button){
+    button.textContent=dark?"☀️":"🌙";
+    button.setAttribute("aria-label",dark?"Aktifkan mode siang":"Aktifkan mode malam");
+    button.title=dark?"Ganti ke mode siang":"Ganti ke mode malam";
+  }
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.setAttribute("content",dark?"#101820":"#102a43");
+}
+window.toggleTheme=function(){
+  const next=document.body.classList.contains("dark-theme")?"light":"dark";
+  try{localStorage.setItem("fatihReloadTheme",next)}catch(e){}
+  applyTheme(next);
+};
+(function initTheme(){
+  let saved="light";
+  try{saved=localStorage.getItem("fatihReloadTheme")||"light"}catch(e){}
+  applyTheme(saved);
+})();
 
 /* INISIALISASI: SELALU MULAI DARI HALAMAN PELANGGAN */
 $("yearNow").textContent=new Date().getFullYear();updatePaymentHours();showCustomer();loadPackages();
