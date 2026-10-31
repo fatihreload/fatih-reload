@@ -176,6 +176,9 @@ window.createOrder=async function(){
   try{const {data,error}=await db.functions.invoke("create-order",{body:{package_id:selectedPackageId,phone}});if(error)throw error;const p=unwrapData(data),id=getOrderId(p);if(!id)throw new Error(p?.message||"ID pesanan tidak ditemukan.");currentOrder=p.order||p;currentOrderId=id;currentPhone=phone;currentOrderStatus=getOrderStatus(p);proofSubmitted=false;renderCurrentOrderPanel();renderPaymentPanel();showCustomerView("customer-orders");startOrderPolling();showToast("Pesanan berhasil dibuat.")}catch(e){console.error(e);showToast("Gagal membuat pesanan: "+getErrorMessage(e))}finally{setLoading(b,false)}
 };
 function renderPaymentPanel(){
+  const previousProvider=$("paymentProvider")?.value||"DANA";
+  const previousProofFile=$("paymentProof")?.files?.[0]||null;
+  const panel=$("paymentPanel"),content=$("paymentContent");
   const previousProofFile=$("paymentProof")?.files?.[0]||null;
   const panel=$("paymentPanel"),content=$("paymentContent");if(!currentOrderId||!panel||!content)return;panel.classList.remove("hidden");
   const p=packages.find(x=>String(x.id)===String(currentOrder?.package_id||selectedPackageId)),amount=currentOrder?.amount_idr??p?.price_idr??0;
