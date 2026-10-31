@@ -161,6 +161,16 @@ th,td{padding:9px 10px;font-size:11px}
   text-align:center;
 }
 
+
+/* Pilih dan hapus banyak voucher sekaligus */
+.voucher-bulk-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.voucher-bulk-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.voucher-select-all{width:18px;height:18px;accent-color:var(--blue);cursor:pointer}
+.voucher-item{justify-content:flex-start}
+.voucher-item .voucher-check{width:18px;height:18px;flex:0 0 18px;accent-color:var(--blue);cursor:pointer}
+.voucher-item .voucher-info{min-width:0;flex:1}
+@media(max-width:700px){.voucher-bulk-toolbar .btn{font-size:11px;padding:8px 10px}}
+
 </style>
 </head>
 <body>
@@ -214,7 +224,7 @@ th,td{padding:9px 10px;font-size:11px}
 <section id="admin-history" class="admin-page"><div class="admin-heading"><div><h1>Riwayat Transaksi</h1><p>Daftar transaksi berdasarkan tanggal dan status.</p></div><button class="btn btn-light btn-sm" onclick="loadTransactionHistory()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field"><label>Dari tanggal</label><input type="date" id="historyDateFrom"></div><div class="field"><label>Sampai tanggal</label><input type="date" id="historyDateTo"></div><div class="field"><label>Status</label><select id="historyStatus"><option value="">Semua status</option><option value="pending">Pending</option><option value="waiting_payment">Menunggu pembayaran</option><option value="paid">Dibayar</option><option value="completed">Selesai</option><option value="rejected">Ditolak</option><option value="expired">Kedaluwarsa</option></select></div><button class="btn btn-primary" onclick="historyCurrentPage=1;loadTransactionHistory()">Tampilkan</button></div><div id="historySummary" class="notice" style="margin-bottom:14px">Pilih tanggal.</div><div id="historyTable" class="empty">Memuat...</div><div class="pagination"><button class="btn btn-light btn-sm" onclick="changeHistoryPage(-1)">← Sebelumnya</button><span id="historyPageInfo" class="small muted">Halaman 1</span><button class="btn btn-light btn-sm" onclick="changeHistoryPage(1)">Berikutnya →</button></div></div></section>
 <section id="admin-import" class="admin-page"><div class="admin-heading"><div><h1>Import Stok Voucher</h1><p>Tambahkan stok voucher menggunakan file CSV seperti sebelumnya.</p></div></div><div class="card"><div class="field"><label for="importPackage">Pilih Paket</label><select id="importPackage"><option value="">Memuat paket...</option></select></div><div class="field"><label for="voucherFile">Pilih File Voucher (CSV)</label><input id="voucherFile" type="file" accept=".csv,text/csv,application/vnd.ms-excel" onchange="loadVoucherCSV(this)"><div id="voucherFileInfo" class="notice" style="margin-top:9px">Belum ada file dipilih. Pilih file berformat .csv dari HP atau komputer.</div><textarea id="voucherCSV" class="hidden" aria-hidden="true" tabindex="-1"></textarea></div><button class="btn btn-primary btn-block" id="importBtn" onclick="importVouchers()">Import Voucher</button><div id="importResult" style="margin-top:14px"></div></div></section>
 <section id="admin-stock" class="admin-page"><div class="admin-heading"><div><h1>Paket & Stok</h1><p>Informasi stok voucher setiap paket.</p></div><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Refresh</button></div><div id="adminStockGrid" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"><div class="empty">Memuat stok...</div></div></section>
-<section id="admin-vouchers" class="admin-page"><div class="admin-heading"><div><h1>Kelola Voucher</h1><p>Lihat dan hapus voucher yang masih tersedia.</p></div><button class="btn btn-light btn-sm" onclick="loadAvailableVouchers()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field grow"><label>Pilih Paket</label><select id="manageVoucherPackage"><option value="">Pilih paket</option></select></div><button class="btn btn-primary" onclick="loadAvailableVouchers()">Tampilkan</button></div><div id="voucher-total" class="notice" style="margin-bottom:14px">Pilih paket.</div><div id="voucher-list" class="voucher-list"><div class="empty">Silakan pilih paket.</div></div></div></section>
+<section id="admin-vouchers" class="admin-page"><div class="admin-heading"><div><h1>Kelola Voucher</h1><p>Lihat dan hapus voucher yang masih tersedia.</p></div><button class="btn btn-light btn-sm" onclick="loadAvailableVouchers()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field grow"><label>Pilih Paket</label><select id="manageVoucherPackage"><option value="">Pilih paket</option></select></div><button class="btn btn-primary" onclick="loadAvailableVouchers()">Tampilkan</button></div><div id="voucher-total" class="notice" style="margin-bottom:14px">Pilih paket.</div><div class="voucher-bulk-toolbar"><div class="voucher-bulk-left"><label style="display:flex;align-items:center;gap:7px;margin:0;font-size:12px"><input id="voucherSelectAll" class="voucher-select-all" type="checkbox" onchange="toggleSelectAllVouchers(this.checked)"> Pilih Semua</label><span id="voucherSelectedCount" class="small muted">0 dipilih</span></div><button id="deleteSelectedVouchersBtn" class="btn btn-danger" onclick="deleteSelectedVouchers()" disabled>Hapus Terpilih</button></div><div id="voucher-list" class="voucher-list"><div class="empty">Silakan pilih paket.</div></div></div></section>
 <section id="admin-payments" class="admin-page"><div class="admin-heading"><div><h1>Verifikasi Pembayaran</h1><p>Periksa bukti pembayaran pelanggan.</p></div><button class="btn btn-light btn-sm" onclick="loadAdminPayments()">↻ Refresh</button></div><div class="card"><div id="payment-list"><div class="empty">Memuat...</div></div></div></section>
 <section id="admin-check" class="admin-page"><div class="admin-heading"><div><h1>Cek Pesanan</h1><p>Periksa status transaksi berdasarkan ID pesanan.</p></div></div><div class="card"><div class="field"><label>ID Pesanan</label><input id="adminCheckOrderId" placeholder="ID pesanan"></div><div class="field"><label>Nomor WhatsApp Pelanggan</label><input id="adminCheckPhone" placeholder="Nomor WhatsApp"></div><button class="btn btn-primary btn-block" onclick="adminCheckOrder()">Periksa Pesanan</button><div id="adminCheckResult" style="margin-top:14px"></div></div></section>
 </main></div>
@@ -235,7 +245,7 @@ const $ = id => document.getElementById(id);
 
 let packages=[], packageStocks=[], selectedPackageId=null, currentOrder=null;
 let currentPhone="", currentOrderId="", currentOrderStatus="", proofSubmitted=false;
-let availableVouchers=[], historyCurrentPage=1, historyTotalPages=1;
+let availableVouchers=[], selectedVoucherIds=new Set(), historyCurrentPage=1, historyTotalPages=1;
 window.adminPaymentRows=[];
 const historyLimit=20;
 let currentAdminView="admin-home", currentCustomerView="customer-home";
@@ -473,23 +483,76 @@ window.importVouchers=async function(){
   }
 };
 
-/* KELOLA VOUCHER - API MENERIMA SATU package_id UUID */
+/* KELOLA VOUCHER - PILIH DAN HAPUS BANYAK VOUCHER */
+function updateVoucherSelectionUI(){
+  const count=selectedVoucherIds.size;
+  const countEl=$("voucherSelectedCount"),button=$("deleteSelectedVouchersBtn"),all=$("voucherSelectAll");
+  if(countEl)countEl.textContent=`${count} dipilih`;
+  if(button)button.disabled=count===0;
+  if(all){
+    const total=availableVouchers.length;
+    all.checked=total>0&&count===total;
+    all.indeterminate=count>0&&count<total;
+  }
+}
+window.toggleVoucherSelection=function(id,checked){
+  if(!requireAdmin())return;
+  if(checked)selectedVoucherIds.add(String(id));
+  else selectedVoucherIds.delete(String(id));
+  updateVoucherSelectionUI();
+};
+window.toggleSelectAllVouchers=function(checked){
+  if(!requireAdmin())return;
+  selectedVoucherIds.clear();
+  if(checked)availableVouchers.forEach(v=>{if(v?.id!==undefined&&v?.id!==null)selectedVoucherIds.add(String(v.id))});
+  document.querySelectorAll("#voucher-list .voucher-check").forEach(el=>{el.checked=checked});
+  updateVoucherSelectionUI();
+};
 window.loadAvailableVouchers=async function(){
   const list=$("voucher-list"),total=$("voucher-total");if(!list||!total)return;
   if(!requireAdmin())return;
   const packageId=$("manageVoucherPackage")?.value||"";
+  selectedVoucherIds.clear();updateVoucherSelectionUI();
   if(!packageId){availableVouchers=[];list.innerHTML=`<div class="empty" style="grid-column:1/-1">Silakan pilih paket terlebih dahulu.</div>`;total.textContent="Pilih paket untuk melihat voucher.";return}
   total.textContent="Memuat data...";list.innerHTML=`<div class="empty" style="grid-column:1/-1">Memuat voucher...</div>`;
   try{
     const {data,error}=await db.functions.invoke("admin-vouchers",{body:{action:"list",package_id:packageId}});if(error)throw error;
     const p=unwrapData(data);availableVouchers=getRows(p,["vouchers","data","items"]);total.textContent=`Jumlah voucher tersedia: ${p?.total??availableVouchers.length}`;
-    if(!availableVouchers.length){list.innerHTML=`<div class="empty" style="grid-column:1/-1">Tidak ada voucher tersedia untuk paket ini.</div>`;return}
-    list.innerHTML=availableVouchers.map(v=>`<div class="voucher-item"><div style="min-width:0"><div class="voucher-code">${escapeHTML(getVoucherCode(v)||"-")}</div><div class="small muted">${escapeHTML(v.package_name||v.package?.name||"")}</div></div><button class="btn btn-danger btn-sm" onclick="deleteVoucher('${String(v.id).replace(/'/g,"")}')">Hapus</button></div>`).join("")
-  }catch(e){console.error(e);list.innerHTML=`<div class="notice warning" style="grid-column:1/-1">${escapeHTML(getErrorMessage(e))}</div>`;total.textContent="Gagal memuat voucher."}
+    if(!availableVouchers.length){list.innerHTML=`<div class="empty" style="grid-column:1/-1">Tidak ada voucher tersedia untuk paket ini.</div>`;updateVoucherSelectionUI();return}
+    list.innerHTML=availableVouchers.map(v=>{
+      const id=String(v.id??"");
+      return `<div class="voucher-item"><input class="voucher-check" type="checkbox" aria-label="Pilih voucher" ${id?`onchange="toggleVoucherSelection('${escapeHTML(id)}',this.checked)"`:"disabled"}><div class="voucher-info"><div class="voucher-code">${escapeHTML(getVoucherCode(v)||"-")}</div><div class="small muted">${escapeHTML(v.package_name||v.package?.name||"")}</div></div><button class="btn btn-danger btn-sm" onclick="deleteVoucher('${escapeHTML(id)}')">Hapus</button></div>`;
+    }).join("");
+    updateVoucherSelectionUI();
+  }catch(e){console.error(e);availableVouchers=[];selectedVoucherIds.clear();list.innerHTML=`<div class="notice warning" style="grid-column:1/-1">${escapeHTML(getErrorMessage(e))}</div>`;total.textContent="Gagal memuat voucher.";updateVoucherSelectionUI()}
 };
 window.deleteVoucher=async function(id){
   if(!requireAdmin())return;if(!id||!confirm("Yakin ingin menghapus voucher ini?"))return;
   try{const {data,error}=await db.functions.invoke("admin-vouchers",{body:{action:"delete",voucher_ids:[id]}});if(error)throw error;const p=unwrapData(data),deleted=p?.deleted_count??p?.deleted,skipped=p?.skipped_count??p?.skipped;showToast(p?.pesan||p?.message||(deleted!==undefined?`Voucher dihapus: ${deleted}${skipped!==undefined?`, dilewati: ${skipped}`:""}`:"Voucher berhasil diproses."));await loadAvailableVouchers();await loadStock()}catch(e){console.error(e);showToast("Gagal menghapus voucher: "+getErrorMessage(e))}
+};
+window.deleteSelectedVouchers=async function(){
+  if(!requireAdmin())return;
+  const ids=[...selectedVoucherIds].filter(id=>availableVouchers.some(v=>String(v?.id)===id));
+  if(!ids.length){showToast("Pilih voucher yang ingin dihapus.");return}
+  if(!confirm(`Yakin ingin menghapus ${ids.length} voucher terpilih?`))return;
+  const button=$("deleteSelectedVouchersBtn");setLoading(button,true,"Menghapus...");
+  try{
+    const {data,error}=await db.functions.invoke("admin-vouchers",{body:{action:"delete",voucher_ids:ids}});
+    if(error)throw error;
+    const p=unwrapData(data);
+    if(p?.success===false)throw new Error(p?.error||p?.pesan||p?.message||"Penghapusan voucher gagal.");
+    const deleted=p?.deleted_count??p?.deleted;
+    const skipped=p?.skipped_count??p?.skipped;
+    showToast(p?.pesan||p?.message||(deleted!==undefined?`Voucher dihapus: ${deleted}${skipped!==undefined?`, dilewati: ${skipped}`:""}`:"Voucher terpilih berhasil diproses."));
+    await loadAvailableVouchers();
+    await loadStock();
+  }catch(e){
+    console.error("Hapus banyak voucher:",e);
+    showToast("Gagal menghapus voucher: "+getErrorMessage(e));
+  }finally{
+    setLoading(button,false);
+    updateVoucherSelectionUI();
+  }
 };
 
 /* VERIFIKASI PEMBAYARAN */
