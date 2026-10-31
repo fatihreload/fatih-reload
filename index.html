@@ -320,6 +320,11 @@ const historyLimit=20;
 let currentAdminView="admin-home", currentCustomerView="customer-home";
 let adminDataLoadedForSession=false, adminVerified=false;
 let orderPollingTimer=null, toastTimer=null, proofUploading=false;
+  
+// AUTO LOGOUT ADMIN: 5 MENIT TANPA AKTIVITAS
+const ADMIN_IDLE_LIMIT = 5 * 60 * 1000;
+let adminIdleTimer = null;
+let lastAdminActivity = 0;
 
 function money(v){return "Rp "+Number(v||0).toLocaleString("id-ID")}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
@@ -334,6 +339,40 @@ function getRows(r,keys=[]){const d=unwrapData(r);if(Array.isArray(d))return d;f
 function statusBadge(s){s=String(s||"").toLowerCase();if(["paid","completed","success","approved","delivered"].includes(s))return `<span class="badge green">${escapeHTML(s)}</span>`;if(["rejected","failed","cancelled","expired"].includes(s))return `<span class="badge red">${escapeHTML(s)}</span>`;return `<span class="badge orange">${escapeHTML(s||"pending")}</span>`}
 function getOrderId(d){return d?.order_id||d?.id||d?.order?.id||d?.data?.order_id||d?.data?.id||""}
 function getOrderStatus(d){return d?.status||d?.order?.status||d?.data?.status||"pending"}
+function resetAdminIdleTimer(){
+  if(!adminVerified)return;
+
+  clearTimeout(adminIdleTimer);
+  lastAdminActivity=Date.now();
+
+  adminIdleTimer=setTimeout(()=>{
+    if(!adminVerified)return;
+
+    const idleTime=Date.now()-lastAdminActivity;
+
+    if(idleTime>=ADMIN_IDLE_LIMIT){
+      window.adminLogout("idle");
+    }else{
+      resetAdminIdleTimer();
+    }
+  },ADMIN_IDLE_LIMIT);
+}
+
+// Aktivitas pengguna akan mengatur ulang waktu logout
+["click","keydown","pointerdown","touchstart","scroll","wheel"].forEach(event=>{
+  document.addEventListener(event,resetAdminIdleTimer,{passive:true});
+});
+
+// Periksa waktu ketika pengguna kembali membuka tab
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible"||!adminVerified)return;
+
+  if(Date.now()-lastAdminActivity>=ADMIN_IDLE_LIMIT){
+    window.adminLogout("idle");
+  }else{
+    resetAdminIdleTimer();
+  }
+});
 function requireAdmin(){if(!adminVerified){showToast("Akses admin diperlukan. Silakan login kembali.");$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");return false}return true}
 
 /* NAVIGASI PELANGGAN / ADMIN */
@@ -472,19 +511,48 @@ window.adminLogin=async function(){
   }catch(e){adminVerified=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");msg.textContent=getErrorMessage(e)}
   finally{setLoading(b,false)}
 };
-window.adminLogout=async function(){
-  adminVerified=false;adminDataLoadedForSession=false;availableVouchers=[];
-  $("adminArea").classList.add("hidden");$("adminLoginScreen").classList.add("hidden");$("adminPassword").value="";$("loginMessage").textContent="";
-  $("voucher-list").innerHTML=`<div class="empty">Silakan login sebagai admin.</div>`;$("payment-list").innerHTML=`<div class="empty">Silakan login sebagai admin.</div>`;$("voucher-total").textContent="Belum ada daftar voucher.";
-  const {error}=await db.auth.signOut();if(error){showToast(getErrorMessage(error));return}showCustomer();showToast("Berhasil keluar.")
+window.adminLogout=async function(reason="manual"){
+  clearTimeout(adminIdleTimer);
+  lastAdminActivity=0;
+
+  adminVerified=false;
+  adminDataLoadedForSession=false;
+  availableVouchers=[];
+
+  $("adminArea").classList.add("hidden");
+  $("adminLoginScreen").classList.add("hidden");
+  $("adminPassword").value="";
+  $("loginMessage").textContent="";
+
+  $("voucher-list").innerHTML=`<div class="empty">Silakan login sebagai admin.</div>`;
+  $("payment-list").innerHTML=`<div class="empty">Silakan login sebagai admin.</div>`;
+  $("voucher-total").textContent="Belum ada daftar voucher.";
+
+  const {error}=await db.auth.signOut();
+
+  if(error){
+    showToast(getErrorMessage(error));
+    return;
+  }
+
+  showCustomer();
+
+  if(reason==="idle"){
+    showToast("Anda otomatis logout karena tidak aktif selama 5 menit.");
+  }else{
+    showToast("Berhasil keluar.");
+  }
 };
+  
 async function updateAdminUI(){
   const {data,error}=await db.auth.getUser();
   if(error||!data.user||data.user.id!==ADMIN_ID){
     adminVerified=false;adminDataLoadedForSession=false;$("adminArea").classList.add("hidden");$("adminLoginScreen").classList.remove("hidden");availableVouchers=[];
     $("payment-list").textContent="Silakan login sebagai admin.";$("voucher-list").innerHTML=`<div class="empty">Akses admin diperlukan.</div>`;$("voucher-total").textContent="Belum ada daftar voucher.";return false
   }
-  adminVerified=true;$("adminLoginScreen").classList.add("hidden");$("adminArea").classList.remove("hidden");
+  adminVerified=true;
+resetAdminIdleTimer();
+$("adminLoginScreen").classList.add("hidden");
   if(!adminDataLoadedForSession){adminDataLoadedForSession=true;await loadPackages();initializeHistoryDates();await Promise.allSettled([loadAdminPayments(),loadTransactionHistory(),refreshAdminDashboard()])}
   return true
 };
