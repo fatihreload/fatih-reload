@@ -10,29 +10,38 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f2f6fa;color:#172b3a;font:15px system-ui}
-header{background:linear-gradient(120deg,#102a43,#1769aa);color:white;padding:24px max(16px,calc((100% - 950px)/2)) 32px}
-.brand{font-size:21px;font-weight:900}
-.hero{margin-top:25px}
-.hero h1{font-size:36px;margin:0}
-.wrap{max-width:950px;margin:24px auto;padding:0 15px}
+header{background:linear-gradient(120deg,#102a43,#1769aa);color:white;padding:16px max(16px,calc((100% - 950px)/2)) 22px;border-radius:0 0 22px 22px}
+.brand{font-size:19px;font-weight:900;letter-spacing:.5px}
+.hero{margin-top:15px}
+.hero h1{font-size:clamp(25px,5vw,34px);line-height:1.15;margin:0}
+.hero p{margin-bottom:0;color:#dceafa}
+.wrap{max-width:950px;margin:17px auto;padding:0 13px}
 .tabs,.row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.tabs{justify-content:flex-start;margin-bottom:16px}
-button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;background:#1769aa;color:white}
+.tabs{position:sticky;top:0;z-index:10;background:#f4f7fb;padding:8px 0;margin-bottom:10px;justify-content:flex-start}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;background:#1769aa;color:white;transition:.15s ease}
 button:disabled{opacity:.6;cursor:not-allowed}
-.tab{background:white;color:#102a43;border:1px solid #dce5ec}
+button:active{transform:scale(.98)}
+.tab{flex:1;background:white;color:#102a43;border:1px solid #dce5ec;padding:10px;font-size:13px}
 .active{background:#1769aa!important;color:white!important}
-.card{background:white;border:1px solid #dce5ec;border-radius:15px;padding:17px;margin-bottom:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.pkg{cursor:pointer}
-.pkg.selected{border:2px solid #1769aa;background:#f3f9ff}
+.card{background:white;border:1px solid #e2eaf2;border-radius:14px;padding:14px;margin-bottom:11px;box-shadow:0 3px 12px rgba(16,42,67,.035)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pkg{cursor:pointer;padding:12px;margin:0;transition:.15s ease}
+.pkg h3{font-size:16px;margin:8px 0 3px}
+.pkg .price{font-size:23px;font-weight:850;margin:5px 0;color:#1769aa}
+.pkg.selected{border:2px solid #1769aa;background:#eff7ff}
+.pkg.soldout{opacity:.7;cursor:not-allowed}
 .price{font-size:27px;font-weight:850;margin:7px 0}
 .muted,small{color:#66798a;font-size:13px}
 .pill{display:inline-block;background:#e8f5f7;color:#087887;border-radius:20px;padding:4px 9px;font-size:11px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.field{margin:12px 0;display:grid;gap:6px}
-.field input,.field select,.file{width:100%;padding:12px;border:1px solid #dce5ec;border-radius:10px;font:inherit}
-.wide{width:100%}
-.qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:25px;text-align:center;min-height:150px;display:grid;place-content:center;gap:8px}
+.stock-info{display:inline-block;margin-top:9px;padding:5px 9px;border-radius:8px;background:#eaf8ef;color:#176b35;font-size:12px;font-weight:800}
+.stock-empty{background:#fff0f0;color:#b42318}
+.stock-loading{background:#f0f3f6;color:#66798a}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px}
+.cols .card{margin-bottom:0}
+.field{margin:9px 0;display:grid;gap:5px}
+.field input,.field select,.file,.check-input{width:100%;padding:11px;border:1px solid #dce5ec;border-radius:10px;font:inherit}
+.wide{width:100%;min-height:43px}
+.qr{border:1px dashed #a9bac8;background:#f7fafc;border-radius:12px;padding:14px;text-align:center;min-height:105px;display:grid;place-content:center;gap:8px}
 .hidden{display:none!important}
 .notice{background:#fff8e8;border:1px solid #f0d99b;color:#73520b;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin:14px 0}
 .success{background:#eaf8ef;border:1px solid #b7e2c4;color:#176b35;border-radius:12px;padding:12px;margin:12px 0}
@@ -40,233 +49,33 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .payment-method{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
 .payment-method label{flex:1;min-width:120px;border:1px solid #dce5ec;border-radius:10px;padding:13px;cursor:pointer}
 .payment-method input{margin-right:7px}
-.account{background:#f3f9ff;border:1px solid #c8dfef;padding:15px;border-radius:12px;margin:12px 0}
-.account-number{font-size:24px;font-weight:900;letter-spacing:1px}
+.account{background:#f3f9ff;border:1px solid #c8dfef;padding:12px;border-radius:12px;margin:12px 0}
+.account-number{font-size:22px;font-weight:900;letter-spacing:1px}
 .copy{background:#e8f1f8;color:#1769aa;padding:7px 10px;margin-top:8px}
 table{width:100%;border-collapse:collapse}
 td,th{text-align:left;border-bottom:1px solid #dce5ec;padding:9px;font-size:13px}
-footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
-.check-input{width:100%;padding:12px;margin:8px 0;border:1px solid #dce5ec;border-radius:10px;font:inherit}
+footer{text-align:center;padding:16px;color:#66798a;font-size:12px}
+.check-input{margin:8px 0}
 .payment-card{border:1px solid #dce5ec;border-radius:12px;padding:15px;margin:12px 0;background:#fff}
 .payment-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .btn-reject{background:#b42318}
 .proof-link{display:inline-block;margin-top:8px;color:#1769aa;font-weight:700}
 .voucher-box{background:white;border:1px solid #b7e2c4;border-radius:10px;padding:15px;margin-top:12px;text-align:center}
 .voucher-code{font-size:25px;font-weight:900;letter-spacing:1px;margin:8px 0;overflow-wrap:anywhere}
+
 @media(max-width:650px){
+  .wrap{margin-top:12px;padding:0 11px}
+  header{padding:15px 16px 19px}
+  .hero{margin-top:12px}
+  .hero h1{font-size:27px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .pkg{padding:11px}
+  .pkg .price{font-size:21px}
   .cols{grid-template-columns:1fr}
-  .hero h1{font-size:30px}
+  .cols .card{padding:13px}
+  .payment-method label{min-width:0;padding:11px}
+  .account-number{font-size:21px}
 }
-  
-/* ===== DESAIN BARU FATIH RELOAD ===== */
-
-body {
-  background: #f4f7fb;
-  color: #172b3a;
-  font-family: system-ui, sans-serif;
-}
-
-header {
-  padding: 16px max(16px, calc((100% - 950px)/2)) 22px;
-  background: linear-gradient(120deg, #102a43, #1769aa);
-  border-radius: 0 0 22px 22px;
-}
-
-.brand {
-  font-size: 19px;
-  letter-spacing: .5px;
-}
-
-.hero {
-  margin-top: 15px;
-}
-
-.hero h1 {
-  font-size: clamp(25px, 5vw, 34px);
-  line-height: 1.15;
-}
-
-.hero p {
-  margin-bottom: 0;
-  color: #dceafa;
-}
-
-.wrap {
-  max-width: 950px;
-  margin: 17px auto;
-  padding: 0 13px;
-}
-
-.tabs {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #f4f7fb;
-  padding: 8px 0;
-  margin-bottom: 10px;
-}
-
-.tab {
-  flex: 1;
-  padding: 10px;
-  border-radius: 11px;
-  font-size: 13px;
-}
-
-h2 {
-  font-size: 19px;
-  margin: 10px 0 13px;
-}
-
-h3 {
-  font-size: 16px;
-  margin: 5px 0 10px;
-}
-
-.card {
-  border: 1px solid #e2eaf2;
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 11px;
-  box-shadow: 0 3px 12px rgba(16,42,67,.035);
-}
-
-.grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.pkg {
-  padding: 12px;
-  margin: 0;
-  transition: .15s ease;
-}
-
-.pkg h3 {
-  margin: 8px 0 3px;
-}
-
-.pkg .price {
-  font-size: 23px;
-  margin: 5px 0;
-  color: #1769aa;
-}
-
-.pkg.selected {
-  border: 2px solid #1769aa;
-  background: #eff7ff;
-}
-
-.cols {
-  gap: 11px;
-  margin-top: 12px;
-}
-
-.cols .card {
-  margin-bottom: 0;
-}
-
-.field {
-  margin: 9px 0;
-  gap: 5px;
-}
-
-.field input,
-.field select,
-.check-input,
-.file {
-  border-radius: 10px;
-  padding: 11px;
-}
-
-button {
-  border-radius: 10px;
-  transition: .15s ease;
-}
-
-button:active {
-  transform: scale(.98);
-}
-
-.wide {
-  min-height: 43px;
-}
-
-.qr {
-  min-height: 105px;
-  padding: 14px;
-}
-
-.payment-box {
-  margin-top: 12px;
-}
-
-.account {
-  padding: 12px;
-}
-
-.account-number {
-  font-size: 22px;
-}
-
-#check-order {
-  margin-top: 15px !important;
-}
-
-footer {
-  padding: 16px;
-}
-
-/* Tampilan HP */
-@media(max-width:650px) {
-  .wrap {
-    margin-top: 12px;
-    padding: 0 11px;
-  }
-
-  header {
-    padding: 15px 16px 19px;
-  }
-
-  .hero {
-    margin-top: 12px;
-  }
-
-  .hero h1 {
-    font-size: 27px;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
-  }
-
-  .pkg {
-    padding: 11px;
-  }
-
-  .pkg .price {
-    font-size: 21px;
-  }
-
-  .cols {
-    grid-template-columns: 1fr;
-  }
-
-  .cols .card {
-    padding: 13px;
-  }
-
-  .payment-method label {
-    min-width: 0;
-    padding: 11px;
-  }
-
-  .account-number {
-    font-size: 21px;
-  }
-}
-
 </style>
 </head>
 
@@ -358,12 +167,8 @@ footer {
 
       <div class="field">
         <label>Unggah bukti transfer</label>
-        <input
-          class="file"
-          id="payment-proof"
-          type="file"
-          accept="image/jpeg,image/png,image/webp,application/pdf"
-        >
+        <input class="file" id="payment-proof" type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf">
         <small>Format JPG, PNG, WEBP, atau PDF. Maksimal 5 MB.</small>
       </div>
 
@@ -419,10 +224,14 @@ footer {
         <p id="msg" class="muted"></p>
       </div>
 
-      <!-- DAFTAR PAKET -->
+      <!-- DAFTAR PAKET DAN STOK -->
       <div class="card">
-        <h3>Paket tersedia</h3>
-        <div id="admintable"></div>
+        <div class="row">
+          <h3>Paket dan stok voucher</h3>
+          <button id="refresh-stock" type="button">Muat stok</button>
+        </div>
+        <p class="muted">Jumlah voucher yang masih tersedia untuk setiap paket.</p>
+        <div id="admintable">Memuat stok...</div>
       </div>
 
       <!-- VERIFIKASI PEMBAYARAN -->
@@ -484,12 +293,13 @@ const WALLET_NUMBER = "089601293092";
 const WALLET_NAME = "MUHAMAD IMRON";
 
 let packagesData = [];
+let stockData = {};
+let stockLoaded = false;
 let selectedId = null;
 let currentOrder = null;
 let currentPhone = null;
 let proofSubmitted = false;
 
-// Variabel pemantauan pesanan
 let orderPollingTimer = null;
 let orderPollingActive = false;
 let orderPollingBusy = false;
@@ -512,7 +322,6 @@ function escapeHtml(s) {
   }[c]));
 }
 
-// Mengambil kode voucher dari respons string/objek
 function getVoucherCode(value) {
   if (typeof value === "string") return value;
 
@@ -575,52 +384,152 @@ function updatePaymentHours() {
   }
 }
 
-// MENAMPILKAN PAKET
+// MENAMPILKAN PAKET DAN STOK
 function renderPackages() {
   $("packages").innerHTML = packagesData.length
-    ? packagesData.map(p => `
-      <div class="card pkg ${p.id === selectedId ? "selected" : ""}" data-id="${p.id}">
-        <span class="pill">Paket internet</span>
-        <h3>${escapeHtml(p.name)}</h3>
-        <div class="price">${rupiah(p.price_idr)}</div>
-        <small>${escapeHtml(p.description || ("Voucher " + p.name))}</small>
-      </div>
-    `).join("")
+    ? packagesData.map(p => {
+        const stock = stockData[p.id] ?? 0;
+        const habis = stock <= 0;
+
+        return `
+          <div class="card pkg
+            ${p.id === selectedId ? "selected" : ""}
+            ${habis ? "soldout" : ""}"
+            data-id="${p.id}">
+
+            <span class="pill">Paket internet</span>
+            <h3>${escapeHtml(p.name)}</h3>
+            <div class="price">${rupiah(p.price_idr)}</div>
+
+            <small>
+              ${escapeHtml(p.description || ("Voucher " + p.name))}
+            </small>
+
+            <div class="stock-info ${
+              !stockLoaded ? "stock-loading" : (habis ? "stock-empty" : "")
+            }">
+              ${
+                stockLoaded
+                  ? (habis ? "STOK HABIS" : `Stok tersedia: ${stock} voucher`)
+                  : "Memuat stok..."
+              }
+            </div>
+          </div>
+        `;
+      }).join("")
     : '<div class="card">Belum ada paket aktif.</div>';
 
   document.querySelectorAll(".pkg").forEach(el => {
     el.addEventListener("click", () => {
-      selectedId = el.dataset.id;
+      const id = el.dataset.id;
+
+      if (!stockLoaded) {
+        alert("Stok sedang dimuat. Silakan tunggu sebentar.");
+        return;
+      }
+
+      if ((stockData[id] ?? 0) <= 0) {
+        alert("Maaf, stok voucher paket ini sedang habis.");
+        return;
+      }
+
+      selectedId = id;
       renderPackages();
       renderChoice();
     });
   });
 
   $("target").innerHTML = packagesData.map(p =>
-    `<option value="${p.id}">${escapeHtml(p.name)} — ${rupiah(p.price_idr)}</option>`
+    `<option value="${p.id}">
+      ${escapeHtml(p.name)} — ${rupiah(p.price_idr)}
+    </option>`
   ).join("");
 
-  $("admintable").innerHTML =
-    '<table><tr><th>Paket</th><th>Harga</th></tr>' +
-    packagesData.map(p =>
-      `<tr><td>${escapeHtml(p.name)}</td><td>${rupiah(p.price_idr)}</td></tr>`
-    ).join("") +
-    '</table>';
-
+  renderAdminStock();
   renderChoice();
+}
+
+// TABEL STOK ADMIN
+function renderAdminStock() {
+  $("admintable").innerHTML = `
+    <table>
+      <tr>
+        <th>Paket</th>
+        <th>Harga</th>
+        <th>Stok tersedia</th>
+      </tr>
+
+      ${packagesData.map(p => {
+        const stock = stockData[p.id] ?? 0;
+
+        return `
+          <tr>
+            <td>${escapeHtml(p.name)}</td>
+            <td>${rupiah(p.price_idr)}</td>
+            <td>
+              <b style="color:${stock > 0 ? "#176b35" : "#b42318"}">
+                ${stockLoaded ? stock + " voucher" : "Memuat..."}
+              </b>
+            </td>
+          </tr>
+        `;
+      }).join("")}
+    </table>
+    <p class="muted">Terakhir diperbarui: ${new Date().toLocaleTimeString("id-ID")}</p>
+  `;
 }
 
 function renderChoice() {
   const p = packagesData.find(x => x.id === selectedId);
 
-  $("choice").innerHTML = p
-    ? `<b>${escapeHtml(p.name)}</b> — ${rupiah(p.price_idr)}`
-    : "Pilih paket.";
+  if (!p) {
+    $("choice").innerHTML = "Pilih paket.";
+    return;
+  }
+
+  const stock = stockData[p.id] ?? 0;
+
+  $("choice").innerHTML = `
+    <b>${escapeHtml(p.name)}</b> — ${rupiah(p.price_idr)}
+    <br>
+    <small>${stockLoaded ? `Stok tersedia: ${stock} voucher` : "Memuat stok..."}</small>
+  `;
+}
+
+// MEMUAT STOK DARI SUPABASE
+async function loadStock() {
+  const { data, error } = await db.rpc("get_package_stock");
+
+  if (error) {
+    console.error("Gagal memuat stok:", error);
+    throw error;
+  }
+
+  const newStock = {};
+
+  (data || []).forEach(row => {
+    newStock[row.package_id] = Number(row.stock_count);
+  });
+
+  stockData = newStock;
+  stockLoaded = true;
+
+  if (
+    !packagesData.some(p =>
+      p.id === selectedId && (stockData[p.id] ?? 0) > 0
+    )
+  ) {
+    selectedId =
+      packagesData.find(p => (stockData[p.id] ?? 0) > 0)?.id || null;
+  }
+
+  renderPackages();
 }
 
 // MEMUAT PAKET
 async function loadPackages() {
-  $("packages").innerHTML = '<div class="card">Menghubungkan ke database...</div>';
+  $("packages").innerHTML =
+    '<div class="card">Menghubungkan ke database...</div>';
 
   const { data, error } = await db
     .from("packages")
@@ -630,18 +539,31 @@ async function loadPackages() {
 
   if (error) {
     $("packages").innerHTML =
-      '<div class="card">Gagal memuat paket dari Supabase. Periksa kebijakan akses tabel packages.</div>';
+      '<div class="card">Gagal memuat paket dari Supabase.</div>';
     console.error(error);
     return;
   }
 
   packagesData = data || [];
 
-  if (!packagesData.some(p => p.id === selectedId)) {
-    selectedId = packagesData[0]?.id || null;
-  }
+  try {
+    await loadStock();
+  } catch (error) {
+    $("packages").innerHTML =
+      '<div class="card">Paket berhasil dimuat, tetapi stok gagal dibaca. Periksa fungsi get_package_stock di Supabase.</div>';
 
-  renderPackages();
+    $("admintable").textContent = "Gagal memuat stok.";
+    console.error(error);
+  }
+}
+
+// MEMPERBARUI STOK SAJA
+async function refreshStock() {
+  try {
+    await loadStock();
+  } catch (error) {
+    console.error("Refresh stok gagal:", error);
+  }
 }
 
 // STATUS LOGIN ADMIN
@@ -655,6 +577,7 @@ async function updateAdminUI() {
 
   if (loggedIn) {
     loadAdminPayments();
+    refreshStock();
   } else {
     $("payment-list").textContent = "Silakan login sebagai admin.";
   }
@@ -731,6 +654,9 @@ $("import").onclick = async () => {
     );
 
     $("file").value = "";
+
+    await refreshStock();
+
   } catch (e) {
     console.error(e);
     showMessage("msg", "Gagal impor: " + (e.message || "Periksa login dan pengaturan Edge Function."), true);
@@ -751,6 +677,15 @@ $("pay").onclick = async () => {
   }
 
   if (!p) return alert("Pilih paket terlebih dahulu.");
+
+  if (!stockLoaded) {
+    return alert("Stok sedang diperiksa. Silakan coba kembali.");
+  }
+
+  if ((stockData[p.id] ?? 0) <= 0) {
+    await refreshStock();
+    return alert("Maaf, stok voucher paket ini sedang habis.");
+  }
 
   if (!/^0[0-9]{8,13}$/.test(phone)) {
     return alert("Masukkan nomor WhatsApp yang benar, diawali 0.");
@@ -853,10 +788,7 @@ $("copy-number").onclick = async () => {
   }
 };
 
-// =====================================
 // PEMANTAUAN OTOMATIS STATUS PESANAN
-// =====================================
-
 function stopOrderPolling() {
   orderPollingActive = false;
   orderPollingBusy = false;
@@ -898,6 +830,8 @@ function showCustomerVoucher(code) {
 
   $("status").textContent =
     "Pembayaran berhasil dan voucher sudah tersedia.";
+
+  refreshStock();
 }
 
 async function checkCustomerOrderAutomatically() {
@@ -1055,11 +989,7 @@ $("submit-proof").onclick = async () => {
   }
 };
 
-// =====================================
-// FITUR VERIFIKASI PEMBAYARAN ADMIN
-// =====================================
-
-// MEMUAT DAFTAR PESANAN ADMIN
+// VERIFIKASI PEMBAYARAN ADMIN
 async function loadAdminPayments() {
   const container = $("payment-list");
 
@@ -1221,6 +1151,7 @@ $("payment-list").addEventListener("click", async event => {
     }
 
     await loadAdminPayments();
+    await refreshStock();
 
   } catch (error) {
     console.error("Payment action error:", error);
@@ -1238,6 +1169,19 @@ $("payment-list").addEventListener("click", async event => {
 // MUAT ULANG DAFTAR PEMBAYARAN
 $("refresh-payments").addEventListener("click", () => {
   loadAdminPayments();
+});
+
+// MUAT ULANG STOK MANUAL
+$("refresh-stock").addEventListener("click", async () => {
+  const button = $("refresh-stock");
+
+  button.disabled = true;
+  button.textContent = "Memuat...";
+
+  await refreshStock();
+
+  button.disabled = false;
+  button.textContent = "Muat stok";
 });
 
 // CEK PESANAN PELANGGAN MANUAL
@@ -1315,6 +1259,9 @@ db.auth.onAuthStateChange(() => {
 loadPackages();
 updateAdminUI();
 updatePaymentHours();
+
+// Perbarui stok setiap 30 detik
+setInterval(refreshStock, 30000);
 
 // Perbarui jam operasional setiap 30 detik
 setInterval(updatePaymentHours, 30000);
