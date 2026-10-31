@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="id">
 <head>
@@ -58,6 +57,216 @@ footer{text-align:center;padding:25px;color:#66798a;font-size:12px}
   .cols{grid-template-columns:1fr}
   .hero h1{font-size:30px}
 }
+  
+/* ===== DESAIN BARU FATIH RELOAD ===== */
+
+body {
+  background: #f4f7fb;
+  color: #172b3a;
+  font-family: system-ui, sans-serif;
+}
+
+header {
+  padding: 16px max(16px, calc((100% - 950px)/2)) 22px;
+  background: linear-gradient(120deg, #102a43, #1769aa);
+  border-radius: 0 0 22px 22px;
+}
+
+.brand {
+  font-size: 19px;
+  letter-spacing: .5px;
+}
+
+.hero {
+  margin-top: 15px;
+}
+
+.hero h1 {
+  font-size: clamp(25px, 5vw, 34px);
+  line-height: 1.15;
+}
+
+.hero p {
+  margin-bottom: 0;
+  color: #dceafa;
+}
+
+.wrap {
+  max-width: 950px;
+  margin: 17px auto;
+  padding: 0 13px;
+}
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f4f7fb;
+  padding: 8px 0;
+  margin-bottom: 10px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 11px;
+  font-size: 13px;
+}
+
+h2 {
+  font-size: 19px;
+  margin: 10px 0 13px;
+}
+
+h3 {
+  font-size: 16px;
+  margin: 5px 0 10px;
+}
+
+.card {
+  border: 1px solid #e2eaf2;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 11px;
+  box-shadow: 0 3px 12px rgba(16,42,67,.035);
+}
+
+.grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pkg {
+  padding: 12px;
+  margin: 0;
+  transition: .15s ease;
+}
+
+.pkg h3 {
+  margin: 8px 0 3px;
+}
+
+.pkg .price {
+  font-size: 23px;
+  margin: 5px 0;
+  color: #1769aa;
+}
+
+.pkg.selected {
+  border: 2px solid #1769aa;
+  background: #eff7ff;
+}
+
+.cols {
+  gap: 11px;
+  margin-top: 12px;
+}
+
+.cols .card {
+  margin-bottom: 0;
+}
+
+.field {
+  margin: 9px 0;
+  gap: 5px;
+}
+
+.field input,
+.field select,
+.check-input,
+.file {
+  border-radius: 10px;
+  padding: 11px;
+}
+
+button {
+  border-radius: 10px;
+  transition: .15s ease;
+}
+
+button:active {
+  transform: scale(.98);
+}
+
+.wide {
+  min-height: 43px;
+}
+
+.qr {
+  min-height: 105px;
+  padding: 14px;
+}
+
+.payment-box {
+  margin-top: 12px;
+}
+
+.account {
+  padding: 12px;
+}
+
+.account-number {
+  font-size: 22px;
+}
+
+#check-order {
+  margin-top: 15px !important;
+}
+
+footer {
+  padding: 16px;
+}
+
+/* Tampilan HP */
+@media(max-width:650px) {
+  .wrap {
+    margin-top: 12px;
+    padding: 0 11px;
+  }
+
+  header {
+    padding: 15px 16px 19px;
+  }
+
+  .hero {
+    margin-top: 12px;
+  }
+
+  .hero h1 {
+    font-size: 27px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .pkg {
+    padding: 11px;
+  }
+
+  .pkg .price {
+    font-size: 21px;
+  }
+
+  .cols {
+    grid-template-columns: 1fr;
+  }
+
+  .cols .card {
+    padding: 13px;
+  }
+
+  .payment-method label {
+    min-width: 0;
+    padding: 11px;
+  }
+
+  .account-number {
+    font-size: 21px;
+  }
+}
+
 </style>
 </head>
 
