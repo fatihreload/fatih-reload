@@ -1243,7 +1243,7 @@ function renderAdminDebtCustomers(){
       let actions="";
       if(c.status==="pending")actions=`<button class="btn btn-success btn-sm" onclick="adminDebtCustomerAction('approve','${c.id}')">Setujui</button> <button class="btn btn-danger btn-sm" onclick="adminDebtCustomerAction('reject','${c.id}')">Tolak</button>`;
       else if(c.status==="approved")actions=`<button class="btn btn-light btn-sm" onclick="adminDebtPriority('${c.id}',${!c.is_priority})">${c.is_priority?"Jadikan Reguler":"Jadikan Prioritas"}</button> <button class="btn btn-danger btn-sm" onclick="adminDebtCustomerAction('suspend','${c.id}')">Tangguhkan</button>`;
-      else if(c.status==="suspended")actions=`<span class="small muted">Akses ditangguhkan</span>`;
+      else if(c.status==="suspended")actions=`<button class="btn btn-success btn-sm" onclick="adminDebtCustomerAction('reactivate','${c.id}')">Aktifkan Kembali</button> <button class="btn btn-danger btn-sm" style="margin-top:5px" onclick="deleteDebtCustomer('${c.id}')">Hapus Akun</button>`;
       const clear=total>0?`<button class="btn btn-danger btn-sm" style="margin-top:5px" onclick="clearDebtNotes('${c.id}')">Hapus Catatan Tagihan</button>`:"";
       return `<tr><td><strong>${escapeHTML(c.name)}</strong><div class="small muted">${escapeHTML(c.phone)}</div><div class="small muted">${formatDate(c.created_at)}</div></td><td>${statusBadge(c.status)}</td><td>${c.is_priority?'<span class="badge green">Prioritas</span>':'<span class="badge">Reguler</span>'}</td><td><strong>${money(total)}</strong><div class="small muted">${issued.length} transaksi</div></td><td>${actions}${clear}</td></tr>`;
     }).join("")
@@ -1265,13 +1265,40 @@ function renderAdminDebtOrders(){
 }
 window.adminDebtCustomerAction=async function(action,customerId){
   if(!requireAdmin())return;
-  const label=action==="approve"?"menyetujui":action==="reject"?"menolak":"menangguhkan";
+  const labels={
+    approve:"menyetujui",
+    reject:"menolak",
+    suspend:"menangguhkan",
+    reactivate:"mengaktifkan kembali"
+  };
+  const label=labels[action]||"memproses";
   if(!confirm(`Yakin ingin ${label} pelanggan ini?`))return;
   try{
     await callAdminDebt({action,customer_id:customerId});
-    showToast("Data pelanggan berhasil diperbarui.");
+    showToast(action==="reactivate"?"Akun pelanggan berhasil diaktifkan kembali.":"Data pelanggan berhasil diperbarui.");
     await loadAdminDebt();
   }catch(e){showToast("Gagal: "+getErrorMessage(e))}
+};
+window.deleteDebtCustomer=async function(customerId){
+  if(!requireAdmin())return;
+  const customer=adminDebtCustomers.find(c=>c.id===customerId);
+  if(!customer||customer.status!=="suspended"){
+    showToast("Akun harus ditangguhkan terlebih dahulu.");
+    return;
+  }
+  const confirmed=confirm(
+    `HAPUS PERMANEN akun ${customer.name||"pelanggan ini"}?\n\n`+
+    "Pastikan tagihan sudah dibayar dan catatan tagihan sudah dihapus.\n"+
+    "Akun, riwayat transaksi, catatan pembayaran, dan sesi login akan dihapus.\n"+
+    "Voucher yang sudah diterbitkan tetap berstatus TERJUAL.\n\n"+
+    "Tindakan ini tidak dapat dibatalkan. Lanjutkan?"
+  );
+  if(!confirmed)return;
+  try{
+    const result=await callAdminDebt({action:"delete_customer",customer_id:customerId});
+    showToast(result.message||"Akun dan riwayat pelanggan berhasil dihapus.");
+    await loadAdminDebt();
+  }catch(e){showToast("Gagal menghapus akun: "+getErrorMessage(e))}
 };
 window.adminDebtPriority=async function(customerId,isPriority){
   if(!requireAdmin())return;
