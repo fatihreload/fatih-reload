@@ -413,9 +413,15 @@ function resetAdminIdleTimer(){
   },ADMIN_IDLE_LIMIT);
 }
 
-// Aktivitas pengguna akan mengatur ulang waktu logout
-["click","keydown","pointerdown","touchstart","scroll","wheel"].forEach(event=>{
-  document.addEventListener(event,resetAdminIdleTimer,{passive:true});
+// Aktivitas nyata admin mengatur ulang waktu logout
+["click","keydown","pointerdown","touchstart","wheel"].forEach(event=>{
+  document.addEventListener(event,(e)=>{
+    if(!e.isTrusted) return;
+    if(!adminVerified) return;
+    if($("adminArea").classList.contains("hidden")) return;
+
+    resetAdminIdleTimer();
+  },{passive:true});
 });
 
 // Periksa waktu ketika pengguna kembali membuka tab
