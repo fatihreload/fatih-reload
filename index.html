@@ -374,7 +374,9 @@ window.adminPaymentRows=[];
 const historyLimit=20;
 let currentAdminView="admin-home", currentCustomerView="customer-home";
 let adminDataLoadedForSession=false, adminVerified=false;
+let orderPollingTimer=null
 let orderPollingTimer=null, toastTimer=null, proofUploading=false;
+let creatingOrder=false;, toastTimer=null, proofUploading=false;
   
 // AUTO LOGOUT ADMIN: 5 MENIT TANPA AKTIVITAS
 const ADMIN_IDLE_LIMIT = 5 * 60 * 1000;
@@ -758,6 +760,118 @@ window.selectPackage=function(id){
     </div>
     <button class="btn btn-primary btn-block" onclick="createOrder()">Buat Pesanan</button>
   `;
+};
+  window.createOrder = async function(){
+  if(creatingOrder) return;
+
+  if(!storeSettingsLoaded){
+    showToast("Sedang memeriksa jam operasional. Coba kembali.");
+    return;
+  }
+
+  if(!isPaymentOpen()){
+    showToast("Pembelian voucher sedang tutup.");
+    return;
+  }
+
+  const packageId = selectedPackageId;
+  const phone = normalizePhone($("customerPhone")?.value);
+  const selectedPackage = packages.find(
+    p => String(p.id) === String(packageId)
+  );
+
+  if(!selectedPackage){
+    showToast("Paket tidak ditemukan. Silakan pilih ulang.");
+    return;
+  }
+
+  if(!phone || phone.replace(/\D/g,"").length < 9){
+    showToast("Masukkan nomor WhatsApp yang benar.");
+    $("customerPhone")?.focus();
+    return;
+  }
+
+  if(findStock(packageId) <= 0){
+    showToast("Stok voucher paket ini habis.");
+    await loadStock();
+    return;
+  }
+
+  creatingOrder = true;
+
+  const button = $("paymentContent")?.querySelector("button");
+  if(button){
+    button.disabled = true;
+    button.textContent = "Membuat pesanan...";
+  }
+
+  try{
+    const {data,error} = await db.functions.invoke(
+      "create-order",
+      {
+        body:{
+          package_id: packageId,
+          phone: phone
+        }
+      }
+    );
+
+    if(error) throw error;
+
+    const result = unwrapData(data);
+
+    if(!result || result.success !== true || !result.order?.id){
+      throw new Error(
+        result?.error ||
+        result?.message ||
+        "Pesanan gagal dibuat."
+      );
+    }
+
+    currentOrder = {
+      ...result.order,
+      package_id: packageId
+    };
+
+    currentOrderId = String(result.order.id);
+    currentOrderStatus = result.order.status || "pending";
+    currentPhone = phone;
+    proofSubmitted = false;
+
+    if($("checkOrderId")){
+      $("checkOrderId").value = currentOrderId;
+    }
+
+    if($("checkPhone")){
+      $("checkPhone").value = currentPhone;
+    }
+
+    showCustomerView("customer-orders");
+
+    $("paymentPanel").classList.remove("hidden");
+
+    renderCurrentOrderPanel();
+    renderPaymentPanel();
+    startOrderPolling();
+
+    await loadStock();
+
+    showToast(
+      result.message || "Pesanan berhasil dibuat. Silakan lakukan pembayaran."
+    );
+
+  }catch(e){
+    console.error("Gagal membuat pesanan:",e);
+    showToast("Gagal membuat pesanan: " + getErrorMessage(e));
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "Buat Pesanan";
+    }
+
+  }finally{
+    creatingOrder = false;
+  }
 };
 function renderPaymentPanel(){
   const panel=$("paymentPanel"),content=$("paymentContent");
