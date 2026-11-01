@@ -761,6 +761,8 @@ window.selectPackage=function(id){
     <button class="btn btn-primary btn-block" onclick="createOrder()">Buat Pesanan</button>
   `;
 };
+  
+function renderPaymentPanel(){
   window.createOrder = async function(){
   if(creatingOrder) return;
 
@@ -873,7 +875,6 @@ window.selectPackage=function(id){
     creatingOrder = false;
   }
 };
-function renderPaymentPanel(){
   const panel=$("paymentPanel"),content=$("paymentContent");
   if(!currentOrderId||!panel||!content)return;
   panel.classList.remove("hidden");
