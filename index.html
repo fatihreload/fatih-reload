@@ -1194,7 +1194,7 @@ window.createDebtOrder=async function(packageId){
       out.innerHTML=`<div class="notice success">Voucher berhasil diterbitkan dan dicatat sebagai tagihan Bayar Nanti.</div>
         <div class="order-result"><strong>${escapeHTML(result.package_name||p.name)}</strong><div class="package-price">${money(result.amount_idr??p.price_idr)}</div>
         ${code?`<div class="code-box"><span class="small">KODE VOUCHER</span><strong>${escapeHTML(code)}</strong><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="copyVoucher('${escapeHTML(code)}')">Salin Voucher</button></div>`:""}
-        <div class="small muted">Transaksi ke-${escapeHTML(result.daily_transactions??"-")} dari ${escapeHTML(result.daily_limit??5)} transaksi hari ini.</div>
+        <div class="small muted">Transaksi ke-${escapeHTML(result.daily_transactions??"-")} dari ${escapeHTML(result.daily_limit??5)} transaksi hari ini.</div></div>`;
       await loadStock();
     }else{
       out.innerHTML=`<div class="notice success">Permintaan pembelian berhasil dikirim dan sedang menunggu persetujuan admin. Voucher belum diterbitkan dan stok belum dipotong.</div>
