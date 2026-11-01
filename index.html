@@ -374,9 +374,7 @@ window.adminPaymentRows=[];
 const historyLimit=20;
 let currentAdminView="admin-home", currentCustomerView="customer-home";
 let adminDataLoadedForSession=false, adminVerified=false;
-let orderPollingTimer=null
-let orderPollingTimer=null, toastTimer=null, proofUploading=false;
-let creatingOrder=false;, toastTimer=null, proofUploading=false;
+let orderPollingTimer=null, toastTimer=null, proofUploading=false, creatingOrder=false;
   
 // AUTO LOGOUT ADMIN: 5 MENIT TANPA AKTIVITAS
 const ADMIN_IDLE_LIMIT = 5 * 60 * 1000;
@@ -761,9 +759,7 @@ window.selectPackage=function(id){
     <button class="btn btn-primary btn-block" onclick="createOrder()">Buat Pesanan</button>
   `;
 };
-  
-function renderPaymentPanel(){
-  window.createOrder = async function(){
+    window.createOrder = async function(){
   if(creatingOrder) return;
 
   if(!storeSettingsLoaded){
@@ -875,6 +871,7 @@ function renderPaymentPanel(){
     creatingOrder = false;
   }
 };
+function renderPaymentPanel(){
   const panel=$("paymentPanel"),content=$("paymentContent");
   if(!currentOrderId||!panel||!content)return;
   panel.classList.remove("hidden");
