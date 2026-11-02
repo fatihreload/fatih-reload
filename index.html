@@ -363,8 +363,9 @@ body.dark-theme .footer{color:#8295a6}
 </div>
 
 <div class="grid admin-shortcuts" style="
-  grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
-  gap:12px;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
 ">
 
   <button class="shortcut" onclick="showAdminView('admin-payments')">
