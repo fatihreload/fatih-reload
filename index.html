@@ -1148,24 +1148,50 @@ window.debtLogin=async function(){
   }finally{setLoading(button,false)}
 };
 async function verifyDebtSession(){
-  const token=getDebtSession();
-  if(!token)return false;
+  const token = getDebtSession();
+  if(!token) return false;
+
   try{
-    const {data,error}=await db.functions.invoke("debt-verify-session",{body:{session_token:token}});
-    if(error)throw error;
-    const result=unwrapData(data);
-    if(result?.success!==true||!result?.customer)throw new Error(result?.error||"Sesi tidak berlaku.");
-    debtCustomer={
+    const {data,error} = await db.functions.invoke(
+      "debt-verify-session",
+      {
+        body:{
+          session_token:token
+        }
+      }
+    );
+
+    if(error) throw error;
+
+    const result = unwrapData(data);
+
+    if(result?.success !== true || !result?.customer){
+      throw new Error(result?.error || "Sesi tidak berlaku.");
+    }
+
+    debtCustomer = {
       ...result.customer,
-      transactions:Array.isArray(result.transactions)?result.transactions:[]
+      transactions:Array.isArray(result.transactions)
+        ? result.transactions
+        : []
     };
+
     renderDebtMember();
+
+    // Mulai pemeriksaan otomatis setelah sesi berhasil.
+    startDebtAutoRefresh();
+
     return true;
+
   }catch(e){
+    stopDebtAutoRefresh();
+
     setDebtSession("");
-    debtCustomer=null;
+    debtCustomer = null;
+
     $("debtMemberPanel")?.classList.add("hidden");
     $("debtCustomerPanel")?.classList.remove("hidden");
+
     return false;
   }
 }
@@ -1224,12 +1250,17 @@ window.refreshDebtHistory=async function(){
   else showToast("Sesi berakhir. Silakan login kembali.");
 }
 window.debtLogout=function(){
+  stopDebtAutoRefresh();
+
   setDebtSession("");
-  debtCustomer=null;
+  debtCustomer = null;
+
   $("debtMemberPanel")?.classList.add("hidden");
   $("debtCustomerPanel")?.classList.remove("hidden");
-  $("debtPurchaseResult").innerHTML="";
+  $("debtPurchaseResult").innerHTML = "";
+
   showDebtAuth("login");
+
   showToast("Anda telah keluar dari Bayar Nanti.");
 };
 window.createDebtOrder=async function(packageId){
@@ -1259,7 +1290,75 @@ window.createDebtOrder=async function(packageId){
     out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`;
   }
 };
+/* AUTO REFRESH BAYAR NANTI */
+let debtPollingTimer = null;
+let debtPollingBusy = false;
 
+function stopDebtAutoRefresh(){
+  if(debtPollingTimer){
+    clearInterval(debtPollingTimer);
+    debtPollingTimer = null;
+  }
+}
+
+function startDebtAutoRefresh(){
+  stopDebtAutoRefresh();
+
+  if(!getDebtSession()) return;
+
+  debtPollingTimer = setInterval(()=>{
+    refreshDebtSessionSilently();
+  },5000);
+}
+
+async function refreshDebtSessionSilently(){
+  if(debtPollingBusy || !getDebtSession()) return;
+
+  debtPollingBusy = true;
+
+  try{
+    const {data,error} = await db.functions.invoke(
+      "debt-verify-session",
+      {
+        body:{
+          session_token:getDebtSession()
+        }
+      }
+    );
+
+    if(error) throw error;
+
+    const result = unwrapData(data);
+
+    if(result?.success !== true || !result?.customer){
+      stopDebtAutoRefresh();
+      setDebtSession("");
+      debtCustomer = null;
+
+      $("debtMemberPanel")?.classList.add("hidden");
+      $("debtCustomerPanel")?.classList.remove("hidden");
+
+      return;
+    }
+
+    debtCustomer = {
+      ...result.customer,
+      transactions:Array.isArray(result.transactions)
+        ? result.transactions
+        : []
+    };
+
+    // Perbarui riwayat tanpa mengganggu tampilan paket.
+    renderDebtHistory();
+
+  }catch(e){
+    // Jika internet atau server bermasalah sementara,
+    // jangan langsung mengeluarkan pelanggan.
+    console.warn("Auto refresh Bayar Nanti:",e);
+  }finally{
+    debtPollingBusy = false;
+  }
+}
 /* BAYAR NANTI - ADMIN */
 let adminDebtCustomers=[],adminDebtOrders=[];
 async function callAdminDebt(body){
@@ -1679,7 +1778,15 @@ window.toggleTheme=function(){
   try{saved=localStorage.getItem("fatihReloadTheme")||"light"}catch(e){}
   applyTheme(saved);
 })();
-
+document.addEventListener("visibilitychange",()=>{
+  if(
+    document.visibilityState === "visible" &&
+    debtCustomer &&
+    getDebtSession()
+  ){
+    refreshDebtSessionSilently();
+  }
+});
 /* INISIALISASI: SELALU MULAI DARI HALAMAN PELANGGAN */
 $("yearNow").textContent=new Date().getFullYear();
 
