@@ -1888,26 +1888,48 @@ window.loadArchiveVouchers = async function(){
     }
 
     
-list.innerHTML = archiveVouchers.map(v => {
-  const id = String(v.id || "");
-  const status = v.status === "sold" ? "Terjual" : "Tersedia";
-  const badgeClass = v.status === "sold" ? "warning" : "success";
 
-  return `<div class="voucher-item" style="display:flex;align-items:center;gap:12px;padding:12px">
-    <input class="archive-voucher-check" type="checkbox"
-      aria-label="Pilih voucher"
-      style="flex-shrink:0;width:18px;height:18px"
-      ${id ? `onchange="toggleArchiveVoucherSelection('${escapeHTML(id)}',this.checked)"` : "disabled"}>
-    <div class="voucher-info" style="flex:1;min-width:0;text-align:left">
-      <div class="voucher-code" style="white-space:normal;overflow-wrap:anywhere;text-align:left">
-        ${escapeHTML(getVoucherCode(v) || "-")}
-      </div>
-      <div style="margin-top:5px">
-        <span class="badge ${badgeClass}">${status}</span>
-      </div>
-    </div>
-  </div>`;
-}).join("");
+list.innerHTML = `
+  <div style="
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:7px;
+  ">
+    ${archiveVouchers.map(v => {
+      const id = String(v.id || "");
+      const status = v.status === "sold" ? "Terjual" : "Tersedia";
+      const color = v.status === "sold" ? "#d97706" : "#16a34a";
+
+      return `<div class="voucher-item" style="
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:5px;
+        padding:7px 3px;
+        min-width:0;
+        text-align:center;
+      ">
+        <input class="archive-voucher-check" type="checkbox"
+          aria-label="Pilih voucher"
+          style="width:17px;height:17px;margin:0"
+          ${id ? `onchange="toggleArchiveVoucherSelection('${escapeHTML(id)}',this.checked)"` : "disabled"}>
+        <div class="voucher-code" style="
+          font-size:10px;
+          white-space:normal;
+          overflow-wrap:anywhere;
+          text-align:center;
+          line-height:1.3;
+        ">${escapeHTML(getVoucherCode(v) || "-")}</div>
+        <span style="
+          font-size:9px;
+          font-weight:700;
+          color:${color};
+        ">${status}</span>
+      </div>`;
+    }).join("")}
+  </div>
+`;
 
     updateArchiveSelectionUI();
 
