@@ -475,7 +475,13 @@ body.dark-theme .footer{color:#8295a6}
     <span>⚙</span>
     <span><strong>Pengaturan</strong><small>Atur toko</small></span>
   </button>
-
+<button class="shortcut" onclick="adminLogout()">
+  <span>⇥</span>
+  <span>
+    <strong>Keluar Admin</strong>
+    <small>Keluar dari dashboard</small>
+  </span>
+</button>
 </div>
 </section>
 <section id="admin-history" class="admin-page"><div class="admin-heading"><div><h1>Riwayat Transaksi</h1><p>Daftar transaksi berdasarkan tanggal dan status.</p></div><button class="btn btn-light btn-sm" onclick="loadTransactionHistory()">↻ Refresh</button></div><div class="card"><div class="toolbar"><div class="field"><label>Dari tanggal</label><input type="date" id="historyDateFrom"></div><div class="field"><label>Sampai tanggal</label><input type="date" id="historyDateTo"></div><div class="field"><label>Status</label><select id="historyStatus"><option value="">Semua status</option><option value="pending">Pending</option><option value="waiting_payment">Menunggu pembayaran</option><option value="paid">Dibayar</option><option value="completed">Selesai</option><option value="rejected">Ditolak</option><option value="expired">Kedaluwarsa</option></select></div><button class="btn btn-primary" onclick="historyCurrentPage=1;loadTransactionHistory()">Tampilkan</button></div><div id="historySummary" class="notice" style="margin-bottom:14px">Pilih tanggal.</div><div id="historyTable" class="empty">Memuat...</div><div class="pagination"><button class="btn btn-light btn-sm" onclick="changeHistoryPage(-1)">← Sebelumnya</button><span id="historyPageInfo" class="small muted">Halaman 1</span><button class="btn btn-light btn-sm" onclick="changeHistoryPage(1)">Berikutnya →</button></div></div></section>
