@@ -1887,20 +1887,27 @@ window.loadArchiveVouchers = async function(){
       return;
     }
 
-    list.innerHTML = archiveVouchers.map(v => {
-      const id = String(v.id || "");
-      const status = v.status === "sold" ? "Terjual" : "Tersedia";
+    
+list.innerHTML = archiveVouchers.map(v => {
+  const id = String(v.id || "");
+  const status = v.status === "sold" ? "Terjual" : "Tersedia";
+  const badgeClass = v.status === "sold" ? "warning" : "success";
 
-      return `<div class="voucher-item">
-        <input class="archive-voucher-check" type="checkbox"
-          aria-label="Pilih voucher"
-          ${id ? `onchange="toggleArchiveVoucherSelection('${escapeHTML(id)}',this.checked)"` : "disabled"}>
-        <div class="voucher-info">
-          <div class="voucher-code">${escapeHTML(getVoucherCode(v) || "-")}</div>
-          <div class="small muted">Status: ${status}</div>
-        </div>
-      </div>`;
-    }).join("");
+  return `<div class="voucher-item" style="display:flex;align-items:center;gap:12px;padding:12px">
+    <input class="archive-voucher-check" type="checkbox"
+      aria-label="Pilih voucher"
+      style="flex-shrink:0;width:18px;height:18px"
+      ${id ? `onchange="toggleArchiveVoucherSelection('${escapeHTML(id)}',this.checked)"` : "disabled"}>
+    <div class="voucher-info" style="flex:1;min-width:0;text-align:left">
+      <div class="voucher-code" style="white-space:normal;overflow-wrap:anywhere;text-align:left">
+        ${escapeHTML(getVoucherCode(v) || "-")}
+      </div>
+      <div style="margin-top:5px">
+        <span class="badge ${badgeClass}">${status}</span>
+      </div>
+    </div>
+  </div>`;
+}).join("");
 
     updateArchiveSelectionUI();
 
