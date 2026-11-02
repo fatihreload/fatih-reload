@@ -1105,6 +1105,7 @@ function startDebtAutoRefresh(){
   },5000);
 }
 
+
 async function refreshDebtSessionSilently(){
   if(debtPollingBusy || !getDebtSession()) return;
 
@@ -1142,17 +1143,56 @@ async function refreshDebtSessionSilently(){
         : []
     };
 
-    // Perbarui riwayat tanpa mengganggu tampilan paket.
+    // Perbarui riwayat transaksi.
     renderDebtHistory();
 
+    // Perbarui kotak hasil pembelian jika transaksi sudah diterbitkan.
+    const out = $("debtPurchaseResult");
+
+    if(out && Array.isArray(debtCustomer.transactions)){
+      const pendingBox = out.querySelector(".notice.success");
+
+      if(pendingBox){
+        const latestIssued = debtCustomer.transactions.find(t =>
+          t.status === "issued" &&
+          t.voucher_code
+        );
+
+        if(latestIssued){
+          const code = getVoucherCode(latestIssued.voucher_code);
+
+          pendingBox.remove();
+
+          if(code){
+            out.innerHTML = `
+              <div class="notice success">
+                Persetujuan berhasil! Voucher sudah diterbitkan.
+              </div>
+              <div class="order-result">
+                <strong>${escapeHTML(latestIssued.package_name_snapshot || "Paket Bayar Nanti")}</strong>
+                <div class="code-box">
+                  <span class="small">KODE VOUCHER</span>
+                  <strong>${escapeHTML(code)}</strong>
+                  <button class="btn btn-secondary btn-sm"
+                    style="margin-top:10px"
+                    onclick="copyVoucher('${escapeHTML(code)}')">
+                    Salin Voucher
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        }
+      }
+    }
+
   }catch(e){
-    // Jika internet atau server bermasalah sementara,
-    // jangan langsung mengeluarkan pelanggan.
     console.warn("Auto refresh Bayar Nanti:",e);
   }finally{
     debtPollingBusy = false;
   }
 }
+
 function getDebtSession(){
   try{return localStorage.getItem(DEBT_SESSION_KEY)||""}catch(e){return ""}
 }
