@@ -885,9 +885,36 @@ async function refreshStock(){const ok=await loadStock();showToast(ok?"Stok berh
 async function loadPackages(){
   const {data,error}=await db.from("packages").select("id,name,slug,price_idr,description,is_active").eq("is_active",true).order("price_idr",{ascending:true});
   if(error){console.error(error);$("packageGrid").innerHTML=`<div class="empty" style="grid-column:1/-1">Gagal memuat paket. Silakan muat ulang halaman.</div>`;return}
-  packages=data||[];renderPackageOptions();await loadStock();renderPackages();if(debtCustomer)renderDebtMember();
+  packages=data||[];
+renderPackageOptions();
+renderArchivePackageOptions();
+await loadStock();
+renderPackages();
+if(debtCustomer)renderDebtMember();
 }
+function renderArchivePackageOptions(){
+  const ids=["archiveVoucherPackage","archivedVoucherPackage"];
 
+  ids.forEach(id=>{
+    const el=$(id);
+    if(!el)return;
+
+    const current=el.value;
+
+    el.innerHTML='<option value="">Pilih paket</option>';
+
+    packages.forEach(p=>{
+      const option=document.createElement("option");
+      option.value=p.id;
+      option.textContent=p.name;
+      el.appendChild(option);
+    });
+
+    if(packages.some(p=>p.id===current)){
+      el.value=current;
+    }
+  });
+}
 /* PEMESANAN */
 window.selectPackage=function(id){
   if(!storeSettingsLoaded){
