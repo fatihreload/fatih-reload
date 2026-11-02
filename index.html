@@ -1145,7 +1145,13 @@ async function refreshDebtSessionSilently(){
 
     // Perbarui riwayat transaksi.
     renderDebtHistory();
-
+if($("debtMemberPanel") &&
+   !$("debtMemberPanel").classList.contains("hidden")){
+  const grid=$("debtPackageGrid");
+  if(grid){
+    renderDebtMember();
+  }
+}
     // Perbarui kotak hasil pembelian jika transaksi sudah diterbitkan.
     const out = $("debtPurchaseResult");
 
@@ -1304,25 +1310,47 @@ async function verifyDebtSession(){
     return false;
   }
 }
+
 function renderDebtMember(){
   if(!debtCustomer)return;
+
   $("debtCustomerPanel")?.classList.add("hidden");
   $("debtMemberPanel")?.classList.remove("hidden");
+
   $("debtMemberName").textContent=debtCustomer.name||"Pelanggan";
   $("debtMemberPhone").textContent=debtCustomer.phone||"";
+
   $("debtMemberType").textContent=debtCustomer.is_priority
     ?"Akun Prioritas: pembelian akan langsung menerbitkan voucher dan masuk catatan tagihan."
     :"Akun Reguler: permintaan pembelian menunggu persetujuan admin.";
+
   const grid=$("debtPackageGrid");
   if(!grid)return;
-  grid.innerHTML=packages.length?packages.map(p=>`
-    <article class="package-card">
-      <div class="package-icon">📶</div>
-      <h3>${escapeHTML(p.name)}</h3>
-      <div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div>
-      <div class="package-price">${money(p.price_idr)}</div>
-      <button class="btn btn-primary btn-block" onclick="createDebtOrder('${escapeHTML(p.id)}')">Pilih Paket</button>
-    </article>`).join(""):`<div class="empty" style="grid-column:1/-1">Paket belum tersedia.</div>`;
+
+  grid.innerHTML=packages.length?packages.map(p=>{
+    const st=findStock(p.id);
+    const canBuy=st>0;
+
+    return `
+      <article class="package-card">
+        <div class="package-icon">📶</div>
+        <h3>${escapeHTML(p.name)}</h3>
+        <div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div>
+        <div class="package-price">${money(p.price_idr)}</div>
+
+        <div class="package-stock">
+          ${st>0?`Stok tersedia: ${st}`:"Stok habis"}
+        </div>
+
+        <button class="btn ${canBuy?"btn-primary":"btn-light"} btn-block"
+          ${canBuy?"":"disabled"}
+          onclick="createDebtOrder('${escapeHTML(p.id)}')">
+          ${canBuy?"Pilih Paket":"Stok Habis"}
+        </button>
+      </article>
+    `;
+  }).join(""):`<div class="empty" style="grid-column:1/-1">Paket belum tersedia.</div>`;
+
   renderDebtHistory();
 }
 function renderDebtHistory(){
