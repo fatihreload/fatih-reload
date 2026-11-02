@@ -1796,6 +1796,238 @@ window.deleteSelectedVouchers=async function(){
   }
 };
 
+/* ARSIP VOUCHER */
+
+let archiveVouchers = [];
+let selectedArchiveVoucherIds = new Set();
+let archivedVouchers = [];
+
+window.updateArchiveSelectionUI = function(){
+  const count = selectedArchiveVoucherIds.size;
+  const confirmation = $("archiveUsedConfirmation")?.checked === true;
+  const countEl = $("archiveSelectedCount");
+  const button = $("archiveSelectedBtn");
+  const all = $("archiveSelectAll");
+
+  if(countEl) countEl.textContent = `${count} dipilih`;
+  if(button) button.disabled = count === 0 || !confirmation;
+
+  if(all){
+    const total = archiveVouchers.length;
+    all.checked = total > 0 && count === total;
+    all.indeterminate = count > 0 && count < total;
+  }
+};
+
+window.toggleArchiveVoucherSelection = function(id, checked){
+  if(checked) selectedArchiveVoucherIds.add(String(id));
+  else selectedArchiveVoucherIds.delete(String(id));
+
+  updateArchiveSelectionUI();
+};
+
+window.toggleSelectAllArchive = function(checked){
+  selectedArchiveVoucherIds.clear();
+
+  if(checked){
+    archiveVouchers.forEach(v => {
+      if(v.id) selectedArchiveVoucherIds.add(String(v.id));
+    });
+  }
+
+  document.querySelectorAll(".archive-voucher-check").forEach(el => {
+    el.checked = checked;
+  });
+
+  updateArchiveSelectionUI();
+};
+
+window.loadArchiveVouchers = async function(){
+  const list = $("archiveVoucherList");
+  const total = $("archiveVoucherTotal");
+
+  if(!list || !total || !requireAdmin()) return;
+
+  const packageId = $("archiveVoucherPackage")?.value || "";
+
+  archiveVouchers = [];
+  selectedArchiveVoucherIds.clear();
+
+  if($("archiveUsedConfirmation")) $("archiveUsedConfirmation").checked = false;
+  if($("archiveSelectAll")) $("archiveSelectAll").checked = false;
+
+  updateArchiveSelectionUI();
+
+  if(!packageId){
+    list.innerHTML = `<div class="empty">Silakan pilih paket terlebih dahulu.</div>`;
+    total.textContent = "Pilih paket untuk melihat voucher.";
+    return;
+  }
+
+  total.textContent = "Memuat data...";
+  list.innerHTML = `<div class="empty">Memuat voucher...</div>`;
+
+  try{
+    const {data,error} = await db.functions.invoke("admin-vouchers",{
+      body:{
+        action:"list-for-archive",
+        package_id:packageId
+      }
+    });
+
+    if(error) throw error;
+
+    const p = unwrapData(data);
+    archiveVouchers = getRows(p,["vouchers","data","items"]);
+
+    total.textContent = `Jumlah voucher belum diarsipkan: ${p?.total ?? archiveVouchers.length}`;
+
+    if(!archiveVouchers.length){
+      list.innerHTML = `<div class="empty">Tidak ada voucher untuk paket ini.</div>`;
+      return;
+    }
+
+    list.innerHTML = archiveVouchers.map(v => {
+      const id = String(v.id || "");
+      const status = v.status === "sold" ? "Terjual" : "Tersedia";
+
+      return `<div class="voucher-item">
+        <input class="archive-voucher-check" type="checkbox"
+          aria-label="Pilih voucher"
+          ${id ? `onchange="toggleArchiveVoucherSelection('${escapeHTML(id)}',this.checked)"` : "disabled"}>
+        <div class="voucher-info">
+          <div class="voucher-code">${escapeHTML(getVoucherCode(v) || "-")}</div>
+          <div class="small muted">Status: ${status}</div>
+        </div>
+      </div>`;
+    }).join("");
+
+    updateArchiveSelectionUI();
+
+  }catch(e){
+    console.error("Muat voucher arsip:",e);
+    archiveVouchers = [];
+    list.innerHTML = `<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`;
+    total.textContent = "Gagal memuat voucher.";
+    updateArchiveSelectionUI();
+  }
+};
+
+window.archiveSelectedVouchers = async function(){
+  if(!requireAdmin()) return;
+
+  const ids = [...selectedArchiveVoucherIds].filter(id =>
+    archiveVouchers.some(v => String(v.id) === id)
+  );
+
+  if(!ids.length){
+    showToast("Pilih voucher yang ingin diarsipkan.");
+    return;
+  }
+
+  if(!$("archiveUsedConfirmation")?.checked){
+    showToast("Konfirmasi bahwa voucher sudah berstatus Used di Adopisoft.");
+    return;
+  }
+
+  if(!confirm(`Arsipkan ${ids.length} voucher terpilih? Pastikan semuanya benar-benar Used di Adopisoft.`)) return;
+
+  const button = $("archiveSelectedBtn");
+  setLoading(button,true,"Mengarsipkan...");
+
+  try{
+    const {data,error} = await db.functions.invoke("admin-vouchers",{
+      body:{
+        action:"archive",
+        voucher_ids:ids
+      }
+    });
+
+    if(error) throw error;
+
+    const p = unwrapData(data);
+
+    if(p?.success === false){
+      throw new Error(p?.error || "Gagal mengarsipkan voucher.");
+    }
+
+    showToast(p?.pesan || `Berhasil mengarsipkan ${p?.archived_count ?? ids.length} voucher.`);
+
+    if($("archiveUsedConfirmation")) $("archiveUsedConfirmation").checked = false;
+
+    await loadArchiveVouchers();
+    await loadArchivedVoucherList();
+    await loadStock();
+
+  }catch(e){
+    console.error("Arsip voucher:",e);
+    showToast("Gagal mengarsipkan voucher: " + getErrorMessage(e));
+  }finally{
+    setLoading(button,false);
+    updateArchiveSelectionUI();
+  }
+};
+
+window.loadArchivedVoucherList = async function(){
+  const list = $("archivedVoucherList");
+  const total = $("archivedVoucherTotal");
+
+  if(!list || !total || !requireAdmin()) return;
+
+  const packageId = $("archivedVoucherPackage")?.value || "";
+
+  archivedVouchers = [];
+
+  if(!packageId){
+    list.innerHTML = `<div class="empty">Silakan pilih paket arsip.</div>`;
+    total.textContent = "Pilih paket untuk melihat arsip.";
+    return;
+  }
+
+  total.textContent = "Memuat data...";
+  list.innerHTML = `<div class="empty">Memuat arsip voucher...</div>`;
+
+  try{
+    const {data,error} = await db.functions.invoke("admin-vouchers",{
+      body:{
+        action:"list-archived",
+        package_id:packageId
+      }
+    });
+
+    if(error) throw error;
+
+    const p = unwrapData(data);
+    archivedVouchers = getRows(p,["vouchers","data","items"]);
+
+    total.textContent = `Jumlah voucher diarsipkan: ${p?.total ?? archivedVouchers.length}`;
+
+    if(!archivedVouchers.length){
+      list.innerHTML = `<div class="empty">Belum ada voucher yang diarsipkan.</div>`;
+      return;
+    }
+
+    list.innerHTML = archivedVouchers.map(v => {
+      const date = v.archived_at
+        ? new Date(v.archived_at).toLocaleString("id-ID")
+        : "-";
+
+      return `<div class="voucher-item">
+        <div class="voucher-info">
+          <div class="voucher-code">${escapeHTML(getVoucherCode(v) || "-")}</div>
+          <div class="small muted">Diarsipkan: ${escapeHTML(date)}</div>
+        </div>
+      </div>`;
+    }).join("");
+
+  }catch(e){
+    console.error("Muat arsip voucher:",e);
+    archivedVouchers = [];
+    list.innerHTML = `<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`;
+    total.textContent = "Gagal memuat arsip voucher.";
+  }
+};
+
 /* VERIFIKASI PEMBAYARAN */
 window.loadAdminPayments=async function(){
   if(!requireAdmin())return;const box=$("payment-list");if(!box)return;box.innerHTML=`<div class="empty">Memuat daftar pembayaran...</div>`;
