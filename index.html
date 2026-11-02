@@ -1434,64 +1434,6 @@ function startDebtRegistrationTracking(token) {
     checkDebtRegistrationStatus();
   }, 5000);
 }
-
-async function checkDebtRegistrationStatus() {
-  if (
-    debtRegistrationTrackingBusy ||
-    !debtRegistrationTrackingToken
-  ) return;
-
-  debtRegistrationTrackingBusy = true;
-
-  try {
-    const { data, error } = await db.functions.invoke(
-      "debt-registration-status",
-      {
-        body: {
-          tracking_token: debtRegistrationTrackingToken
-        }
-      }
-    );
-
-    if (error) throw error;
-
-    const result = unwrapData(data);
-
-    if (result?.success !== true) {
-      stopDebtRegistrationTracking();
-      return;
-    }
-
-    if (
-      result.status === "approved" ||
-      result.status === "rejected"
-    ) {
-      stopDebtRegistrationTracking();
-      showDebtRegistrationNotice(result.status);
-    }
-
-  } catch (error) {
-    console.warn(
-      "Pemeriksaan status pendaftaran:",
-      error
-    );
-  } finally {
-    debtRegistrationTrackingBusy = false;
-  }
-}
-
-function startDebtRegistrationTracking(token) {
-  stopDebtRegistrationTracking();
-
-  debtRegistrationTrackingToken = token;
-
-  checkDebtRegistrationStatus();
-
-  debtRegistrationTrackingTimer = setInterval(() => {
-    checkDebtRegistrationStatus();
-  }, 5000);
-}
-
 function stopDebtAutoRefresh(){
   if(debtPollingTimer){
     clearInterval(debtPollingTimer);
