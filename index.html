@@ -1084,6 +1084,75 @@ $("adminLoginScreen").classList.add("hidden");
 
 
 /* BAYAR NANTI - PELANGGAN */
+/* AUTO REFRESH BAYAR NANTI */
+let debtPollingTimer = null;
+let debtPollingBusy = false;
+
+function stopDebtAutoRefresh(){
+  if(debtPollingTimer){
+    clearInterval(debtPollingTimer);
+    debtPollingTimer = null;
+  }
+}
+
+function startDebtAutoRefresh(){
+  stopDebtAutoRefresh();
+
+  if(!getDebtSession()) return;
+
+  debtPollingTimer = setInterval(()=>{
+    refreshDebtSessionSilently();
+  },5000);
+}
+
+async function refreshDebtSessionSilently(){
+  if(debtPollingBusy || !getDebtSession()) return;
+
+  debtPollingBusy = true;
+
+  try{
+    const {data,error} = await db.functions.invoke(
+      "debt-verify-session",
+      {
+        body:{
+          session_token:getDebtSession()
+        }
+      }
+    );
+
+    if(error) throw error;
+
+    const result = unwrapData(data);
+
+    if(result?.success !== true || !result?.customer){
+      stopDebtAutoRefresh();
+      setDebtSession("");
+      debtCustomer = null;
+
+      $("debtMemberPanel")?.classList.add("hidden");
+      $("debtCustomerPanel")?.classList.remove("hidden");
+
+      return;
+    }
+
+    debtCustomer = {
+      ...result.customer,
+      transactions:Array.isArray(result.transactions)
+        ? result.transactions
+        : []
+    };
+
+    // Perbarui riwayat tanpa mengganggu tampilan paket.
+    renderDebtHistory();
+
+  }catch(e){
+    // Jika internet atau server bermasalah sementara,
+    // jangan langsung mengeluarkan pelanggan.
+    console.warn("Auto refresh Bayar Nanti:",e);
+  }finally{
+    debtPollingBusy = false;
+  }
+}
 function getDebtSession(){
   try{return localStorage.getItem(DEBT_SESSION_KEY)||""}catch(e){return ""}
 }
@@ -1290,75 +1359,6 @@ window.createDebtOrder=async function(packageId){
     out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`;
   }
 };
-/* AUTO REFRESH BAYAR NANTI */
-let debtPollingTimer = null;
-let debtPollingBusy = false;
-
-function stopDebtAutoRefresh(){
-  if(debtPollingTimer){
-    clearInterval(debtPollingTimer);
-    debtPollingTimer = null;
-  }
-}
-
-function startDebtAutoRefresh(){
-  stopDebtAutoRefresh();
-
-  if(!getDebtSession()) return;
-
-  debtPollingTimer = setInterval(()=>{
-    refreshDebtSessionSilently();
-  },5000);
-}
-
-async function refreshDebtSessionSilently(){
-  if(debtPollingBusy || !getDebtSession()) return;
-
-  debtPollingBusy = true;
-
-  try{
-    const {data,error} = await db.functions.invoke(
-      "debt-verify-session",
-      {
-        body:{
-          session_token:getDebtSession()
-        }
-      }
-    );
-
-    if(error) throw error;
-
-    const result = unwrapData(data);
-
-    if(result?.success !== true || !result?.customer){
-      stopDebtAutoRefresh();
-      setDebtSession("");
-      debtCustomer = null;
-
-      $("debtMemberPanel")?.classList.add("hidden");
-      $("debtCustomerPanel")?.classList.remove("hidden");
-
-      return;
-    }
-
-    debtCustomer = {
-      ...result.customer,
-      transactions:Array.isArray(result.transactions)
-        ? result.transactions
-        : []
-    };
-
-    // Perbarui riwayat tanpa mengganggu tampilan paket.
-    renderDebtHistory();
-
-  }catch(e){
-    // Jika internet atau server bermasalah sementara,
-    // jangan langsung mengeluarkan pelanggan.
-    console.warn("Auto refresh Bayar Nanti:",e);
-  }finally{
-    debtPollingBusy = false;
-  }
-}
 /* BAYAR NANTI - ADMIN */
 let adminDebtCustomers=[],adminDebtOrders=[];
 async function callAdminDebt(body){
