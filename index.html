@@ -458,7 +458,7 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
   <div class="section-title"><h2>Pusat Bantuan</h2></div>
   <div class="card"><h3 style="margin-top:0;color:var(--navy)">Cara membeli voucher</h3><ol style="padding-left:20px;font-size:13px;line-height:1.9"><li>Pilih paket voucher.</li><li>Masukkan nomor WhatsApp.</li><li>Buat pesanan.</li><li>Transfer sesuai nominal.</li><li>Upload bukti pembayaran.</li><li>Tunggu verifikasi admin.</li><li>Voucher muncul setelah pembayaran disetujui.</li></ol></div>
   <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Informasi Pembayaran</h3><div class="payment-info"><div class="small muted">DANA / GoPay</div><div class="wallet-number">089601293092</div><div class="wallet-name">a.n. MUHAMAD IMRON</div></div><div id="customerPaymentHours" class="notice">Memeriksa jam pelayanan...</div><p class="small muted">Pembayaran QRIS belum tersedia. Pastikan nama penerima dan nominal benar.</p></div>
-  <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Butuh bantuan?</h3><p class="small muted">Hubungi admin jika mengalami kendala.</p><a class="btn btn-success btn-block" href="https://wa.me/6289601293092" target="_blank" rel="noopener">Chat WhatsApp Admin</a></div>
+  <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Butuh bantuan?</h3><p class="small muted">Hubungi admin jika mengalami kendala.</p><a class="btn btn-success btn-block" href="https://wa.me/6289643667444" target="_blank" rel="noopener">Chat WhatsApp Admin</a></div>
 </section>
 
 <section id="customer-debt" class="customer-view">
@@ -466,21 +466,21 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
   <div class="notice" style="margin-bottom:14px">Ajukan akses Bayar Nanti. Setelah disetujui admin, Anda dapat membeli voucher tanpa membayar di awal.</div>
   <div id="debtCustomerPanel" class="card">
     <div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px">
-      <button class="btn btn-primary" id="debtShowLoginBtn" onclick="showDebtAuth('login')">Masuk</button>
-      <button class="btn btn-light" id="debtShowRegisterBtn" onclick="showDebtAuth('register')">Daftar</button>
+      <button class="btn btn-primary" id="debtShowLoginBtn" onclick="showDebtAuth('login')">MASUK</button>
+      <button class="btn btn-light" id="debtShowRegisterBtn" onclick="showDebtAuth('register')">DAFTAR</button>
     </div>
     <div id="debtLoginForm">
       <h3 style="margin:0 0 12px;color:var(--navy)">Masuk Bayar Nanti</h3>
       <div class="field"><label>Nomor WhatsApp</label><input id="debtLoginPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div>
       <div class="field"><label>PIN 6 angka</label><input id="debtLoginPin" type="password" inputmode="numeric" maxlength="6" placeholder="Masukkan PIN"></div>
-      <button class="btn btn-primary btn-block" id="debtLoginButton" onclick="debtLogin()">Masuk</button>
+      <button class="btn btn-primary btn-block" id="debtLoginButton" onclick="debtLogin()">MASUK</button>
     </div>
     <div id="debtRegisterForm" class="hidden">
       <h3 style="margin:0 0 12px;color:var(--navy)">Daftar Bayar Nanti</h3>
       <div class="field"><label>Nama</label><input id="debtRegisterName" maxlength="80" placeholder="Nama lengkap"></div>
       <div class="field"><label>Nomor WhatsApp</label><input id="debtRegisterPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div>
       <div class="field"><label>Buat PIN 6 angka</label><input id="debtRegisterPin" type="password" inputmode="numeric" maxlength="6" placeholder="Buat PIN"></div>
-      <button class="btn btn-primary btn-block" id="debtRegisterButton" onclick="debtRegister()">Kirim Pendaftaran</button>
+      <button class="btn btn-primary btn-block" id="debtRegisterButton" onclick="debtRegister()">KIRIM PENDAFTARAN</button>
       <p class="small muted">Pendaftaran menunggu persetujuan admin. Gunakan nomor WhatsApp milik Anda sendiri.</p>
     </div>
     <div id="debtAuthResult" style="margin-top:12px"></div>
