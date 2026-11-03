@@ -259,7 +259,7 @@ body.dark-theme .footer{color:#8295a6}
 .admin-shortcuts {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 14px !important;
+  gap: 10px !important;
 }
 
 .admin-shortcuts .shortcut {
@@ -359,9 +359,9 @@ body.dark-theme .footer{color:#8295a6}
 /* TAMPILAN HP */
 @media(max-width:700px) {
   .admin-shortcuts {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
-  }
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
 
   .admin-shortcuts .shortcut {
     min-height: 125px;
@@ -400,7 +400,7 @@ body.dark-theme .footer{color:#8295a6}
 <body>
 <header class="topbar"><div class="container topbar-inner">
   <div class="brand"><div class="brand-logo">F</div><div><div class="brand-name">FATIH RELOAD</div><div class="brand-sub">WIFI VOUCHER STORE</div></div></div>
-  <div class="header-actions"><button class="header-btn theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti mode tampilan">🌙</button><button class="header-btn" onclick="showCustomer()">Beranda</button><button class="header-btn" onclick="showAdmin()">Admin</button></div>
+  <div class="header-actions"><button class="header-btn theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Ganti mode tampilan">🌙</button><button class="header-btn" onclick="showCustomer()">Beranda</button><button class="header-btn" onclick="showAdmin()">Admin</button><button class="header-btn" onclick="adminLogout()" title="Keluar Admin" aria-label="Keluar Admin">⏻</button></div>
 </div></header>
 
 <main id="customerArea"><div class="container">
@@ -553,11 +553,6 @@ body.dark-theme .footer{color:#8295a6}
   <button class="shortcut" onclick="showAdminView('admin-hours')">
     <span class="shortcut-icon tone-pink">⚙️</span>
     <span><strong>Pengaturan</strong><small>Atur toko</small></span>
-  </button>
-
-  <button class="shortcut" onclick="adminLogout()">
-    <span class="shortcut-icon tone-red">🚪</span>
-    <span><strong>Keluar Admin</strong><small>Keluar dari dashboard</small></span>
   </button>
 
 </div>
