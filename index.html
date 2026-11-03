@@ -402,6 +402,20 @@ body.dark-theme .footer{color:#8295a6}
 body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
   display: inline-flex !important;
 }
+#adminLogoutHeader {
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  vertical-align: middle;
+  font-size: 20px;
+}
+
+body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
+  display: inline-flex !important;
+}
 </style>
 </head>
 <body>
@@ -417,7 +431,7 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
 
   <button class="header-btn" id="adminLogoutHeader"
     onclick="adminLogout()" title="Keluar Admin"
-    aria-label="Keluar Admin">🚪↗</button>
+    aria-label="Keluar Admin">🚪</button>
 </div>
 </div></header>
 
