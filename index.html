@@ -616,6 +616,19 @@ body.dark-theme .footer{color:#8295a6}
       </p>
     </div>
 
+    <hr>
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:9px">
+        <input type="checkbox" id="telegramNotificationsEnabled" checked
+          style="width:18px;height:18px;min-width:18px">
+        Aktifkan Notifikasi Telegram
+      </label>
+      <p class="small muted">
+        Jika dinonaktifkan, semua notifikasi Telegram Fatih Reload akan dihentikan.
+        Pengaturan ini tidak menghapus token bot dan tidak memengaruhi notifikasi aplikasi admin di masa mendatang.
+      </p>
+    </div>
+
     <button class="btn btn-primary btn-block"
       id="saveStoreSettingsBtn"
       onclick="saveStoreSettings()">
@@ -646,7 +659,8 @@ let packages=[], packageStocks=[], selectedPackageId=null, currentOrder=null;
 let storeSettings = {
   opening_time: "07:00",
   closing_time: "23:00",
-  is_enabled: true
+  is_enabled: true,
+  telegram_notifications_enabled: true
 };
 let storeSettingsLoaded = false;
 let currentPhone="", currentOrderId="", currentOrderStatus="", proofSubmitted=false;
@@ -827,7 +841,7 @@ async function loadStoreSettings(){
   try{
     const {data,error} = await db
       .from("store_settings")
-      .select("opening_time,closing_time,is_enabled")
+      .select("opening_time,closing_time,is_enabled,telegram_notifications_enabled")
       .eq("id",1)
       .maybeSingle();
 
@@ -837,7 +851,8 @@ async function loadStoreSettings(){
     storeSettings = {
       opening_time: data.opening_time,
       closing_time: data.closing_time,
-      is_enabled: data.is_enabled
+      is_enabled: data.is_enabled,
+      telegram_notifications_enabled: data.telegram_notifications_enabled ?? true
     };
 
     storeSettingsLoaded = true;
@@ -873,6 +888,9 @@ function fillStoreSettingsForm(){
   if($("openingTime")) $("openingTime").value = storeSettings.opening_time;
   if($("closingTime")) $("closingTime").value = storeSettings.closing_time;
   if($("storeEnabled")) $("storeEnabled").checked = storeSettings.is_enabled;
+  if($("telegramNotificationsEnabled")) {
+    $("telegramNotificationsEnabled").checked = storeSettings.telegram_notifications_enabled;
+  }
 
   updateAdminHoursStatus();
 }
@@ -902,6 +920,7 @@ window.saveStoreSettings = async function(){
   const opening = $("openingTime").value;
   const closing = $("closingTime").value;
   const enabled = $("storeEnabled").checked;
+  const telegramEnabled = $("telegramNotificationsEnabled").checked;
   const button = $("saveStoreSettingsBtn");
   const result = $("storeSettingsResult");
 
@@ -924,10 +943,11 @@ window.saveStoreSettings = async function(){
         opening_time: opening,
         closing_time: closing,
         is_enabled: enabled,
+        telegram_notifications_enabled: telegramEnabled,
         updated_at: new Date().toISOString()
       })
       .eq("id",1)
-      .select("opening_time,closing_time,is_enabled")
+      .select("opening_time,closing_time,is_enabled,telegram_notifications_enabled")
       .single();
 
     if(error) throw error;
@@ -935,7 +955,8 @@ window.saveStoreSettings = async function(){
     storeSettings = {
       opening_time: data.opening_time,
       closing_time: data.closing_time,
-      is_enabled: data.is_enabled
+      is_enabled: data.is_enabled,
+      telegram_notifications_enabled: data.telegram_notifications_enabled ?? true
     };
 
     storeSettingsLoaded = true;
