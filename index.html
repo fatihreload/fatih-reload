@@ -2523,6 +2523,30 @@ document.addEventListener("visibilitychange",()=>{
     refreshDebtSessionSilently();
   }
 });
+/* PELACAKAN PENGUNJUNG WEBSITE */
+(async function trackWebsiteVisitor() {
+  try {
+    let visitorId = localStorage.getItem("fatih_visitor_id");
+
+    if (!visitorId) {
+      visitorId = crypto.randomUUID();
+      localStorage.setItem("fatih_visitor_id", visitorId);
+    }
+
+    const { error } = await db.functions.invoke("track-visitor", {
+      body: {
+        visitor_id: visitorId,
+        page: window.location.pathname
+      }
+    });
+
+    if (error) {
+      console.warn("Pelacakan pengunjung gagal:", error);
+    }
+  } catch (error) {
+    console.warn("Pelacakan pengunjung:", error);
+  }
+})();
 /* INISIALISASI: SELALU MULAI DARI HALAMAN PELANGGAN */
 $("yearNow").textContent=new Date().getFullYear();
 
