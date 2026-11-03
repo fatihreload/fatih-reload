@@ -416,6 +416,28 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
 body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
   display: inline-flex !important;
 }
+/* MEMBUAT IKON MENU ADMIN BERADA DI TENGAH */
+.admin-shortcuts .shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.admin-shortcuts .shortcut-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.admin-shortcuts .shortcut strong {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
 </style>
 </head>
 <body>
@@ -538,7 +560,6 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
 <div class="section-title">
   <h2>Semua Menu Admin</h2>
 </div>
-
 
 <div class="grid admin-shortcuts">
 
