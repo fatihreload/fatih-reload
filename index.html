@@ -16,34 +16,7 @@
 .customer-desktop-link.active{background:#eaf4fc;border-color:#cfe5f7;color:var(--blue)}
 body.dark-theme .customer-desktop-link{background:#18232d;color:#c0ccd7;border-color:var(--border)}
 body.dark-theme .customer-desktop-link.active{background:#203b50;color:#80c5ff}
-.hero-marquee {
-  width: 100%;
-  overflow: hidden;
-  margin-top: 14px;
-  white-space: nowrap;
-}
 
-.hero-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: heroRunningText 25s linear infinite;
-}
-
-.hero-marquee-track span {
-  flex-shrink: 0;
-  padding-right: 40px;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-@keyframes heroRunningText {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
 .admin-shell{display:grid;grid-template-columns:235px minmax(0,1fr);min-height:calc(100vh - 68px)}.admin-sidebar{background:#fff;border-right:1px solid var(--border);padding:22px 14px;position:sticky;top:68px;height:calc(100vh - 68px);overflow:auto}.sidebar-label{color:#9aabba;font-size:10px;font-weight:900;letter-spacing:1.2px;padding:12px}.admin-nav{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:#52667a;padding:12px;border-radius:11px;text-align:left;font-weight:700;font-size:13px;margin:3px 0}.admin-nav.active{background:#eaf4fc;color:var(--blue)}.admin-main{padding:25px;min-width:0;max-width:1450px;width:100%;margin:auto}.admin-page{display:none}.admin-page.active{display:block}.admin-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:20px}.admin-heading h1{font-size:24px;color:var(--navy);margin:0}.admin-heading p{font-size:13px;color:var(--muted);margin:5px 0 0}.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:20px}.stat-card{padding:18px}.stat-label{font-size:12px;color:var(--muted);font-weight:700}.stat-value{font-size:23px;font-weight:900;color:var(--navy);margin-top:3px}.admin-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr))}.shortcut{border:1px solid var(--border);background:#fff;border-radius:15px;padding:17px;text-align:left;display:flex;align-items:center;gap:12px;color:var(--text)}.shortcut strong{display:block;font-size:13px}.shortcut small{color:var(--muted);font-size:11px}.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:13px}table{border-collapse:collapse;width:100%;min-width:650px;background:white}th,td{padding:12px 13px;border-bottom:1px solid #edf1f5;text-align:left;font-size:12px}th{background:#f7fafc;color:#718096;font-size:11px;text-transform:uppercase}tr:last-child td{border-bottom:0}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin-bottom:15px}.toolbar .field{margin:0;min-width:150px}.toolbar .field.grow{flex:1}.login-wrap{max-width:430px;margin:55px auto;padding:0 16px}.login-brand{text-align:center;margin-bottom:20px}.admin-mobile-nav{display:none}.voucher-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.voucher-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px;border:1px solid var(--border);border-radius:11px;background:#fff;font-size:12px}.voucher-code{font-family:monospace;font-weight:800;word-break:break-all}.pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:15px}.toast{position:fixed;z-index:100;left:50%;bottom:25px;transform:translate(-50%,20px);background:#102a43;color:#fff;border-radius:12px;padding:12px 18px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 30px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.footer{text-align:center;color:#9aabba;font-size:11px;padding:25px 10px}.admin-login-screen{min-height:calc(100vh - 68px);padding:1px 0 40px}
 @media(max-width:950px){.package-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.customer-desktop-nav{display:none}.container{width:calc(100% - 24px)}.topbar-inner{min-height:60px}.brand-logo{width:37px;height:37px}.brand-name{font-size:15px}.header-btn{font-size:11px;padding:7px 9px}.customer-hero{padding:22px 19px;border-radius:19px;margin:15px 0}.customer-hero h1{font-size:23px}.package-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.package-card{padding:12px;min-height:170px}.package-card.selected{padding:11px}.package-price{font-size:18px}.bottom-nav{display:block}.admin-shell{display:block;min-height:0}.admin-sidebar{display:none}.admin-main{padding:18px 12px 100px}.admin-mobile-nav{display:none!important}.admin-mobile-nav .admin-nav{display:flex;flex-direction:column;gap:3px;padding:5px 2px;margin:0;text-align:center;font-size:9px}.admin-heading h1{font-size:21px}.stats-grid{gap:10px}.stat-card{padding:13px}.stat-value{font-size:19px}.admin-shortcuts{gap:9px}.shortcut{padding:12px}.voucher-list{grid-template-columns:1fr}}
@@ -492,26 +465,9 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
   <button class="customer-desktop-link" data-customer-view="customer-debt" onclick="showCustomerView('customer-debt')">🧾 Bayar Nanti</button>
 </nav>
 <section id="customer-home" class="customer-view active">
-  <div class="customer-hero">
-  <div class="hero-kicker">FATIH RELOAD WIFI</div>
+  tolong jadikan teks berjalan
 
-  <h1>Pilih Paket<br>Voucher WiFi</h1>
-
-  <div class="hero-marquee">
-    <div class="hero-marquee-track">
-      <span>
-        Pilih paket voucher WiFi favoritmu. Pembelian mudah,
-        pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.
-        ⚡ Proses mudah &nbsp; 🔐 Pembayaran aman &nbsp; 📶 Voucher WiFi
-      </span>
-      <span aria-hidden="true">
-        Pilih paket voucher WiFi favoritmu. Pembelian mudah,
-        pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.
-        ⚡ Proses mudah &nbsp; 🔐 Pembayaran aman &nbsp; 📶 Voucher WiFi
-      </span>
-    </div>
-  </div>
-</div>
+  <div class="customer-hero"><div class="hero-kicker">FATIH RELOAD WIFI</div><h1>Pilih Paket<br>Voucher WiFi</h1><p>Pilih paket voucher WiFi favoritmu. Pembelian mudah, pembayaran praktis, voucher dikirim otomatis setelah pembayaran diverifikasi.</p><div class="hero-pills"><span>⚡ Proses mudah</span><span>🔐 Pembayaran aman</span><span>📶 Voucher WiFi</span></div></div>
   <div class="section-title"><h2>Pilih Paket Internet</h2><button class="btn btn-light btn-sm" onclick="refreshStock()">↻ Perbarui</button></div>
   <div id="packageGrid" class="grid package-grid"><div class="empty" style="grid-column:1/-1">Memuat paket voucher...</div></div>
   <div class="notice" style="margin-top:18px">💡 Pilih paket, masukkan nomor WhatsApp, lalu lanjutkan pesanan.</div>
