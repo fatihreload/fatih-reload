@@ -460,8 +460,8 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
 <main id="customerArea"><div class="container">
 <nav class="customer-desktop-nav" aria-label="Navigasi pelanggan">
   <button class="customer-desktop-link active" data-customer-view="customer-home" onclick="showCustomerView('customer-home')">⌂ Beranda</button>
+  <button class="customer-desktop-link" data-customer-view="customer-help" onclick="showCustomerView('customer-help')">ⓘ Cara Beli Paket</button>
   <button class="customer-desktop-link" data-customer-view="customer-orders" onclick="showCustomerView('customer-orders')">▤ Pesanan</button>
-  <button class="customer-desktop-link" data-customer-view="customer-help" onclick="showCustomerView('customer-help')">ⓘ Bantuan</button>
   <button class="customer-desktop-link" data-customer-view="customer-debt" onclick="showCustomerView('customer-debt')">🧾 Bayar Nanti</button>
 </nav>
 <section id="customer-home" class="customer-view active">
@@ -479,7 +479,7 @@ body:has(#adminArea:not(.hidden)) #adminLogoutHeader {
 <section id="customer-help" class="customer-view">
   <div class="section-title"><h2>Pusat Bantuan</h2></div>
   <div class="card"><h3 style="margin-top:0;color:var(--navy)">Cara membeli voucher</h3><ol style="padding-left:20px;font-size:13px;line-height:1.9"><li>Pilih paket voucher.</li><li>Masukkan nomor WhatsApp.</li><li>Buat pesanan.</li><li>Transfer sesuai nominal.</li><li>Upload bukti pembayaran.</li><li>Tunggu verifikasi admin.</li><li>Voucher muncul setelah pembayaran disetujui.</li></ol></div>
-  <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Informasi Pembayaran</h3><div class="payment-info"><div class="small muted">DANA / GoPay</div><div class="wallet-number">089601293092</div><div class="wallet-name">a.n. MUHAMAD IMRON</div></div><div id="customerPaymentHours" class="notice">Memeriksa jam pelayanan...</div><p class="small muted">Pembayaran QRIS belum tersedia. Pastikan nama penerima dan nominal benar.</p></div>
+  <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Informasi Pembayaran</h3><div class="payment-info"><div class="small muted">DANA / GoPay</div><div class="wallet-number">089601293092</div><div class="wallet-name">MUHAMAD IMRON</div></div><div id="customerPaymentHours" class="notice">Memeriksa jam pelayanan...</div><p class="small muted">Pastikan nama penerima, nomor WhatsApp dan nominal sudah benar.</p></div>
   <div class="card" style="margin-top:14px"><h3 style="margin-top:0;color:var(--navy)">Butuh bantuan?</h3><p class="small muted">Hubungi admin jika mengalami kendala.</p><a class="btn btn-success btn-block" href="https://wa.me/6289643667444" target="_blank" rel="noopener">Chat WhatsApp Admin</a></div>
 </section>
 
