@@ -598,6 +598,48 @@ body.dark-theme .package-card::after{background:radial-gradient(circle 9px at 0 
   .package-grid{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.hero-art{animation:none}.package-card,.btn{transition:none}}
+
+/* ============================================================
+   KARTU PAKET GESER (CAROUSEL) + CARA BELI
+   ============================================================ */
+#packageGrid,#debtPackageGrid{display:flex!important;position:relative;overflow-x:auto;overflow-y:hidden;gap:14px;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;
+  max-width:460px;margin:0 auto;padding:8px 6px 16px}
+#packageGrid::-webkit-scrollbar,#debtPackageGrid::-webkit-scrollbar{display:none}
+#packageGrid>*,#debtPackageGrid>*{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always}
+#packageGrid .package-card,#debtPackageGrid .package-card{padding:16px 16px 14px}
+#packageGrid .package-card .btn,#debtPackageGrid .package-card .btn{font-size:13px;min-height:42px}
+#packageGrid .package-card .btn::before,#debtPackageGrid .package-card .btn::before{left:-16px;right:-16px;top:-14px}
+#packageGrid .package-card::after,#debtPackageGrid .package-card::after{bottom:56px}
+#packageGrid .package-icon,#debtPackageGrid .package-icon{width:50px;height:50px;font-size:23px}
+#packageGrid .package-card h3,#debtPackageGrid .package-card h3{font-size:16px}
+#packageGrid .package-desc,#debtPackageGrid .package-desc{font-size:12px}
+#packageGrid .package-price,#debtPackageGrid .package-price{font-size:24px}
+#packageGrid .package-price::before,#debtPackageGrid .package-price::before{width:22px;height:22px;flex-basis:22px;font-size:13px}
+#packageGrid .package-stock,#debtPackageGrid .package-stock{font-size:12px;padding-bottom:10px}
+
+.pk-nav{display:flex;align-items:center;justify-content:center;gap:14px;max-width:460px;margin:0 auto 8px}
+.pk-nav.hidden{display:none}
+.pk-arrow{width:38px;height:38px;border-radius:50%;border:2px solid #c98a00;font-size:22px;line-height:1;font-weight:800;
+  color:#5a3a00;background:radial-gradient(circle at 30% 28%,#fff3b8,var(--coin2) 45%,var(--coin));
+  box-shadow:0 3px 8px rgba(214,146,0,.35);display:grid;place-items:center;padding:0 0 3px;transition:transform .15s,opacity .15s}
+.pk-arrow:active{transform:scale(.92)}
+.pk-arrow:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.pk-dots{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;max-width:220px}
+.pk-dot{width:9px;height:9px;border-radius:50%;border:0;padding:0;background:#c3d9df;transition:.25s}
+.pk-dot.active{width:24px;border-radius:6px;background:linear-gradient(90deg,#19c6d8,#f6b92b)}
+.pk-hint{text-align:center;font-size:11px;color:var(--muted);margin:-2px 0 6px}
+
+.how-buy{margin:2px 0 14px;border-radius:12px;background:#eefafc;border:1px solid #cfe9ee;font-size:12px}
+.how-buy summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:10px 12px;font-weight:700;color:#0a7d8f}
+.how-buy summary::-webkit-details-marker{display:none}
+.how-buy summary::after{content:"▾";margin-left:auto;transition:transform .2s}
+.how-buy[open] summary::after{transform:rotate(180deg)}
+.how-buy ol{margin:0;padding:0 14px 12px 30px;line-height:1.75;color:var(--text)}
+body.dark-theme .how-buy{background:#10303b;border-color:#245565}
+body.dark-theme .how-buy summary{color:#5fe0ee}
+body.dark-theme .pk-dot{background:#35586a}
+@media(prefers-reduced-motion:reduce){#packageGrid,#debtPackageGrid{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -1301,6 +1343,16 @@ function renderPackages(){
         <div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div>
         <div class="package-price">${money(p.price_idr)}</div>
         <div class="package-stock">${st>0?`Stok tersedia: ${st}`:"Stok habis"}</div>
+        <details class="how-buy">
+          <summary>🛒 Cara beli paket ini</summary>
+          <ol>
+            <li>Tekan tombol <b>Pilih Paket</b>.</li>
+            <li>Masukkan nomor WhatsApp, lalu buat pesanan.</li>
+            <li>Transfer sesuai nominal ke DANA / GoPay.</li>
+            <li>Upload bukti pembayaran.</li>
+            <li>Tunggu verifikasi. Kode voucher muncul di menu <b>Pesanan</b>.</li>
+          </ol>
+        </details>
         <button class="btn ${canBuy?"btn-primary":"btn-light"} btn-block"
           ${canBuy?"": "disabled"}
           onclick="selectPackage('${String(p.id).replace(/'/g,"")}')">
@@ -2055,6 +2107,15 @@ function renderDebtMember(){
         <div class="package-stock">
           ${st>0?`Stok tersedia: ${st}`:"Stok habis"}
         </div>
+        <details class="how-buy">
+          <summary>🛒 Cara beli paket ini</summary>
+          <ol>
+            <li>Tekan tombol <b>Pilih Paket</b>.</li>
+            <li>Akun Prioritas: voucher langsung terbit. Akun Reguler: tunggu persetujuan admin.</li>
+            <li>Kode voucher muncul di <b>Riwayat Transaksi</b> di bawah.</li>
+            <li>Lunasi tagihan ke admin sesuai ketentuan Bayar Nanti.</li>
+          </ol>
+        </details>
 
         <button class="btn ${canBuy?"btn-primary":"btn-light"} btn-block"
           ${canBuy?"":"disabled"}
@@ -2872,6 +2933,48 @@ db.auth.onAuthStateChange((event,session)=>{
 });
 /* Service worker */
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(e=>console.warn("Service worker:",e)))}
+</script>
+
+<script>
+/* Carousel paket: panah, titik, dan posisi geser dipertahankan saat daftar dirender ulang. */
+(function(){
+  function setup(id){
+    var g=document.getElementById(id); if(!g) return;
+    var nav=document.createElement('div'); nav.className='pk-nav hidden';
+    nav.innerHTML='<button type="button" class="pk-arrow" aria-label="Paket sebelumnya">&#8249;</button><div class="pk-dots"></div><button type="button" class="pk-arrow" aria-label="Paket berikutnya">&#8250;</button>';
+    var hint=document.createElement('div'); hint.className='pk-hint hidden'; hint.textContent='Geser untuk melihat paket lain';
+    g.insertAdjacentElement('afterend',nav); nav.insertAdjacentElement('afterend',hint);
+    var prev=nav.children[0], dots=nav.children[1], next=nav.children[2];
+    var idx=0, built=-1, raf=0;
+    function cards(){return Array.prototype.slice.call(g.querySelectorAll(':scope > .package-card'));}
+    function step(){var c=cards(); if(c.length>1){var d=c[1].offsetLeft-c[0].offsetLeft; if(d>0) return d;} return g.clientWidth+14;}
+    function paint(){
+      var n=cards().length, show=n>1;
+      nav.classList.toggle('hidden',!show); hint.classList.toggle('hidden',!show);
+      if(built!==n){
+        dots.innerHTML='';
+        for(var i=0;i<n;i++){(function(i){var b=document.createElement('button');b.type='button';b.className='pk-dot';b.setAttribute('aria-label','Paket '+(i+1));b.onclick=function(){go(i);};dots.appendChild(b);})(i);}
+        built=n;
+      }
+      Array.prototype.forEach.call(dots.children,function(d,i){d.classList.toggle('active',i===idx);});
+      prev.disabled=idx<=0; next.disabled=idx>=n-1;
+    }
+    function go(i){var n=cards().length; if(!n) return; idx=Math.max(0,Math.min(n-1,i)); g.scrollTo({left:idx*step(),behavior:'smooth'}); paint();}
+    prev.onclick=function(){go(idx-1);}; next.onclick=function(){go(idx+1);};
+    g.addEventListener('scroll',function(){
+      if(raf) return;
+      raf=requestAnimationFrame(function(){raf=0; if(!g.clientWidth) return; var n=cards().length; idx=Math.max(0,Math.min(n-1,Math.round(g.scrollLeft/step()))); paint();});
+    },{passive:true});
+    new MutationObserver(function(){
+      var n=cards().length; if(idx>n-1) idx=Math.max(0,n-1);
+      if(g.clientWidth){var prevBehavior=g.style.scrollBehavior; g.style.scrollBehavior='auto'; g.scrollLeft=idx*step(); g.style.scrollBehavior=prevBehavior;}
+      paint();
+    }).observe(g,{childList:true});
+    window.addEventListener('resize',function(){if(g.clientWidth){g.style.scrollBehavior='auto';g.scrollLeft=idx*step();g.style.scrollBehavior='';}});
+    paint();
+  }
+  setup('packageGrid'); setup('debtPackageGrid');
+})();
 </script>
 </body>
 </html>
