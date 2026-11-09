@@ -583,7 +583,7 @@ body.dark-theme .package-card::after{background:radial-gradient(circle 9px at 0 
 /* ---------- Responsif ---------- */
 @media(min-width:701px){
   .package-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .customer-hero{padding:10px 32px}
+  .customer-hero{padding:30px 32px}
   .customer-hero h1{font-size:32px}
   .customer-hero p{font-size:13px}
   .hero-art{width:190px;height:190px;right:30px}
@@ -683,6 +683,11 @@ body.dark-theme #packageGrid .package-card.pk-active,body.dark-theme #debtPackag
   #packageGrid .pk-active .package-icon,#debtPackageGrid .pk-active .package-icon,
   #packageGrid .package-card.pk-active::before,#debtPackageGrid .package-card.pk-active::before,.pk-hint{animation:none}
 }
+
+/* label AKTIF pada judul paket */
+.package-card h3{letter-spacing:.6px}
+.package-card h3 .pk-aktif{color:#0e9fb3;font-weight:800}
+body.dark-theme .package-card h3 .pk-aktif{color:#5fe0ee}
 </style>
 </head>
 <body>
@@ -1382,8 +1387,7 @@ function renderPackages(){
     return `
       <article class="package-card ${sel?"selected":""}">
         <div class="package-icon">📶</div>
-        <h3>${escapeHTML(p.name)}</h3>
-        <div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div>
+        <h3><span class="pk-aktif">AKTIF </span>${escapeHTML(String(p.name).toUpperCase().replace(/^\s*AKTIF\s+/,""))}</h3>
         <div class="package-price">${money(p.price_idr)}</div>
         <div class="package-stock">${st>0?`Stok tersedia: ${st}`:"Stok habis"}</div>
         <details class="how-buy">
@@ -2143,8 +2147,7 @@ function renderDebtMember(){
     return `
       <article class="package-card">
         <div class="package-icon">📶</div>
-        <h3>${escapeHTML(p.name)}</h3>
-        <div class="package-desc">${escapeHTML(p.description||"Paket voucher WiFi")}</div>
+        <h3><span class="pk-aktif">AKTIF </span>${escapeHTML(String(p.name).toUpperCase().replace(/^\s*AKTIF\s+/,""))}</h3>
         <div class="package-price">${money(p.price_idr)}</div>
 
         <div class="package-stock">
