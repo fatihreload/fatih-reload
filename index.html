@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102a43">
+<meta name="theme-color" content="#0b2a3d">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Fatih Reload WiFi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -604,9 +604,10 @@ body.dark-theme .package-card::after{background:radial-gradient(circle 9px at 0 
    ============================================================ */
 #packageGrid,#debtPackageGrid{display:flex!important;position:relative;overflow-x:auto;overflow-y:hidden;gap:14px;
   scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;
-  max-width:460px;margin:0 auto;padding:8px 6px 16px}
+  max-width:500px;margin:0 auto;padding:20px 10% 26px;perspective:1000px}
 #packageGrid::-webkit-scrollbar,#debtPackageGrid::-webkit-scrollbar{display:none}
 #packageGrid>*,#debtPackageGrid>*{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always}
+#packageGrid>.package-card,#debtPackageGrid>.package-card{flex:0 0 100%}
 #packageGrid .package-card,#debtPackageGrid .package-card{padding:16px 16px 14px}
 #packageGrid .package-card .btn,#debtPackageGrid .package-card .btn{font-size:13px;min-height:42px}
 #packageGrid .package-card .btn::before,#debtPackageGrid .package-card .btn::before{left:-16px;right:-16px;top:-14px}
@@ -640,6 +641,48 @@ body.dark-theme .how-buy{background:#10303b;border-color:#245565}
 body.dark-theme .how-buy summary{color:#5fe0ee}
 body.dark-theme .pk-dot{background:#35586a}
 @media(prefers-reduced-motion:reduce){#packageGrid,#debtPackageGrid{scroll-behavior:auto}}
+
+/* ============================================================
+   EFEK GESER: COVERFLOW 3D (kartu tengah besar, samping mengecil & memudar)
+   Variabel --d (jarak dari tengah, -1..1) dan --a (nilai mutlak) diisi oleh JS.
+   ============================================================ */
+#packageGrid .package-card,#debtPackageGrid .package-card{
+  --d:0;--a:0;
+  transform:rotateY(calc(var(--d) * -26deg)) scale(calc(1 - var(--a) * .16)) translateZ(0);
+  opacity:calc(1 - var(--a) * .55);
+  filter:saturate(calc(1 - var(--a) * .5));
+  transform-origin:center center;
+  transition:box-shadow .3s,border-color .3s;
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+}
+#packageGrid .package-card:hover,#debtPackageGrid .package-card:hover{
+  transform:rotateY(calc(var(--d) * -26deg)) scale(calc(1 - var(--a) * .16)) translateZ(0)}
+#packageGrid .package-card.pk-active,#debtPackageGrid .package-card.pk-active{
+  box-shadow:0 0 0 2px rgba(246,185,43,.55),0 0 28px rgba(246,185,43,.35),0 16px 34px rgba(11,42,61,.25);
+  border-color:var(--coin)}
+#packageGrid .package-card.pk-side,#debtPackageGrid .package-card.pk-side{cursor:pointer}
+#packageGrid .package-card.pk-side *,#debtPackageGrid .package-card.pk-side *{pointer-events:none}
+
+/* koin berputar pada kartu yang sedang tampil */
+#packageGrid .pk-active .package-icon,#debtPackageGrid .pk-active .package-icon{animation:coinSpin 4s ease-in-out infinite}
+@keyframes coinSpin{0%,55%{transform:rotateY(0)}80%,100%{transform:rotateY(360deg)}}
+
+/* kilau berjalan di kartu aktif */
+#packageGrid .package-card.pk-active::before,#debtPackageGrid .package-card.pk-active::before{
+  background:linear-gradient(90deg,#19c6d8,#f6b92b,#fff3b8,#f6b92b,#19c6d8);background-size:250% 100%;animation:barShine 3s linear infinite}
+@keyframes barShine{from{background-position:0 0}to{background-position:-250% 0}}
+
+/* titik penanda lebih hidup */
+.pk-dot.active{box-shadow:0 0 8px rgba(246,185,43,.7)}
+.pk-hint{animation:hintNudge 2.2s ease-in-out infinite}
+@keyframes hintNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+body.dark-theme #packageGrid .package-card.pk-active,body.dark-theme #debtPackageGrid .package-card.pk-active{
+  box-shadow:0 0 0 2px rgba(246,185,43,.6),0 0 30px rgba(246,185,43,.28),0 16px 34px rgba(0,0,0,.5)}
+@media(prefers-reduced-motion:reduce){
+  #packageGrid .pk-active .package-icon,#debtPackageGrid .pk-active .package-icon,
+  #packageGrid .package-card.pk-active::before,#debtPackageGrid .package-card.pk-active::before,.pk-hint{animation:none}
+}
 </style>
 </head>
 <body>
@@ -2958,12 +3001,30 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
       }
       Array.prototype.forEach.call(dots.children,function(d,i){d.classList.toggle('active',i===idx);});
       prev.disabled=idx<=0; next.disabled=idx>=n-1;
+      fx();
     }
+    function fx(){
+      var w=g.clientWidth; if(!w) return;
+      var st=step(), mid=g.scrollLeft+w/2;
+      cards().forEach(function(c,i){
+        var d=((c.offsetLeft+c.offsetWidth/2)-mid)/st;
+        d=Math.max(-1.4,Math.min(1.4,d));
+        var a=Math.min(1,Math.abs(d));
+        c.style.setProperty('--d',d.toFixed(3));
+        c.style.setProperty('--a',a.toFixed(3));
+        c.classList.toggle('pk-active',a<0.5);
+        c.classList.toggle('pk-side',a>=0.5);
+      });
+    }
+    g.addEventListener('click',function(e){
+      var c=e.target.closest&&e.target.closest('.package-card'); if(!c) return;
+      var i=cards().indexOf(c); if(i>=0&&c.classList.contains('pk-side')) go(i);
+    });
     function go(i){var n=cards().length; if(!n) return; idx=Math.max(0,Math.min(n-1,i)); g.scrollTo({left:idx*step(),behavior:'smooth'}); paint();}
     prev.onclick=function(){go(idx-1);}; next.onclick=function(){go(idx+1);};
     g.addEventListener('scroll',function(){
       if(raf) return;
-      raf=requestAnimationFrame(function(){raf=0; if(!g.clientWidth) return; var n=cards().length; idx=Math.max(0,Math.min(n-1,Math.round(g.scrollLeft/step()))); paint();});
+      raf=requestAnimationFrame(function(){raf=0; if(!g.clientWidth) return; fx(); var n=cards().length; idx=Math.max(0,Math.min(n-1,Math.round(g.scrollLeft/step()))); paint();});
     },{passive:true});
     new MutationObserver(function(){
       var n=cards().length; if(idx>n-1) idx=Math.max(0,n-1);
