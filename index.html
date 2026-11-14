@@ -1026,11 +1026,11 @@ tr:hover td{background:rgba(0,240,255,.05)}
   #packageGrid .package-price,#debtPackageGrid .package-price{font-size:16px}
 }
 
-/* ---------- Tombol Keluar dipindah ke dashboard, tepat di atas Refresh ---------- */
+/* ---------- Tombol Keluar: satu baris dengan Kembali ke Dashboard ---------- */
 #adminLogoutHeader,body:has(#adminArea:not(.hidden)) #adminLogoutHeader{display:none!important}
-#admin-home .admin-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.admin-heading-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex-shrink:0}
-.admin-heading-actions .btn{width:100%;white-space:nowrap;justify-content:center}
+.admin-toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.admin-toprow .btn{white-space:nowrap}
+#adminLogoutDashboard{margin-left:auto}
 </style>
 </head>
 <body>
@@ -1151,13 +1151,16 @@ tr:hover td{background:rgba(0,240,255,.05)}
 <button class="admin-nav" data-admin-view="admin-hours" onclick="showAdminView('admin-hours')">◷ Jam Operasional</button><hr><button class="admin-nav" onclick="adminLogout()">⇥ Keluar</button>
 </aside>
 <main class="admin-main">
+<div class="admin-toprow">
 <button id="adminBackHome"
   class="btn btn-light btn-sm"
   onclick="showAdminView('admin-home')"
-  style="display:inline-flex;margin-bottom:15px">
+  style="display:inline-flex">
   ← Kembali ke Dashboard
 </button>
-<section id="admin-home" class="admin-page active"><div class="admin-heading"><div><h1>Dashboard</h1><p>Ringkasan aktivitas Fatih Reload WiFi.</p></div><div class="admin-heading-actions"><button class="btn btn-danger btn-sm" id="adminLogoutDashboard" onclick="adminLogout()" title="Keluar Admin">⇥ Keluar</button><button class="btn btn-light btn-sm" onclick="refreshAdminDashboard()">↻ Refresh</button></div></div>
+<button class="btn btn-danger btn-sm" id="adminLogoutDashboard" onclick="adminLogout()" title="Keluar Admin">⇥ Keluar</button>
+</div>
+<section id="admin-home" class="admin-page active"><div class="admin-heading"><div><h1>Dashboard</h1><p>Ringkasan aktivitas Fatih Reload WiFi.</p></div><button class="btn btn-light btn-sm" onclick="refreshAdminDashboard()">↻ Refresh</button></div>
 <div class="grid stats-grid"><div class="card stat-card"><div class="stat-label">Total Pesanan Hari Ini</div><div class="stat-value" id="statOrders">-</div></div><div class="card stat-card"><div class="stat-label">Pesanan Dibayar</div><div class="stat-value" id="statPaid">-</div></div><div class="card stat-card"><div class="stat-label">Voucher Terjual</div><div class="stat-value" id="statVouchers">-</div></div><div class="card stat-card"><div class="stat-label">Pendapatan Hari Ini</div><div class="stat-value" id="statRevenue">-</div></div></div>
 
 <div class="section-title">
