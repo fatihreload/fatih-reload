@@ -1420,9 +1420,11 @@ function formatDate(v){if(!v)return "-";const d=new Date(v);return Number.isNaN(
 function getVoucherCode(v){if(!v)return "";if(typeof v==="string")return v;if(Array.isArray(v))return getVoucherCode(v[0]);if(typeof v==="object")return v.code||v.voucher_code||v.voucher||v.token||"";return String(v)}
 function unwrapData(r){return r?.data??r??{}}
 function getRows(r,keys=[]){const d=unwrapData(r);if(Array.isArray(d))return d;for(const k of keys)if(Array.isArray(d?.[k]))return d[k];return []}
-function statusBadge(s){s=String(s||"").toLowerCase();if(["paid","completed","success","approved","delivered"].includes(s))return `<span class="badge green">${escapeHTML(s)}</span>`;if(["rejected","failed","cancelled","expired"].includes(s))return `<span class="badge red">${escapeHTML(s)}</span>`;return `<span class="badge orange">${escapeHTML(s||"pending")}</span>`}
+const STATUS_LABEL={pending:"Menunggu",waiting_payment:"Menunggu pembayaran","menunggu verifikasi":"Menunggu verifikasi",pending_approval:"Menunggu persetujuan",paid:"Dibayar",completed:"Selesai",success:"Berhasil",approved:"Disetujui",delivered:"Voucher terkirim",issued:"Voucher diterbitkan",rejected:"Ditolak",cancelled:"Ditolak",failed:"Gagal",expired:"Kedaluwarsa"};
+function statusText(s){const k=String(s||"pending").toLowerCase();return STATUS_LABEL[k]||String(s)}
+function statusBadge(s){s=String(s||"").toLowerCase();const t=escapeHTML(statusText(s));if(["paid","completed","success","approved","delivered","issued"].includes(s))return `<span class="badge green">${t}</span>`;if(["rejected","failed","cancelled","expired"].includes(s))return `<span class="badge red">${t}</span>`;return `<span class="badge orange">${t}</span>`}
 function getOrderId(d){return d?.order_id||d?.id||d?.order?.id||d?.data?.order_id||d?.data?.id||""}
-function getOrderStatus(d){return d?.status||d?.order?.status||d?.data?.status||"pending"}
+function getOrderStatus(d){const st=d?.status||d?.order?.status||d?.data?.status||"pending";return String(st).toLowerCase()==="cancelled"?"rejected":st}
 function resetAdminIdleTimer(){
   if(!adminVerified)return;
 
@@ -1950,6 +1952,16 @@ window.selectPackage=function(id){
     creatingOrder = false;
   }
 };
+function hasPaymentProof(){
+  const o=currentOrder||{};
+  const st=String(currentOrderStatus||o.status||"").toLowerCase();
+  return !!(proofSubmitted||o.payment_proof_url||o.proof_url||o.payment_proof||o.payment_proof_path||o.proof_path||
+    ["waiting_verification","pending_verification","verifying","proof_submitted","waiting_approval","waiting_admin"].includes(st));
+}
+function orderStatusLabel(){
+  const s=String(currentOrderStatus||"pending").toLowerCase();
+  return hasPaymentProof()&&!["paid","completed","delivered","success","approved","rejected","failed","expired","cancelled"].includes(s)?"menunggu verifikasi":currentOrderStatus;
+}
 function renderPaymentPanel(){
   const panel=$("paymentPanel"),content=$("paymentContent");
   if(!currentOrderId||!panel||!content)return;
@@ -1964,10 +1976,10 @@ function renderPaymentPanel(){
     return;
   }
   if(["rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase())){
-    content.innerHTML=`<div class="notice warning">Status pesanan: ${escapeHTML(currentOrderStatus)}.</div><p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p><div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;
+    content.innerHTML=`<div class="notice warning">Status pesanan: <strong>${escapeHTML(statusText(currentOrderStatus))}</strong>.${["rejected","cancelled"].includes(String(currentOrderStatus).toLowerCase())?" Bukti pembayaran ditolak karena tidak sesuai atau tidak valid.":""}</div><p class="small muted">Silakan hubungi admin jika membutuhkan bantuan.</p><div class="small muted">ID Pesanan: ${escapeHTML(currentOrderId)}</div>`;
     return;
   }
-  content.innerHTML=`<div class="notice warning">Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer. Bukti dapat diganti selama pesanan belum diproses.</div><div class="payment-info"><div class="small muted">Total pembayaran</div><div class="wallet-number">${money(amount)}</div><hr><div class="small muted">Transfer melalui DANA / GoPay</div><div class="wallet-number">${WALLET_NUMBER}</div><div class="wallet-name">a.n. ${WALLET_NAME}</div></div><div class="small muted" style="margin-bottom:12px">ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong></div><div class="field"><label>Metode pembayaran</label><select id="paymentProvider"><option value="DANA">DANA</option><option value="GoPay">GoPay</option></select></div><div class="field"><label>Upload / ganti bukti pembayaran</label><input type="file" id="paymentProof" accept="image/jpeg,image/png,image/webp,application/pdf"></div><button class="btn btn-primary btn-block" id="submitProofBtn" onclick="submitPaymentProof()" ${proofUploading?"disabled":""}>${proofUploading?"Mengirim bukti...":proofSubmitted?"Kirim / Ganti Bukti Pembayaran":"Kirim Bukti Pembayaran"}</button><div class="small muted" style="margin-top:10px">Format JPG, PNG, WEBP, atau PDF. Maksimal 5 MB.</div><div class="notice warning" style="margin-top:10px;font-size:12px">📷 Tidak bisa memilih foto? Buka web ini di <b>Chrome</b> / <b>Safari</b>, atau pasang aplikasinya. Jendela login WiFi biasanya tidak bisa membuka galeri.</div>${proofSubmitted?`<div class="notice success" style="margin-top:12px">Bukti pembayaran sudah dikirim. Jika salah, pilih bukti baru lalu kirim kembali. Menunggu verifikasi admin.</div>`:""}`;
+  content.innerHTML=`${hasPaymentProof()?`<div class="notice success">✅ Bukti pembayaran sudah dikirim. Menunggu verifikasi admin. Jika ada kesalahan, pilih bukti baru lalu kirim ulang selama pesanan belum diproses.</div>`:`<div class="notice warning">Selesaikan pembayaran sesuai nominal, lalu upload bukti transfer. Bukti dapat diganti selama pesanan belum diproses.</div>`}<div class="payment-info"><div class="small muted">Total pembayaran</div><div class="wallet-number">${money(amount)}</div><hr><div class="small muted">Transfer melalui DANA / GoPay</div><div class="wallet-number">${WALLET_NUMBER}</div><div class="wallet-name">a.n. ${WALLET_NAME}</div></div><div class="small muted" style="margin-bottom:12px">ID Pesanan: <strong>${escapeHTML(currentOrderId)}</strong></div><div class="field"><label>Metode pembayaran</label><select id="paymentProvider"><option value="DANA">DANA</option><option value="GoPay">GoPay</option></select></div><div class="field"><label>Upload / ganti bukti pembayaran</label><input type="file" id="paymentProof" accept="image/jpeg,image/png,image/webp,application/pdf"></div><button class="btn btn-primary btn-block" id="submitProofBtn" onclick="submitPaymentProof()" ${proofUploading?"disabled":""}>${proofUploading?"Mengirim bukti...":hasPaymentProof()?"Kirim / Ganti Bukti Pembayaran":"Kirim Bukti Pembayaran"}</button><div class="small muted" style="margin-top:10px">Format JPG, PNG, WEBP, atau PDF. Maksimal 5 MB.</div><div class="notice warning" style="margin-top:10px;font-size:12px">📷 Tidak bisa memilih foto? Buka web ini di <b>Chrome</b> / <b>Safari</b>, atau pasang aplikasinya. Jendela login WiFi biasanya tidak bisa membuka galeri.</div>`;
   const providerSelect=$("paymentProvider");
   if(providerSelect)providerSelect.value=oldProvider;
   if(oldFile){try{const dt=new DataTransfer();dt.items.add(oldFile);$("paymentProof").files=dt.files;}catch(e){console.warn("File bukti tidak dapat dipulihkan:",e)}}
@@ -1993,13 +2005,14 @@ window.submitPaymentProof=async function(){
     proofSubmitted=true;
     showToast(result?.message||"Bukti pembayaran berhasil dikirim.");
     renderPaymentPanel();
+    renderCurrentOrderPanel();
   }catch(e){
     console.error("Upload bukti pembayaran:",e);
     showToast("Gagal mengirim bukti: "+getErrorMessage(e));
   }finally{
     proofUploading=false;
     const button=$("submitProofBtn");
-    if(button){button.disabled=false;button.textContent=proofSubmitted?"Kirim / Ganti Bukti Pembayaran":"Kirim Bukti Pembayaran"}
+    if(button){button.disabled=false;button.textContent=hasPaymentProof()?"Kirim / Ganti Bukti Pembayaran":"Kirim Bukti Pembayaran"}
   }
 };
 
@@ -2008,7 +2021,7 @@ async function checkOrderRequest(id,phone){const {data,error}=await db.functions
 window.manualCheckOrder=async function(){const id=$("checkOrderId").value.trim(),phone=normalizePhone($("checkPhone").value),out=$("checkResult");if(!id||!phone){showToast("Isi ID pesanan dan nomor WhatsApp.");return}out.innerHTML=`<div class="notice">Memeriksa pesanan...</div>`;try{out.innerHTML=renderOrderResultHTML(await checkOrderRequest(id,phone))}catch(e){out.innerHTML=`<div class="notice warning">${escapeHTML(getErrorMessage(e))}</div>`}};
 function renderOrderResultHTML(d){const st=getOrderStatus(d),code=getVoucherCode(d?.order?.voucher_code||d?.voucher_code||d?.voucher||d?.code);return `<div class="order-result"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><strong>Status Pesanan</strong>${statusBadge(st)}</div><div class="small muted" style="margin-top:10px">ID: ${escapeHTML(getOrderId(d)||d?.order_id||"-")}</div>${code?`<div class="code-box"><span class="small">KODE VOUCHER</span><strong>${escapeHTML(code)}</strong></div>`:""}${d?.message?`<p class="small">${escapeHTML(d.message)}</p>`:""}</div>`}
 window.copyVoucher=async function(c){try{await navigator.clipboard.writeText(c);showToast("Kode voucher berhasil disalin.")}catch{showToast("Tidak dapat menyalin kode voucher.")}}
-function renderCurrentOrderPanel(){const e=$("currentOrderPanel");if(!e)return;if(!currentOrderId){e.innerHTML=`<div class="empty">Belum ada pesanan aktif.</div>`;return}e.innerHTML=`<div class="order-result"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>Pesanan aktif</strong>${statusBadge(currentOrderStatus)}</div><div class="small muted" style="margin-top:8px">ID Pesanan</div><strong style="word-break:break-all">${escapeHTML(currentOrderId)}</strong><div class="small muted" style="margin-top:8px">Nomor WhatsApp</div><strong>${escapeHTML(currentPhone)}</strong><button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="refreshCurrentOrder()">Perbarui Status</button></div>`}
+function renderCurrentOrderPanel(){const e=$("currentOrderPanel");if(!e)return;if(!currentOrderId){e.innerHTML=`<div class="empty">Belum ada pesanan aktif.</div>`;return}e.innerHTML=`<div class="order-result"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><strong>Pesanan aktif</strong>${statusBadge(orderStatusLabel())}</div><div class="small muted" style="margin-top:8px">ID Pesanan</div><strong style="word-break:break-all">${escapeHTML(currentOrderId)}</strong><div class="small muted" style="margin-top:8px">Nomor WhatsApp</div><strong>${escapeHTML(currentPhone)}</strong><button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="refreshCurrentOrder()">Perbarui Status</button></div>`}
 window.refreshCurrentOrder=async function(){if(!currentOrderId)return;try{const d=await checkOrderRequest(currentOrderId,currentPhone);currentOrder={...currentOrder,...(d.order||d)};currentOrderStatus=getOrderStatus(d);renderCurrentOrderPanel();renderPaymentPanel();showToast("Status pesanan diperbarui.")}catch(e){showToast(getErrorMessage(e))}}
 function startOrderPolling(){clearInterval(orderPollingTimer);if(!currentOrderId)return;orderPollingTimer=setInterval(async()=>{try{const d=await checkOrderRequest(currentOrderId,currentPhone);const nextStatus=getOrderStatus(d);currentOrder={...currentOrder,...(d.order||d)};if(String(nextStatus)!==String(currentOrderStatus)){currentOrderStatus=nextStatus;renderCurrentOrderPanel();renderPaymentPanel()}if(["paid","completed","delivered","rejected","expired","cancelled"].includes(String(currentOrderStatus).toLowerCase()))clearInterval(orderPollingTimer)}catch(e){console.warn("Polling pesanan:",e)}},5000)}
 
