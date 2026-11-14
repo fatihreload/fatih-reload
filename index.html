@@ -994,6 +994,37 @@ tr:hover td{background:rgba(0,240,255,.05)}
   .customer-view{padding-bottom:110px}
 }
 @media(prefers-reduced-motion:reduce){.nav-item,.nav-item .nav-icon,.admin-shortcuts .shortcut,.admin-shortcuts .shortcut-icon,.customer-desktop-link{transition:none!important}}
+
+/* ============================================================
+   PILIH PAKET INTERNET: versi ringkas agar pas di layar HP
+   ============================================================ */
+@media(max-width:700px){
+  #customer-home .section-title{margin:12px 0 4px}
+  #packageGrid,#debtPackageGrid{max-width:100%;gap:8px;padding:6px 15% 12px}
+  #packageGrid .package-card,#debtPackageGrid .package-card{padding:10px 10px 10px;border-radius:13px}
+  #packageGrid .package-card::before,#debtPackageGrid .package-card::before{height:3px}
+  #packageGrid .package-icon,#debtPackageGrid .package-icon{width:34px;height:34px;font-size:16px;margin:2px 0 6px}
+  #packageGrid .package-card h3,#debtPackageGrid .package-card h3{font-size:12px;line-height:1.25;margin:0 0 2px;letter-spacing:.5px}
+  #packageGrid .package-desc,#debtPackageGrid .package-desc{font-size:10px;line-height:1.3;min-height:0}
+  #packageGrid .package-price,#debtPackageGrid .package-price{font-size:17px;margin:6px 0 1px;gap:5px}
+  #packageGrid .package-price::before,#debtPackageGrid .package-price::before{width:16px;height:16px;flex-basis:16px;font-size:9px}
+  #packageGrid .package-stock,#debtPackageGrid .package-stock{font-size:10px;padding-bottom:12px}
+  #packageGrid .package-card .btn,#debtPackageGrid .package-card .btn{min-height:34px;font-size:11px;padding:6px 8px;border-radius:9px}
+  #packageGrid .package-card .btn::before,#debtPackageGrid .package-card .btn::before{left:-10px;right:-10px;top:-10px}
+  #packageGrid .package-card::after,#debtPackageGrid .package-card::after{bottom:45px}
+  .pk-nav{gap:10px;margin:0 auto 4px}
+  .pk-arrow{width:30px;height:30px;font-size:18px;padding:0 0 2px}
+  .pk-dot{width:7px;height:7px}.pk-dot.active{width:18px}
+  .pk-dots{gap:5px;max-width:180px}
+  .pk-hint{font-size:10px;margin:0 0 4px}
+  #customer-home .notice{margin-top:10px!important}
+  #customer-home .customer-hero{margin:10px 0}
+}
+@media(max-width:380px){
+  #packageGrid,#debtPackageGrid{padding:6px 12% 10px}
+  #packageGrid .package-card h3,#debtPackageGrid .package-card h3{font-size:11px}
+  #packageGrid .package-price,#debtPackageGrid .package-price{font-size:16px}
+}
 </style>
 </head>
 <body>
